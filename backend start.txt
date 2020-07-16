@@ -1,0 +1,1 @@
+sudo nohup nodejs app.js --be_ip [backend-internal-ip] --fe_ip [frontend-internal-ip] &
