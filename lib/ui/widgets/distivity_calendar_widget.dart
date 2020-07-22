@@ -115,11 +115,7 @@ class _DistivityCalendarWidgetState extends State<DistivityCalendarWidget> {
                               height: itemSize.height-1,
                               child: GestureDetector(
                                 onTap: (){
-                                  if(forDayTimestamps[i].isTask){
-                                    showTaskDetailsBottomSheet(context, forDayTimestamps[i].getParent());
-                                  }else{
-                                    showActivityDetailsBottomSheet(context, forDayTimestamps[i].getParent());
-                                  }
+                                  showObjectDetailsBottomSheet(context, forDayTimestamps[i].getParent(),day);
                                 },
                                 child: Container(
                                   decoration: BoxDecoration(
@@ -166,11 +162,7 @@ class _DistivityCalendarWidgetState extends State<DistivityCalendarWidget> {
                                 ),
                                 child: GestureDetector(
                                   onTap: (){
-                                    if(forDayTimestamps[i].isTask){
-                                      showTaskDetailsBottomSheet(context, forDayTimestamps[i].getParent());
-                                    }else{
-                                      showActivityDetailsBottomSheet(context, forDayTimestamps[i].getParent());
-                                    }
+                                    showObjectDetailsBottomSheet(context, forDayTimestamps[i].getParent(),day);
                                   },
                                   child: Container(
                                     decoration: BoxDecoration(

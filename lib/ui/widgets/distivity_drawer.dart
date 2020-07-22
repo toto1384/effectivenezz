@@ -1,7 +1,6 @@
 
 
 import 'package:effectivenezz/main.dart';
-import 'package:effectivenezz/ui/pages/calendar_page.dart';
 import 'package:effectivenezz/ui/pages/iap_page.dart';
 import 'package:effectivenezz/ui/pages/manage_calendars.dart';
 import 'package:effectivenezz/ui/pages/metrics_and_stats.dart';
@@ -76,8 +75,8 @@ class _DistivityDrawerState extends State<DistivityDrawer> {
         Padding(
           padding: const EdgeInsets.only(right: 5),
           child: Card(
-            shape: getShape(smallRadius: false,subtleBorder: isShowingPage(context, PlanVsTrackedPage)),
-            color: Colors.transparent,
+            shape: getShape(smallRadius: false),
+            color: isShowingPage(context, PlanVsTrackedPage)?MyColors.color_black:Colors.transparent,
             elevation: 0,
             child: ListTile(
               leading: Stack(
@@ -154,14 +153,12 @@ class _DistivityDrawerState extends State<DistivityDrawer> {
       locked=false;
     }
 
-    bool isShowing = isShowingPage(context, page.runtimeType);
-
     return Padding(
       padding: const EdgeInsets.only(right: 5),
       child: Card(
-        color: Colors.transparent,
+        color: isShowingPage(context, page.runtimeType)?MyColors.color_black:Colors.transparent,
         elevation: 0,
-        shape: getShape(subtleBorder: isShowing,smallRadius: false,),
+        shape: getShape(smallRadius: false,),
         child: GestureDetector(
           onTap: (){
             if(isShowingPage(context, page.runtimeType)){

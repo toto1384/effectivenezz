@@ -29,9 +29,10 @@ class _MetricsAndStatsPageState extends DistivityPageState<MetricsAndStatsPage> 
           scaffoldKey: scaffoldKey,
           body: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.only(bottom: 15),
+                padding: const EdgeInsets.symmetric(vertical: 15,horizontal: 20),
                 child: getSelectedDaysWidgetForAppBar(context,
                     selectedDate: selectedDate, selectedView: SelectedView.Day, onNewDateSelectedPlusPage: (date,i){
                       setState(() {
@@ -39,35 +40,41 @@ class _MetricsAndStatsPageState extends DistivityPageState<MetricsAndStatsPage> 
                       });
                     }),
               ),
-              getPadding(getText('This week',textType: TextType.textTypeSubtitle))
+              getPadding(getText('This week',textType: TextType.textTypeTitle,underline: true),horizontal: 20)
             ]+
-                List.generate(Metric.values.length, (index) => getBasicLinedBorder(
-                    Container(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            getText(getMetricName(Metric.values[index]),textType: TextType.textTypeSubtitle),
-                            getMetricWidget(context, Metric.values[index], StatPeriod.week, selectedDate,true),
-                          ],
+                List.generate(Metric.values.length, (index) => Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: getBasicLinedBorder(
+                      Container(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              getText(getMetricName(Metric.values[index]),textType: TextType.textTypeSubtitle),
+                              getMetricWidget(context, Metric.values[index], StatPeriod.week, selectedDate,true),
+                            ],
+                          ),
                         ),
-                      ),
-                    ),smallRadius: true
-                ))+[getPadding(getText('This month',textType: TextType.textTypeSubtitle))]+
-                List.generate(Metric.values.length, (index) => getBasicLinedBorder(
-                    Container(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            getText(getMetricName(Metric.values[index]),textType: TextType.textTypeSubtitle),
-                            getMetricWidget(context, Metric.values[index], StatPeriod.month, selectedDate,true),
-                          ],
+                      ),smallRadius: true
+                  ),
+                ))+[getPadding(getText('This month',textType: TextType.textTypeTitle,underline: true),horizontal: 20)]+
+                List.generate(Metric.values.length, (index) => Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 8),
+                  child: getBasicLinedBorder(
+                      Container(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              getText(getMetricName(Metric.values[index]),textType: TextType.textTypeSubtitle),
+                              getMetricWidget(context, Metric.values[index], StatPeriod.month, selectedDate,true),
+                            ],
+                          ),
                         ),
-                      ),
-                    ),smallRadius: true
+                      ),smallRadius: true
+                  ),
                 )),
           ),
           appBarWidget: Column(
@@ -78,7 +85,7 @@ class _MetricsAndStatsPageState extends DistivityPageState<MetricsAndStatsPage> 
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    getPadding(getText('Today\'s metrics',textType: TextType.textTypeSubtitle),),
+                    getPadding(getText('Today\'s metrics',textType: TextType.textTypeSubtitle),horizontal: 20),
 //                IconButton(
 //                  icon: getIcon(Icons.arrow_forward_ios),
 //                  onPressed: (){
@@ -109,7 +116,7 @@ class _MetricsAndStatsPageState extends DistivityPageState<MetricsAndStatsPage> 
                           ],
                         ),
                       ),
-                    ),smallRadius: true),
+                    ),smallRadius: true,color: MyColors.color_black_darker),
                   );
                 },scrollDirection: Axis.horizontal,),
               ),

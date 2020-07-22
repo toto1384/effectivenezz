@@ -7,7 +7,6 @@ import 'package:effectivenezz/utils/basic/values_utils.dart';
 import 'package:effectivenezz/utils/basic/widgets_basic.dart';
 import 'package:effectivenezz/utils/distivity_page.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 
 
 class SetTypePage extends StatefulWidget {
@@ -27,10 +26,11 @@ class _SetTypePageState extends DistivityPageState<SetTypePage> {
       onWillPop: ()=>customOnBackPressed(context),
       child: Scaffold(
         key: scaffoldKey,
+        backgroundColor: Colors.black,
         drawer: DistivityDrawer(),
         body: Center(
           child: Card(
-            color: MyColors.color_black,
+            color: MyColors.color_black_darker,
             shape: getShape(),
             child: Padding(
               padding: const EdgeInsets.all(10),

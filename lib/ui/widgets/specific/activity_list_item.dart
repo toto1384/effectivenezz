@@ -60,7 +60,7 @@ class _ActivityListItemState extends State<ActivityListItem> with AfterLayoutMix
               if(widget.minimal??false){
                 widget.onTap();
               }else{
-                showActivityDetailsBottomSheet(getGlobalContext(context), widget.activity);
+                showObjectDetailsBottomSheet(getGlobalContext(context), widget.activity,widget.selectedDate);
               }
             },
             leading: CircleAvatar(
@@ -75,7 +75,7 @@ class _ActivityListItemState extends State<ActivityListItem> with AfterLayoutMix
                   padding: const EdgeInsets.symmetric(horizontal: 4,vertical: 2),
                   child: getText("${formatDouble(widget.activity.value.toDouble())}\$/h",textType: TextType.textTypeSubNormal,
                     color:  getValueColor(widget.activity.value)),
-                ),color: getValueColor(widget.activity.value)),
+                )),
                 Visibility(
                   visible: childs.length!=0,
                   child: getBasicLinedBorder(Padding(
@@ -93,9 +93,10 @@ class _ActivityListItemState extends State<ActivityListItem> with AfterLayoutMix
               ],
             ),
             title: getText(widget.activity.name),
-            onLongPress: ()=>showAddEditActivityBottomSheet(
+            onLongPress: ()=>showAddEditObjectBottomSheet(
                 context, selectedDate: widget.selectedDate,
-                add: false,index: MyApp.dataModel.findObjectIndexById(widget.activity),activity: widget.activity,scheduled: widget.activity.getScheduled(context)[0]
+                add: false,index: MyApp.dataModel.findObjectIndexById(widget.activity),
+                object: widget.activity,scheduled: widget.activity.getScheduled(context)[0],isTask: false
             ),
             trailing: Visibility(
               visible: !(widget.minimal??false),

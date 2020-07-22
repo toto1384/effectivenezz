@@ -22,7 +22,6 @@ import '../main.dart';
 import 'database.dart';
 import 'database_helper.dart';
 import 'google_drive.dart';
-import 'iap.dart';
 import 'prefs.dart';
 import 'package:flutter/services.dart';
 import 'package:effectivenezz/ui/pages/welcome_page.dart';
@@ -238,16 +237,18 @@ class DataModel{
       task(findObjectIndexById(playing), playing, context, CUD.Update);
       taskPlayingId = playing.id;
     }
-    if(playing==null){
-      notificationHelper.cancelNotification(0);
-    }else{
-      notificationHelper.displayNotification(
-        id: 0,
-        title: playing.name,
-        body: "For more info in a popup tap me",
-        payload: "tracked",
-        color: playing.color,
-      );
+    if(!kIsWeb){
+      if(playing==null){
+        notificationHelper.cancelNotification(0);
+      }else{
+        notificationHelper.displayNotification(
+          id: 0,
+          title: playing.name,
+          body: "For more info in a popup tap me",
+          payload: "tracked",
+          color: playing.color,
+        );
+      }
     }
     MyAppState.ss(context);
   }
@@ -424,18 +425,28 @@ class DataModel{
 
 
   //FIND METHODS
-  Color findParentColor(Task task){
-    if(task.parentId<0){
-      return Colors.white;
+  Color findParentColor(dynamic task){
+    if(task is Task){
+      if(task.parentId<0){
+        return Colors.white;
+      }
+      return task.isParentCalendar?findECalendarById(task.parentId).color:findActivityById(task.parentId).color;
+    }else if(task is Activity){
+      return findECalendarById(task.parentCalendarId).color;
     }
-    return task.isParentCalendar?findECalendarById(task.parentId).color:findActivityById(task.parentId).color;
+    return Colors.blueGrey;
   }
 
-  String findParentName(Task task){
-    if(task.parentId<0){
-      return "No parent";
+  String findParentName(dynamic  task){
+    if(task is Task){
+      if(task.parentId<0){
+        return "No parent";
+      }
+      return task.isParentCalendar?findECalendarById(task.parentId).name:findActivityById(task.parentId).name;
+    }else if(task is Activity){
+      return findECalendarById(task.parentCalendarId).name;
     }
-    return task.isParentCalendar?findECalendarById(task.parentId).name:findActivityById(task.parentId).name;
+    return 'No Parent';
   }
 
   //FIND BY PARENT

@@ -1,4 +1,5 @@
 import 'package:effectivenezz/ui/widgets/distivity_drawer.dart';
+import 'package:effectivenezz/ui/widgets/distivity_fab.dart';
 import 'package:effectivenezz/ui/widgets/distivity_secondary_item.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
@@ -24,6 +25,8 @@ class _TrackPageState extends DistivityPageState<TrackPage> {
   );
 
   ScrollController scrollController = ScrollController();
+
+  bool showing = false;
 
   @override
   Widget build(BuildContext context) {
@@ -53,10 +56,9 @@ class _TrackPageState extends DistivityPageState<TrackPage> {
               });
               pageController.animateToPage(i, duration: Duration(milliseconds: 200), curve: Curves.easeInOut);
             }
+          ),
         ),
-        ),
-        bottomNavigationBar: MyApp.dataModel!=null?(MyApp.dataModel.activityPlayingId!=null||MyApp.dataModel.taskPlayingId!=null)?DistivitySecondaryItem():null:null,
-        floatingActionButton: getDistivityFab(selectedDate,(f,b){
+        floatingActionButton:DistivityFAB(controllerLogic:(f,b){
           scrollController.addListener(() {
             if(scrollController.position.userScrollDirection == ScrollDirection.reverse){
               b();
@@ -67,6 +69,8 @@ class _TrackPageState extends DistivityPageState<TrackPage> {
             }
           });
         }),
+        bottomNavigationBar: MyApp.dataModel!=null?(MyApp.dataModel.activityPlayingId!=null
+            ||MyApp.dataModel.taskPlayingId!=null)?DistivitySecondaryItem():null:null,
         body: PageView(
           onPageChanged: (i){
             setState(() {
@@ -76,8 +80,8 @@ class _TrackPageState extends DistivityPageState<TrackPage> {
           controller: pageController,
           children: <Widget>[
             MyApp.dataModel.prefs.getAppMode()?sortByMoneyTasksAndActivities(context, scrollController, selectedDate,):
-              upcomingTasksAndActivities(context,scrollController,selectedDate,),
-            getSortByCalendarListView(context,selectedDate,controller: scrollController),
+            upcomingTasksAndActivities(context,scrollController,selectedDate,),
+            getSortByCalendarListView(context,selectedDate,controller: scrollController,),
           ],
         ),
       ),

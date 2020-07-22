@@ -2,12 +2,9 @@
 import 'dart:math';
 
 import 'package:after_layout/after_layout.dart';
-import 'package:effectivenezz/data/google_drive.dart';
 import 'package:effectivenezz/main.dart';
 import 'package:effectivenezz/objects/list_callback.dart';
 import 'package:effectivenezz/ui/pages/set_type_page.dart';
-import 'package:effectivenezz/ui/pages/welcome_page.dart';
-import 'package:effectivenezz/utils/basic/overflows_basic.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:effectivenezz/utils/basic/widgets_basic.dart';
 import 'package:effectivenezz/utils/complex/widget_complex.dart';
@@ -15,11 +12,8 @@ import 'package:effectivenezz/utils/custom_key.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:googleapis/adsense/v1_4.dart';
 import 'package:launch_review/launch_review.dart';
 
-import 'basic/values_utils.dart';
 
 class DistivityPageState<T extends StatefulWidget> extends State<T> with AfterLayoutMixin{
 

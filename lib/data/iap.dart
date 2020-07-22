@@ -1,6 +1,4 @@
-import 'package:effectivenezz/ui/pages/track_page.dart';
 import 'package:effectivenezz/ui/widgets/distivity_restart_widget.dart';
-import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -55,20 +53,21 @@ class IAPHelper{
   }
 
   Future<bool> isSubscriptionActive()async{
-    if(kIsWeb)return true;
-    try {
-      PurchaserInfo purchaserInfo = await Purchases.getPurchaserInfo();
-//      purchaserInfo.entitlements.all.forEach((key, value) {
-//        print('$key ${value.identifier} ${value.isActive}');
-//      });
-      if (purchaserInfo.activeSubscriptions.length>0) {
-        return true;
-      }
-    } on PlatformException catch (e) {
-      // Error fetching purchaser info
-      print('is subscription active error $e');
-    }
-    return false;
+    return true;
+//    if(kIsWeb)return true;
+//    try {
+//      PurchaserInfo purchaserInfo = await Purchases.getPurchaserInfo();
+////      purchaserInfo.entitlements.all.forEach((key, value) {
+////        print('$key ${value.identifier} ${value.isActive}');
+////      });
+//      if (purchaserInfo.activeSubscriptions.length>0) {
+//        return true;
+//      }
+//    } on PlatformException catch (e) {
+//      // Error fetching purchaser info
+//      print('is subscription active error $e');
+//    }
+//    return false;
   }
 
   Future<Map<String,Offering>> getOfferings()async{

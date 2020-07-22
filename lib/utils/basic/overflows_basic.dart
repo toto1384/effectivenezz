@@ -1,10 +1,11 @@
 import 'dart:async';
 
 import 'package:effectivenezz/utils/basic/date_basic.dart';
-import 'package:effectivenezz/utils/distivity_page.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_duration_picker/flutter_duration_picker.dart';
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
+import 'package:sliding_sheet/sliding_sheet.dart';
 import '../date_n_strings.dart';
 import 'widgets_basic.dart';
 import 'typedef_and_enums.dart';
@@ -56,54 +57,56 @@ showYesNoDialog(BuildContext context,{@required String title,@required String te
   });
 }
 
-showDistivityModalBottomSheet(BuildContext context, StateGetter stateGetter,{bool hideHandler}){
+showDistivityModalBottomSheet(BuildContext context, StateGetter stateGetter,{bool hideHandler,bool dismissible,double initialSnapping}){
 
   if(hideHandler==null){
     hideHandler=false;
   }
-  DistivityPageState state = context.findAncestorStateOfType<DistivityPageState>();
 
-  if(state!=null){
-    context=state.context;
-  }
-  state=null;
-  showModalBottomSheet(
-    shape: getShape(bottomSheetShape: true),
-    backgroundColor: MyColors.getOverFlowColor(),
-    isScrollControlled: true,context: context,builder: (ctx){
-      return StatefulBuilder(
-        builder: (ctx,setState){
-          return SingleChildScrollView(
-            child: Container(
-              padding: EdgeInsets.only(bottom: MediaQuery.of((context)).viewInsets.bottom),
+  showSlidingBottomSheet(context, builder: (ctx){
+    return SlidingSheetDialog(
+      duration: Duration(milliseconds: 100),
+      elevation: 0,
+      cornerRadius: 16,
+      color: MyColors.color_black_darker,
+      cornerRadiusOnFullscreen: 0,
+      isDismissable: dismissible??true,
+      snapSpec: SnapSpec(
+        snap: true,
+        snappings: [(initialSnapping??1), 1.0],
+        positioning: SnapPositioning.relativeToAvailableSpace,
+      ),
+
+      builder: (context, state) {
+        return StatefulBuilder(
+          builder: (ctx,setState){
+            return Card(
+              color: MyColors.color_black_darker,
+              elevation: 0,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Visibility(
                     visible: !hideHandler,
-                    child: getPadding(GestureDetector(
-                        onTap: (){Navigator.pop(context);},
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            getSkeletonView(75, 4)
-                          ],
-                        ),
-                      ),vertical: 15,horizontal: 0),
+                    child: getPadding(IconButton(
+                      onPressed: (){Navigator.pop(context);},
+                      icon: getIcon(Icons.close),
+                    ),vertical: 15,horizontal: 0),
                   ),
                   stateGetter(context,(func){
-                      setState((){
-                        func();
-                      });
-                    }),
+                    setState((){
+                      func();
+                    });
+                  }),
                 ],
               ),
-            ),
-          );
-        },
-      );
-  },
-  );
+            );
+          },
+        );
+      },
+    );
+  });
 }
 
 showDistivityDatePicker(BuildContext context,{@required Function(DateTime) onDateSelected,DateTime selectedDate}) {

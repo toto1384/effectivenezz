@@ -10,7 +10,6 @@ import 'package:effectivenezz/utils/complex/widget_complex.dart';
 import 'package:effectivenezz/utils/distivity_page.dart';
 import 'package:flutter/material.dart';
 
-import '../../main.dart';
 
 class WelcomePage extends StatefulWidget {
 

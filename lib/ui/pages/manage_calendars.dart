@@ -53,21 +53,12 @@ class _ManageCalendarsState extends DistivityPageState<ManageCalendars> {
               ],
             ),
           ),
-          floatingActionButton: DistivityFAB(
-            onTap: (c){
-              showAddEditCalendarBottomSheet(c,add: true);
+          floatingActionButton: FloatingActionButton(
+            onPressed: (){
+              showAddEditCalendarBottomSheet(context,add: true);
             },
-            controllerLogic: (f,b){
-              scrollController.addListener(() {
-                if(scrollController.position.userScrollDirection == ScrollDirection.reverse){
-                  b();
-                } else {
-                  if(scrollController.position.userScrollDirection == ScrollDirection.forward){
-                    f();
-                  }
-                }
-              });
-            },
+            child: getIcon(Icons.add),
+            backgroundColor: MyColors.color_black,
           ),
         ),
     );

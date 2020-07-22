@@ -54,14 +54,11 @@ Text getText(String text, { TextType textType, Color color,int maxLines,bool cro
 }
 
 getDivider(){
-  return Center(
-    child: Padding(
-      padding: const EdgeInsets.all(15.0),
-      child: Container(
-        height: 1,
-        width: 100,
-        color: Colors.white,
-      ),
+  return Padding(
+    padding: const EdgeInsets.all(20),
+    child: Divider(
+      color: Colors.white,
+      thickness: 1.5,
     ),
   );
 }
@@ -69,9 +66,9 @@ getDivider(){
 Widget getBasicLinedBorder(Widget child,{Color color,bool smallRadius}){
   if(smallRadius==null)smallRadius=false;
   return Card(
-    shape: getShape(subtleBorder: true,smallRadius: smallRadius,subtleBorderColor: color),
+    shape: getShape(smallRadius: smallRadius),
     elevation: 0,
-    color: Colors.transparent,
+    color: color??MyColors.color_black,
     child: child,
   );
 }
@@ -125,7 +122,7 @@ getAppDarkTheme(){
   return ThemeData(
     fontFamily: 'Montserrat',
     unselectedWidgetColor: Colors.white,
-    canvasColor: MyColors.getOverFlowColor(),
+    canvasColor: MyColors.color_black_darker,
     accentColor: Colors.white,
     cursorColor: Colors.white,
     snackBarTheme: SnackBarThemeData(
@@ -176,7 +173,9 @@ Widget getFlareCheckbox(bool enabled,{Function(bool) onCallbackCompleted,Functio
   }
 
 getTextField(TextEditingController textEditingController,{String hint,@required int width,
-  TextInputType textInputType,bool focus,Function(String) onChanged,int variant}){
+  TextInputType textInputType,bool focus,Function(String) onChanged,int variant,TextType textType}){
+
+    if(textType==null)textType=TextType.textTypeNormal;
 
     if(focus==null){
       focus = false;
@@ -193,8 +192,8 @@ getTextField(TextEditingController textEditingController,{String hint,@required 
   return Container(
     width: (width.toDouble()),
     child: Card(
-      shape: getShape(subtleBorder: variant==1,smallRadius: false),
-      color: Colors.transparent,
+      shape: getShape(smallRadius: false),
+      color: variant==1?MyColors.color_black:Colors.transparent,
       elevation: 0,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 2),
@@ -205,10 +204,10 @@ getTextField(TextEditingController textEditingController,{String hint,@required 
           controller: textEditingController,
           maxLines: 1000,
           minLines: 1,
-          style: TextStyle(fontSize: TextType.textTypeNormal.size,color: Colors.white,fontWeight: TextType.textTypeNormal.fontWeight),
+          style: TextStyle(fontSize: textType.size,color: Colors.white,fontWeight: textType.fontWeight),
           decoration: InputDecoration.collapsed(
             hintText: hint??'',
-            hintStyle: TextStyle(fontSize: TextType.textTypeNormal.size,color: MyColors.getIconTextGray(),fontWeight: TextType.textTypeNormal.fontWeight),
+            hintStyle: TextStyle(fontSize: textType.size,color: MyColors.getIconTextGray(),fontWeight: textType.fontWeight),
           ),
         ),
       ),
@@ -234,9 +233,9 @@ FlatButton getButton(String text,{int variant,@required Function onPressed}){
     child: getPadding(getText("$text",color: Colors.white),
       horizontal: 7,vertical: 9),
     onPressed: onPressed,
-    shape: getShape(subtleBorder: variant==1?true:false,smallRadius: false),
+    shape: getShape(smallRadius: false),
 
-    color: Colors.transparent,
+    color: variant==1?MyColors.color_black:MyColors.color_black_darker,
   );
 }
 

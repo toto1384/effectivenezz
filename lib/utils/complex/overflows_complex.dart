@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:effectivenezz/data/database.dart';
 import 'package:effectivenezz/objects/activity.dart';
 import 'package:effectivenezz/objects/calendar.dart';
 import 'package:effectivenezz/objects/scheduled.dart';
@@ -18,28 +17,43 @@ import 'package:flutter/material.dart';
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:googleapis/drive/v2.dart';
-import 'package:path/path.dart';
-import 'dart:io' as io;
-import 'package:path_provider/path_provider.dart';
 
 import '../../main.dart';
 
 
 
-showAddEditTaskBottomSheet(BuildContext context,{Task task,int index,bool add,@required DateTime selectedDate,Scheduled scheduled}){
+showAddEditObjectBottomSheet(
+    BuildContext context,{dynamic object,int index,bool add,
+      @required DateTime selectedDate,Scheduled scheduled,@required bool isTask}){
 
-  if(task==null){
-    task=Task(
-      name: '',
-      tags: [],
-      isValueMultiply: false,
-      isParentCalendar: true,
-      checks: [],
-      parentId: -1,
-      trackedEnd: [],
-      trackedStart: [],
-      value: 0,
-    );
+
+  if(!isTask){
+    if(object==null){
+      object=Activity(
+        tags: [],
+        name: '',
+        valueMultiply: false,
+        parentCalendarId: -1,
+        trackedEnd: [],
+        trackedStart: [],
+        value: 0,
+        icon: Icons.mail,
+      );
+    }
+  }else{
+    if(object==null){
+      object=Task(
+        name: '',
+        tags: [],
+        isValueMultiply: false,
+        isParentCalendar: true,
+        checks: [],
+        parentId: -1,
+        trackedEnd: [],
+        trackedStart: [],
+        value: 0,
+      );
+    }
   }
 
   if(scheduled==null){
@@ -52,40 +66,24 @@ showAddEditTaskBottomSheet(BuildContext context,{Task task,int index,bool add,@r
   }
 
   if(add==null)add=false;
-  TextEditingController nameEditingController = TextEditingController(text: task.name??'');
-  TextEditingController descriptionEditingController = TextEditingController(text: task.description??'');
+  TextEditingController nameEditingController = TextEditingController(text: object.name??'');
+  TextEditingController descriptionEditingController = TextEditingController(text: object.description??'');
 
 
   showDistivityModalBottomSheet(context, (ctx,ss){
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          //text field and send
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  IconButton(
-                    icon: getIcon(task.isCheckedOnDate(selectedDate)?Icons.check_circle_outline:Icons.radio_button_unchecked),
-                    onPressed: (){
-                      if(task.isCheckedOnDate(selectedDate)){
-                        task.unCheckOnDate(selectedDate);
-                      }else{
-                        task.checks.add(selectedDate);
-                      }
-                      if(add){ss((){});}else{
-                        MyApp.dataModel.task(MyApp.dataModel.tasks.indexOf(task), task, context, CUD.Update);
-                      }
-                    },
-                  ),
-                  getPadding(getTextField(nameEditingController, width: 200,hint: 'Name goes here',textInputType: TextInputType.text,variant: 2)),
-                ],
-              ),
+              getPadding(getTextField(
+                  nameEditingController, width: 200,hint: 'Name goes here',
+                  textInputType: TextInputType.text,variant: 2,textType: TextType.textTypeSubtitle),),
               IconButton(
-                icon: getIcon(Icons.send),
+                icon: getIcon(Icons.send,size: TextType.textTypeSubtitle.size*1.5),
                 onPressed: (){
                   if(scheduled.durationInMins<0){
                     Fluttertoast.showToast(
@@ -98,89 +96,140 @@ showAddEditTaskBottomSheet(BuildContext context,{Task task,int index,bool add,@r
                         fontSize: 16.0
                     );
                   }else{
-                    task.name = nameEditingController.text;
-                    task.description = descriptionEditingController.text;
-                    MyApp.dataModel.task(index, task, context, add?CUD.Create:CUD.Update,addWith: scheduled);
+                    object.name = nameEditingController.text;
+                    object.description = descriptionEditingController.text;
+                    if(object is Task){
+                      MyApp.dataModel.task(index, object, context, add?CUD.Create:CUD.Update,addWith: scheduled);
+                    }else{
+                      MyApp.dataModel.activity(index, object, context, add?CUD.Create:CUD.Update,addWith: scheduled);
+                    }
                     Navigator.pop(context);
                   }
                 },
               ),
             ],
           ),
-        ),
-        getDivider(),
-        scheduledEditor(context, scheduled, (sc){
-          ss((){
-            scheduled=sc;
-          });
-        }),
-        getDivider(),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            repeatEditor(context, scheduled, (sc){
-              ss((){
-                scheduled=sc;
-              });
-            }),
-            IconButton(
-              icon: getIcon(Icons.colorize,color: task.color),
-              onPressed: (){
-                showEditColorBottomSheet(context,task.color??MyApp.dataModel.findParentColor(task),(col){
+          //set parent
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: ListTile(
+              leading: CircleAvatar(
+                maxRadius: 15,
+                backgroundColor: MyApp.dataModel.findParentColor(object),
+              ),
+              title: getText(MyApp.dataModel.findParentName(object)),
+              onTap: (){
+                showSelectParentBottomSheet(context, taskOrActivity: object, onSelected: (i,b){
                   ss((){
-                    task.color=col;
+                    if(object is Task){
+                      if(object.color==null||object.color==(object.isParentCalendar?
+                        MyApp.dataModel.findECalendarById(object.parentId).color:MyApp.dataModel.
+                        findActivityById(object.parentId).color)){
+                        if(b){
+                          object.color=MyApp.dataModel.findECalendarById(i).color;
+                        }else{
+                          object.color=MyApp.dataModel.findActivityById(i).color;
+                        }
+                      }
+                      object.parentId=i;
+                      object.isParentCalendar=b;
+                      if(object.value==0){
+                        if(!b){
+                          object.value=MyApp.dataModel.findActivityById(i).value;
+                        }
+                      }
+                    }else if(object is Activity){
+                      if(object.color==null||object.color==MyApp.dataModel.
+                        findECalendarById(object.parentCalendarId).color){
+                        object.color=MyApp.dataModel.findECalendarById(i).color;
+                      }
+                      object.parentCalendarId=i;
+                    }
                   });
                 });
               },
             ),
-            getButton("${formatDouble(task.value.toDouble()??0)}\$/hour", onPressed: (){
-              showHourValuePopup(context, value: task.value.toDouble(), isMultiply: task.isValueMultiply, onSelectedValueAndBool: (v,i){
-                ss((){
-                  task.value=v;
-                  task.isValueMultiply=i;
-                });
-              });
-            }),
-          ],
-        ),
-
-        ListTile(
-          leading: CircleAvatar(
-            maxRadius: 15,
-            backgroundColor: MyApp.dataModel.findParentColor(task),
           ),
-          title: getText(MyApp.dataModel.findParentName(task)),
-          onTap: (){
-            showSelectParentBottomSheet(context, taskOrActivity: task, onSelected: (i,b){
-              ss((){
-                if(task.color==null||task.color==(task.isParentCalendar?MyApp.dataModel.findECalendarById(task.parentId).color:MyApp.dataModel.findActivityById(task.parentId).color)){
-                  if(b){
-                    task.color=MyApp.dataModel.findECalendarById(i).color;
-                  }else{
-                    task.color=MyApp.dataModel.findActivityById(i).color;
-                  }
-                }
-                task.parentId=i;
-                task.isParentCalendar=b;
-                if(task.value==0){
-                  if(!b){
-                    task.value=MyApp.dataModel.findActivityById(i).value;
-                  }
-                }
-              });
+          //set icon
+          if(object is Activity)
+            IconButton(
+              icon: getIcon(object.icon??Icons.not_interested),
+              onPressed: (){
+                FlutterIconPicker.showIconPicker(
+                    context,
+                    title: getText("Pick Icon",textType: TextType.textTypeSubtitle),
+                    showTooltips: true,
+                    iconPackMode: IconPack.material,
+                    backgroundColor: MyColors.color_black,
+                    iconColor: Colors.white,
+                    closeChild: getButton("Close",onPressed: ()=>Navigator.pop(context))
+
+                ).then((value) => ss((){
+                  object.icon=value;
+                }));
+              },
+            ),
+
+
+          getDivider(),
+          Padding(
+            padding: const EdgeInsets.only(left: 15,bottom: 20,top: 8),
+            child: getText('Schedule'+(object is Task?' task':' activity'),textType: TextType.textTypeSubtitle,underline: true),
+          ),
+          scheduledEditor(context, scheduled, (sc){
+            ss((){
+              scheduled=sc;
             });
-          },
-        ),
-        Divider(color: MyColors.getHelpColor(),),
-        Padding(
-          padding: const EdgeInsets.only(bottom: 25),
-          child: Center(child: getTextField(descriptionEditingController, width: MediaQuery.of(context).size.width.toInt()-50,textInputType: TextInputType.multiline,hint: 'Description goes here'),),
-        )
-
-
-      ],
-    );
-  });
+          }),
+          getDivider(),
+          ExpansionTile(
+            title: getText('Advanced',textType: TextType.textTypeSubtitle,underline: true),
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    maxRadius: 15,
+                    backgroundColor: object.color,
+                  ),
+                  title: getText('Set Color'),
+                  onTap: (){
+                    showEditColorBottomSheet(context,object.color??MyApp.dataModel.findParentColor(object),(col){
+                      ss((){
+                        object.color=col;
+                      });
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    maxRadius: 15,
+                    backgroundColor: object.color,
+                    child: getIcon(Icons.attach_money),
+                  ),
+                  title: getText('Set value(${formatDouble(object.value.toDouble()??0)}\$/hour)'),
+                  onTap: (){
+                    showHourValuePopup(context, value: object.value.toDouble(), isMultiply: object.isValueMultiply, onSelectedValueAndBool: (v,i){
+                      ss((){
+                        object.value=v;
+                        object.isValueMultiply=i;
+                      });
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 30),
+                child: Center(child: getTextField(descriptionEditingController, width: MediaQuery.of(context).size.width.toInt()-16,textInputType: TextInputType.multiline,hint: 'Description goes here'),),
+              ),
+            ],
+          ),
+        ],
+      );
+  },initialSnapping: .3);
 }
 
 showHourValuePopup(BuildContext context,{@required double value,@required bool isMultiply,@required Function(int,bool) onSelectedValueAndBool}){
@@ -290,8 +339,8 @@ showReplacePlayableBottomSheet(BuildContext context,dynamic currentPlaying){
   });
 }
 
-showTaskDetailsBottomSheet(BuildContext context, Task task){
-
+showObjectDetailsBottomSheet(BuildContext context, dynamic object,DateTime selectedDate){
+  bool isActivity = object is Activity;
 
   showDistivityModalBottomSheet(context, (ctx,ss){
     return Column(
@@ -303,67 +352,50 @@ showTaskDetailsBottomSheet(BuildContext context, Task task){
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              Container(width: MediaQuery.of(context).size.width/1.65,child: getText(task.name,textType: TextType.textTypeSubtitle,)),
+              if(!isActivity)
+                IconButton(
+                  icon: getIcon(object.isCheckedOnDate(selectedDate)?Icons.check_circle_outline:Icons.radio_button_unchecked),
+                  onPressed: (){
+                    if(object.isCheckedOnDate(selectedDate)){
+                      object.unCheckOnDate(selectedDate);
+                    }else{
+                      object.checks.add(selectedDate);
+                    }
+                    MyApp.dataModel.task(MyApp.dataModel.tasks.indexOf(object), object, context, CUD.Update);
+                  },
+                ),
+              Container(width: MediaQuery.of(context).size.width/1.65,child: getText(object.name,textType: TextType.textTypeSubtitle,)),
               getButton("Edit", onPressed: (){
                 Navigator.pop(context);
-                showAddEditTaskBottomSheet(context, selectedDate: getTodayFormated(),task: task,add: false,index: MyApp.dataModel.findObjectIndexById(task),scheduled: task.getScheduled(context)[0]);
+                showAddEditObjectBottomSheet(
+                    context, selectedDate: selectedDate,
+                    object: object,add: false,index: MyApp.dataModel.findObjectIndexById(object),
+                    scheduled: object.getScheduled(context)[0],isTask: true);
               })
             ],
           ),
         ),
-        getText(task.description),
+        getText(object.description),
         getDivider(),
-        getText("${formatDouble(task.value.toDouble())} \$/hour"),
+        getText("${formatDouble(object.value.toDouble())} \$/hour"),
         ListTile(
           leading: getIcon(Icons.delete_outline),
           title: getText('Delete task'),
           onTap: (){
-            MyApp.dataModel.task(MyApp.dataModel.findObjectIndexById(task), task, context, CUD.Delete,withScheduleds: true);
+            if(isActivity){
+              MyApp.dataModel.activity(
+                  MyApp.dataModel.findObjectIndexById(object), object, context, CUD.Delete,withScheduleds: true);
+            }else{
+              MyApp.dataModel.task(
+                  MyApp.dataModel.findObjectIndexById(object), object, context, CUD.Delete,withScheduleds: true);
+            }
             Navigator.pop(context);
           },
         ),
         getText("Tracked",textType: TextType.textTypeSubtitle),
-        if(task.trackedStart.length==0)
+        if(object.trackedStart.length==0)
           getEmptyView(context, "No timestamps")
-      ]+getTrackedIntervalsWidget(context,task, task.color),
-    );
-  });
-}
-
-showActivityDetailsBottomSheet(BuildContext context,Activity activity){
-
-  showDistivityModalBottomSheet(context, (ctx,ss){
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.all(15.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              getText(activity.name,textType: TextType.textTypeSubtitle),
-              getButton("Edit", onPressed: (){
-                Navigator.pop(context);
-                showAddEditActivityBottomSheet(context, selectedDate: getTodayFormated(),activity: activity,add: false,index: MyApp.dataModel.findObjectIndexById(activity),scheduled: activity.getScheduled(context)[0]);
-              })
-            ],
-          ),
-        ),
-        getText(activity.description),
-        getDivider(),
-        getText("${formatDouble(activity.value.toDouble())} \$/hour"),
-        ListTile(
-          leading: getIcon(Icons.delete_outline),
-          title: getText('Delete activity'),
-          onTap: (){
-            MyApp.dataModel.activity(MyApp.dataModel.activities.indexOf(MyApp.dataModel.findActivityById(activity.id)), activity, context, CUD.Delete,withScheduleds: true);
-            Navigator.pop(context);
-          },
-        ),
-        getText("Tracked",textType: TextType.textTypeSubtitle),
-        if(activity.trackedStart.length==0)
-          getEmptyView(context, "No timestamps")
-      ]+getTrackedIntervalsWidget(context,activity, activity.color),
+      ]+getTrackedIntervalsWidget(context,object, object.color),
     );
   });
 }
@@ -599,156 +631,6 @@ showEditTimestampsBottomSheet(BuildContext context, {@required dynamic object,in
   });
 }
 
-showAddEditActivityBottomSheet(BuildContext context,{Activity activity,int index,bool add,@required DateTime selectedDate,Scheduled scheduled}){
-
-  if(activity==null){
-    activity=Activity(
-      tags: [],
-      name: '',
-      valueMultiply: false,
-      parentCalendarId: -1,
-      trackedEnd: [],
-      trackedStart: [],
-      value: 0,
-      icon: Icons.mail,
-    );
-  }
-  if(scheduled==null){
-    scheduled=Scheduled(
-      isParentTask: false,
-      repeatRule: RepeatRule.None,
-      repeatValue: 1,
-      durationInMins: 30
-    );
-  }
-
-
-  if(add==null)add=false;
-
-  TextEditingController nameEditingController = TextEditingController(text: activity.name??'');
-  TextEditingController descriptionEditingController = TextEditingController(text: activity.description??'');
-
-
-  showDistivityModalBottomSheet(context, (ctx,ss){
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              IconButton(
-                icon: getIcon(activity.icon??Icons.not_interested),
-                onPressed: (){
-                  FlutterIconPicker.showIconPicker(
-                    context,
-                    title: getText("Pick Icon",textType: TextType.textTypeSubtitle),
-                    showTooltips: true,
-                    iconPackMode: IconPack.material,
-                    backgroundColor: MyColors.color_black,
-                    iconColor: Colors.white,
-                    closeChild: getButton("Close",onPressed: ()=>Navigator.pop(context))
-
-                  ).then((value) => ss((){
-                    activity.icon=value;
-                  }));
-                },
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  getPadding(getTextField(nameEditingController, width: 200,focus: false,hint: 'Name goes here',textInputType: TextInputType.text,variant: 2)),
-                ],
-              ),
-              IconButton(
-                icon: getIcon(Icons.send),
-                onPressed: (){
-                  if(scheduled.durationInMins<0){
-                    Fluttertoast.showToast(
-                        msg: "End time can not be sooner than start time",
-                        toastLength: Toast.LENGTH_LONG,
-                        gravity: ToastGravity.CENTER,
-                        timeInSecForIosWeb: 3,
-                        backgroundColor: MyColors.color_black,
-                        textColor: Colors.white,
-                        fontSize: 16.0
-                    );
-                  }else{
-                    activity.name = nameEditingController.text;
-                    activity.description = descriptionEditingController.text;
-                    MyApp.dataModel.activity(index, activity, context, add?CUD.Create:CUD.Update,addWith: scheduled);
-                    Navigator.pop(context);
-                  }
-                },
-              ),
-            ],
-          ),
-        ),
-        getDivider(),
-        scheduledEditor(context, scheduled, (sc){
-          ss((){
-            scheduled=sc;
-          });
-        }),
-        getDivider(),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            repeatEditor(context, scheduled, (sc){
-              ss((){
-                scheduled=sc;
-              });
-            }),
-            IconButton(
-              icon: getIcon(Icons.colorize,color: activity.color),
-              onPressed: (){
-                showEditColorBottomSheet(context,activity.color??MyApp.dataModel.findECalendarById(activity.parentCalendarId).color,(col){
-                  ss((){
-                    activity.color=col;
-                  });
-                });
-              },
-            ),
-            getButton("${formatDouble(activity.value.toDouble()??0)}\$/hour", onPressed: (){
-              showHourValuePopup(context, value: activity.value.toDouble(), isMultiply: activity.valueMultiply, onSelectedValueAndBool: (v,i){
-                ss((){
-                  activity.value=v;
-                  activity.valueMultiply=i;
-                });
-              });
-            }),
-          ],
-        ),
-        ListTile(
-          leading: CircleAvatar(
-            maxRadius: 15,
-            backgroundColor: MyApp.dataModel.findECalendarById(activity.parentCalendarId).color,
-          ),
-          title: getText(MyApp.dataModel.findECalendarById(activity.parentCalendarId).name),
-          onTap: (){
-            showSelectParentBottomSheet(context, taskOrActivity: activity, onSelected: (i,b){
-              ss((){
-                if(activity.color==null||activity.color==MyApp.dataModel.findECalendarById(activity.parentCalendarId).color){
-                  activity.color=MyApp.dataModel.findECalendarById(i).color;
-                }
-                activity.parentCalendarId=i;
-              });
-            });
-          },
-        ),
-        Divider(color: MyColors.getHelpColor(),),
-        Padding(
-          padding: const EdgeInsets.only(bottom: 25),
-          child: Center(child: getTextField(descriptionEditingController, width: MediaQuery.of(context).size.width.toInt()-50,textInputType: TextInputType.multiline,hint: 'Description goes here'),),
-        )
-
-
-      ],
-    );
-  });
-}
-
 showSelectParentBottomSheet(BuildContext context,{@required dynamic taskOrActivity,@required Function(int,bool) onSelected}){
 
   bool cal=true;
@@ -943,9 +825,10 @@ showAddEditCalendarBottomSheet(BuildContext context,{ECalendar eCalendar,int ind
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            getPadding(getTextField(nameEditingController, width: 300,hint: 'Name goes here',focus: true,variant: 2),),
+            getPadding(getTextField(nameEditingController, width: 300,hint: 'Name goes here',focus: true,
+                variant: 2,textType: TextType.textTypeSubtitle),),
             IconButton(
-              icon: getIcon(Icons.send),
+              icon: getIcon(Icons.send,size: TextType.textTypeSubtitle.size*1.5),
               onPressed: (){
                 eCalendar.name=nameEditingController.text;
                 eCalendar.description= descriptionEditingController.text;
@@ -958,7 +841,7 @@ showAddEditCalendarBottomSheet(BuildContext context,{ECalendar eCalendar,int ind
         ListTile(
           leading: CircleAvatar(
             maxRadius: 15,
-            backgroundColor: eCalendar.color,
+            backgroundColor: eCalendar.color??Colors.white,
           ),
           title: getText('Set color'),
           onTap: (){

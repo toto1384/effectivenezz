@@ -1,12 +1,10 @@
 import 'package:effectivenezz/data/iap.dart';
-import 'package:effectivenezz/ui/widgets/distivity_drawer.dart';
 import 'package:effectivenezz/ui/widgets/rosse_scaffold.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:effectivenezz/utils/complex/widget_complex.dart';
 import 'package:effectivenezz/utils/distivity_page.dart';
 import 'package:flutter/material.dart';
-import 'package:snaplist/snaplist.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import '../../main.dart';
@@ -25,7 +23,7 @@ class _IAPScreenState extends DistivityPageState<IAPScreen> {
 
 
   YoutubePlayerController controller = YoutubePlayerController(
-      initialVideoId: 'ScMzIvxBSi4',
+      initialVideoId: 'fPEYrpma4Ew',
       flags: YoutubePlayerFlags(
         autoPlay: false,
       )

@@ -9,11 +9,11 @@ import 'package:flutter/material.dart';
 class MyColors{
   static const Color color_primary = Color(0xffffffff);
 
-  static const Color color_black = Color(0xff020716);
-  static const Color color_black_darker = Color(0xff00020C);
+  static const Color color_black = Color(0xff161A2B);
+  static const Color color_black_darker = Color(0xff0E0F1E);
 
 
-  static const Color color_gray_darker = Color(0xff141F33);
+  static const Color color_gray_darker = Color(0xff2d3344);
   static const Color color_gray_lighter = Color(0xff5F6377);
 
   static getHelpColor(){

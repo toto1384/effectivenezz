@@ -1,17 +1,17 @@
 
 
+import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
 import 'package:effectivenezz/utils/basic/widgets_basic.dart';
+import 'package:effectivenezz/utils/complex/overflows_complex.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:simple_speed_dial/simple_speed_dial.dart';
 
 class DistivityFAB extends StatefulWidget {
-
-  final Map<IconData,Function(BuildContext)> subItems;
-  final Function(BuildContext) onTap;
   final Function(Function,Function) controllerLogic;
 
-  const DistivityFAB({Key key,this.subItems,@required this.onTap,@required this.controllerLogic}) : super(key: key);
+  const DistivityFAB({Key key,@required this.controllerLogic}) : super(key: key);
 
   @override
   _DistivityFABState createState() => _DistivityFABState();
@@ -27,9 +27,9 @@ class _DistivityFABState extends State<DistivityFAB> with TickerProviderStateMix
   @override
   void initState() {
     super.initState();
-    animation = AnimationController(vsync: this,duration: Duration(milliseconds: 100));
-    _hideFabAnimation = AnimationController(vsync: this, duration: kThemeAnimationDuration,value: 1);
-    widget.controllerLogic(()=>_hideFabAnimation.forward(),()=>_hideFabAnimation.reverse());
+    animation = AnimationController(vsync: this,duration: Duration(milliseconds: 200));
+    _hideFabAnimation = AnimationController(vsync: this, duration: Duration(milliseconds: 200),value: 1);
+    if(widget.controllerLogic!=null)widget.controllerLogic(()=>_hideFabAnimation.forward(),()=>_hideFabAnimation.reverse());
   }
 
   @override
@@ -41,81 +41,28 @@ class _DistivityFABState extends State<DistivityFAB> with TickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ScaleTransition(
-          alignment: Alignment.bottomCenter,
-          scale: _hideFabAnimation,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-
-              AnimatedOpacity(opacity: extended?1:0,child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: List.generate((widget.subItems??{}).length, (i){
-                    return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(100),
-                            border:Border.all(color: Colors.white,width: 1),
-                            color: MyColors.color_black_darker
-                          ),
-                          child: IconButton(
-                            icon: getIcon(widget.subItems.keys.toList()[i]),
-                            onPressed: (){
-                              widget.subItems.values.toList()[i](context);
-                            },
-                          )
-                      ),
-                    );
-                  }),
-                ),duration: Duration(milliseconds: 100),),
-              Padding(
-                padding: const EdgeInsets.all(10),
-                child: GestureDetector(
-                  onTap: (){
-                      if(widget.subItems==null){
-                        widget.onTap(context);
-                        return;
-                      }
-                      if(extended){
-                        animation.reverse();
-                        widget.onTap(context);
-                      }else{
-                        animation.forward();
-                      }
-                      setState(() {
-                        extended=!extended;
-                      });
-                    },
-                  child: Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(100),
-                        border:Border.all(color: Colors.white,width: 2),
-                      color: MyColors.color_black_darker
-                      ),
-                    child: Center(
-                        child: AnimatedIcon(
-                          progress: animation,
-                          icon: AnimatedIcons.add_event,
-                        ),
-                      ),
-                  ),
-                ),
-              ),
-            ],
+    return ScaleTransition(
+      scale: _hideFabAnimation,
+      child: SpeedDial(
+        controller: animation,
+        child: getIcon(Icons.add),
+        openBackgroundColor: MyColors.color_black,
+        closedBackgroundColor: MyColors.color_black,
+        speedDialChildren: <SpeedDialChild>[
+          SpeedDialChild(
+            backgroundColor: MyColors.color_black,
+            label: 'Add Event',
+            child: getIcon(Icons.event),
+            onPressed: ()=>showAddEditObjectBottomSheet(context, selectedDate: getTodayFormated(), add: true,isTask: false),
           ),
-        ),
-        if(kIsWeb)
-          SizedBox(width: 75,)
-      ],
+          SpeedDialChild(
+            backgroundColor: MyColors.color_black,
+            label: 'Add Task',
+            child: getIcon(Icons.event_available),
+            onPressed: ()=>showAddEditObjectBottomSheet(context, selectedDate: getTodayFormated(), add: true,isTask: true),
+          ),
+        ],
+      ),
     );
   }
 }

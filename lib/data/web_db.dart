@@ -7,7 +7,6 @@ import 'dart:html';
 import 'dart:convert';
 
 import 'package:effectivenezz/data/database_helper.dart';
-import 'package:effectivenezz/main.dart';
 import 'package:effectivenezz/objects/activity.dart';
 import 'package:effectivenezz/objects/calendar.dart';
 import 'package:effectivenezz/objects/scheduled.dart';

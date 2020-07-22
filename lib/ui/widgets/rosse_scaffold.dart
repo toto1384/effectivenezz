@@ -27,7 +27,10 @@ class RosseScaffold extends StatefulWidget {
 //  final Widget subtitle
 
 
-  RosseScaffold(this.title,{Key key, this.bottomAppBar,this.expandedHeight, this.scaffoldKey,this.fab,this.color,this.backEnabled, this.hideMenu, this.appBarWidget,@required this.body, this.floatingActionButtonLocation, this.trailing, this.toolTip, this.scrollController}):super(key:key);
+  RosseScaffold(this.title,{Key key, this.bottomAppBar,this.expandedHeight,
+    this.scaffoldKey,this.fab,this.color,this.backEnabled, this.hideMenu, this.appBarWidget,
+    @required this.body, this.floatingActionButtonLocation, this.trailing, this.toolTip,
+    this.scrollController}):super(key:key);
 
   @override
   _RosseScaffoldState createState() => _RosseScaffoldState();
@@ -70,7 +73,7 @@ class _RosseScaffoldState extends State<RosseScaffold> with TickerProviderStateM
       ),
       key: widget.scaffoldKey,
       drawer: DistivityDrawer(),
-      backgroundColor: widget.color??MyColors.color_primary,
+      backgroundColor: widget.color??MyColors.color_black,
       floatingActionButtonLocation: widget.floatingActionButtonLocation??FloatingActionButtonLocation.centerFloat,
       floatingActionButton: ScaleTransition(
           scale: _hideFabAnimation,

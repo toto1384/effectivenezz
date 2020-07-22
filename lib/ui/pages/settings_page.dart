@@ -8,8 +8,6 @@ import 'package:effectivenezz/utils/complex/widget_complex.dart';
 import 'package:effectivenezz/utils/distivity_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:effectivenezz/ui/pages/welcome_page.dart';
 import 'package:launch_review/launch_review.dart';
 import '../../main.dart';
 
@@ -20,8 +18,6 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends DistivityPageState<SettingsPage>{
-
-  static const platform = const MethodChannel('flutter.native/helper');
 
   @override
   Widget build(BuildContext context) {

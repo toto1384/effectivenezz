@@ -48,7 +48,7 @@ class _TaskListItemState extends State<TaskListItem> with AfterLayoutMixin{
         if(widget.minimal??false){
           widget.onTap();
         }else{
-          showTaskDetailsBottomSheet(getGlobalContext(context), widget.task);
+          showObjectDetailsBottomSheet(getGlobalContext(context), widget.task,widget.selectedDate);
         }
       },
       leading: GestureDetector(
@@ -69,7 +69,7 @@ class _TaskListItemState extends State<TaskListItem> with AfterLayoutMixin{
             padding: const EdgeInsets.symmetric(horizontal: 4,vertical: 2),
             child: getText("${formatDouble(widget.task.value.toDouble())}\$/h",textType: TextType.textTypeSubNormal,
               color:  getValueColor(widget.task.value)),
-          ),color: getValueColor(widget.task.value)),
+          )),
           Visibility(
             visible: widget.task.description!='',
             child: getBasicLinedBorder(Padding(
@@ -80,9 +80,10 @@ class _TaskListItemState extends State<TaskListItem> with AfterLayoutMixin{
         ],
       ),
       title: getText(widget.task.name),
-      onLongPress: ()=>showAddEditTaskBottomSheet(
+      onLongPress: ()=>showAddEditObjectBottomSheet(
           context, selectedDate: widget.selectedDate,
-          add: false,index: MyApp.dataModel.findObjectIndexById(widget.task),task: widget.task,scheduled: widget.task.getScheduled(context)[0]
+          add: false,index: MyApp.dataModel.findObjectIndexById(widget.task),
+          object: widget.task,scheduled: widget.task.getScheduled(context)[0],isTask: true
       ),
       trailing: Visibility(
         visible: !(widget.minimal??false),

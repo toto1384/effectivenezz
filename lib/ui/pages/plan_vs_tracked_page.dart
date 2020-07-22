@@ -1,6 +1,6 @@
 import 'package:effectivenezz/objects/timestamp.dart';
 import 'package:effectivenezz/ui/widgets/distivity_calendar_widget.dart';
-import 'package:effectivenezz/ui/widgets/distivity_drawer.dart';
+import 'package:effectivenezz/ui/widgets/distivity_fab.dart';
 import 'package:effectivenezz/ui/widgets/distivity_zoom_widget.dart';
 import 'package:effectivenezz/ui/widgets/rosse_scaffold.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
@@ -53,20 +53,17 @@ class _PlanVsTrackedPageState extends DistivityPageState<PlanVsTrackedPage>{
         '',
         scaffoldKey: scaffoldKey,
         scrollController: scrollController,
-        fab: Visibility(
-          visible: planTracked==PlanTracked.Plan,
-          child: getDistivityFab(selectedDate,(f,b){
-            scrollController.addListener(() {
-              if(scrollController.position.userScrollDirection == ScrollDirection.reverse){
-                b();
-              } else {
-                if(scrollController.position.userScrollDirection == ScrollDirection.forward){
-                  f();
-                }
+        fab: DistivityFAB(controllerLogic:(f,b){
+          scrollController.addListener(() {
+            if(scrollController.position.userScrollDirection == ScrollDirection.reverse){
+              b();
+            } else {
+              if(scrollController.position.userScrollDirection == ScrollDirection.forward){
+                f();
               }
-            });
-          }),
-        ),
+            }
+          });
+        }),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         color: MyColors.color_black,
         expandedHeight: 250,
@@ -86,13 +83,14 @@ class _PlanVsTrackedPageState extends DistivityPageState<PlanVsTrackedPage>{
                 children: <Widget>[
                  getText('Calendar',textType: TextType.textTypeTitle),
                  getInfoIcon(context, "Here you will get a clear picture of your expectations of yourself, and what you did. "
-                     +"The TRANSPARENT blocks are what you've planned, and the OPAQUE blocks are what you've tracked")
+                     +"The Semi-Transparent blocks are what you've planned, and the Opaque blocks are what you've tracked")
                 ],
               ),
             ),
             getTabBar(
                 items: ["Plan","Tracked","Plan vs Tracked" ,],
                 selected: [PlanTracked.values.indexOf(planTracked)],
+                variant: 2,
                 onSelected: (i,b){
                   setState(() {
                     if(b)planTracked=PlanTracked.values[i];
@@ -131,43 +129,40 @@ class _PlanVsTrackedPageState extends DistivityPageState<PlanVsTrackedPage>{
 
     switch(selectedView){
       case SelectedView.Month:
-        return Center(child: getText('Will be implemented in future release'),);
+        return Center(child: getText('Will be implemented in a future release'),);
         break;
       default:
-        scrollController=ScrollController();
         return Container(
           width: MediaQuery.of(context).size.width-10,
           height: heightPerMinute*60*24+100,
-          child: Flexible(
-            child: PageView.builder(itemBuilder: (ctx,ind){
-              return DistivityCalendarWidget(
-                heightPerMinute: heightPerMinute,
-                days: selectedDateTimes,
-                forPlanVsTracked: true,
-                selectedView: selectedView,
-                plannedTimestamps:getTimeStamps(selectedDateTimes,false),
-                trackedTimestamps: getTimeStamps(selectedDateTimes,true),
-              );
+          child: PageView.builder(itemBuilder: (ctx,ind){
+            return DistivityCalendarWidget(
+              heightPerMinute: heightPerMinute,
+              days: selectedDateTimes,
+              forPlanVsTracked: true,
+              selectedView: selectedView,
+              plannedTimestamps:getTimeStamps(selectedDateTimes,false),
+              trackedTimestamps: getTimeStamps(selectedDateTimes,true),
+            );
 
-            },controller: pageController,onPageChanged: (page){
-              setState(() {
-                switch(selectedView){
-                  case SelectedView.Day:
-                    selectedDate=getDateFromString(getStringFromDate(DateTime.now())).add(Duration(days: page-50));
-                    break;
-                  case SelectedView.ThreeDay:
-                    selectedDate=getDateFromString(getStringFromDate(DateTime.now())).add(Duration(days: (page-50)*3));
-                    break;
-                  case SelectedView.Week:
-                    selectedDate=getDateFromString(getStringFromDate(DateTime.now())).add(Duration(days: (page-50)*7));
-                    break;
-                  case SelectedView.Month:
-                  // TODO: Handle this case.
-                    break;
-                }
-              });
-            },),
-          ),
+          },controller: pageController,onPageChanged: (page){
+            setState(() {
+              switch(selectedView){
+                case SelectedView.Day:
+                  selectedDate=getDateFromString(getStringFromDate(DateTime.now())).add(Duration(days: page-50));
+                  break;
+                case SelectedView.ThreeDay:
+                  selectedDate=getDateFromString(getStringFromDate(DateTime.now())).add(Duration(days: (page-50)*3));
+                  break;
+                case SelectedView.Week:
+                  selectedDate=getDateFromString(getStringFromDate(DateTime.now())).add(Duration(days: (page-50)*7));
+                  break;
+                case SelectedView.Month:
+                // TODO: Handle this case.
+                  break;
+              }
+            });
+          },),
         );
         break;
     }

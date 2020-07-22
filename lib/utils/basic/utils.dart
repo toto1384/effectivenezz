@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:effectivenezz/data/database.dart';
 import 'package:effectivenezz/main.dart';
 import 'package:effectivenezz/ui/widgets/distivity_restart_widget.dart';
 import 'package:effectivenezz/utils/basic/overflows_basic.dart';
@@ -9,20 +8,19 @@ import 'package:effectivenezz/utils/distivity_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 
 
-launchPage(BuildContext context , Widget page){
+launchPage(BuildContext context , Widget page,{bool fullScreenDialog}){
   print("launching page ${page.runtimeType}");
   Navigator.push(context, MaterialPageRoute(
     builder: (context){
       return page;
     }
-  ),);
+  ,fullscreenDialog: fullScreenDialog??false));
 }
+
 bool isShowingPage(BuildContext context,Type type){
   if(DistivityPageState.customKey.pageName==type.toString())return true;
 
@@ -41,16 +39,16 @@ getRepeatText(RepeatRule repeatRule, int repeatValue){
   switch(repeatRule){
 
     case RepeatRule.None:
-      return '';
+      return 'Doesn\'t repeat';
       break;
     case RepeatRule.EveryXDays:
-      return "(${repeatValue}d)";
+      return "Every $repeatValue days";
       break;
     case RepeatRule.EveryXWeeks:
-      return "(${repeatValue}w)";
+      return "Every $repeatValue weeks";
       break;
     case RepeatRule.EveryXMonths:
-      return "(${repeatValue}m)";
+      return "Every $repeatValue months";
       break;
   }
 }
