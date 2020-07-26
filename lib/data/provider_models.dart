@@ -32,12 +32,14 @@ class DataModel{
   static const platform = const MethodChannel('flutter.native/helper');
 
   DatabaseHelper databaseHelper;
+
+  double screenWidth;
+
   Prefs prefs;
   DriveHelper driveHelper;
   NotificationHelper notificationHelper;
 
-  int taskPlayingId;
-  int activityPlayingId;
+  dynamic currentPlaying;
 
   List<Activity> activities =[];
   List<ECalendar> eCalendars = [];
@@ -47,33 +49,21 @@ class DataModel{
 
   static Future<DataModel> init(BuildContext context)async{
     DataModel dataModel = DataModel();
-    print(1);
+    dataModel.screenWidth=MediaQuery.of(context).size.width;
     dataModel.databaseHelper = (kIsWeb?WebDb():await MobileDB.getDatabase(context));
-    print(2);
     dataModel.prefs = await Prefs.getInstance();
-    print(3);
     dataModel.driveHelper= await DriveHelper.init(context);
-    print(4);
     dataModel.scheduleds= await dataModel.databaseHelper.queryAllScheduled();
-    print(5);
     dataModel.tasks=await dataModel.databaseHelper.queryAllTasks();
-    print(6);
     dataModel.activities = await dataModel.databaseHelper.queryAllActivities();
-    print(7);
     dataModel.eCalendars = await dataModel.databaseHelper.queryAllECalendars();
-    print(8);
     dataModel.tags=await dataModel.databaseHelper.queryAllTags();
-    print(9);
+    dataModel.populatePlaying();
     if(!kIsWeb)dataModel.initNotificationsWithCorrectContext(context);
-    print(10);
 
     if(!kIsWeb)dataModel.scheduleEveryDay(context);
-    print(11);
 
     if(!kIsWeb)dataModel.setupDrift();
-    print(12);
-
-    dataModel.populatePlaying();
 
 
     return dataModel;
@@ -157,14 +147,13 @@ class DataModel{
   initNotificationsWithCorrectContext(BuildContext context)async{
     notificationHelper= await NotificationHelper.init(context);
     notificationHelper.cancelNotification(0);
-    dynamic object=taskPlayingId==null?activityPlayingId==null?null:findActivityById(activityPlayingId):findTaskById(taskPlayingId);
-    if(object!=null){
+    if(currentPlaying!=null){
       notificationHelper.displayNotification(
         id: 0,
-        title:"'"+ object.name+"' is tracked",
+        title:"'"+ currentPlaying.name+"' is tracked",
         body: "For more info in a popup tap me",
         payload: "tracked",
-        color: object.color,
+        color: currentPlaying.color,
         importance: Importance.Low,
       );
     }
@@ -174,12 +163,12 @@ class DataModel{
     print("populatePlaying m");
     tasks.forEach((element) {
       if(element.trackedEnd.length<element.trackedStart.length){
-        taskPlayingId=element.id;
+        currentPlaying=element;
       }
     });
     activities.forEach((element) {
       if(element.trackedEnd.length<element.trackedStart.length){
-        activityPlayingId=element.id;
+        currentPlaying=element;
       }
     });
   }
@@ -216,27 +205,28 @@ class DataModel{
   }
 
   setPlaying(BuildContext context,dynamic playing,){
-    if(taskPlayingId!=null){
-      Task currentPlayingTask = findTaskById(taskPlayingId);
-      currentPlayingTask.trackedEnd.add(getTodayFormated());
-      if(currentPlayingTask.id>0)task(findObjectIndexById(currentPlayingTask), currentPlayingTask, context, CUD.Update);
-      taskPlayingId = null;
-    }
-    if(activityPlayingId!=null){
-      Activity currentPlayingActivity = findActivityById(activityPlayingId);
-      currentPlayingActivity.trackedEnd.add(getTodayFormated());
-      if(currentPlayingActivity.id>0)activity(findObjectIndexById(currentPlayingActivity), currentPlayingActivity, context, CUD.Update);
-      activityPlayingId= null;
+    //stop current either of playing
+    if(currentPlaying!=null){
+      currentPlaying.trackedEnd.add(getTodayFormated());
+
+      if(currentPlaying.id>0){
+        if(currentPlaying is Task){
+          task(findObjectIndexById(currentPlaying), currentPlaying, context, CUD.Update);
+        }else{
+          activity(findObjectIndexById(currentPlaying), currentPlaying, context, CUD.Update);
+        }
+      }
+
+      currentPlaying=null;
     }
     //Start playing
     if(playing!=null)playing.trackedStart.add(getTodayFormated());
     if(playing is Activity){
       activity(findObjectIndexById(playing), playing, context, CUD.Update);
-      activityPlayingId=playing.id;
     }else if(playing is Task){
       task(findObjectIndexById(playing), playing, context, CUD.Update);
-      taskPlayingId = playing.id;
     }
+    currentPlaying=playing;
     if(!kIsWeb){
       if(playing==null){
         notificationHelper.cancelNotification(0);
@@ -288,7 +278,7 @@ class DataModel{
         break;
       case CUD.Delete:
         tasks.remove(event);
-        if(event.id==taskPlayingId){
+        if(event.id==currentPlaying.id){
           setPlaying(context, null);
         }
         await databaseHelper.deleteTask(event.id);
@@ -337,7 +327,7 @@ class DataModel{
           }
         }
         activities.remove(event);
-        if(event.id==activityPlayingId){
+        if(event.id==currentPlaying.id){
           setPlaying(context, null);
         }
         await databaseHelper.deleteActivity(event.id);
@@ -432,6 +422,9 @@ class DataModel{
       }
       return task.isParentCalendar?findECalendarById(task.parentId).color:findActivityById(task.parentId).color;
     }else if(task is Activity){
+      if(task.parentCalendarId<0){
+        return Colors.white;
+      }
       return findECalendarById(task.parentCalendarId).color;
     }
     return Colors.blueGrey;
@@ -444,6 +437,9 @@ class DataModel{
       }
       return task.isParentCalendar?findECalendarById(task.parentId).name:findActivityById(task.parentId).name;
     }else if(task is Activity){
+      if(task.parentCalendarId<0){
+        return "No parent";
+      }
       return findECalendarById(task.parentCalendarId).name;
     }
     return 'No Parent';
@@ -539,7 +535,7 @@ class DataModel{
       parentId: 0,
       checks: [],
       isParentCalendar: false,
-      isValueMultiply: false,
+      valueMultiply: false,
       id: -1,
     );
     tasks.forEach((item){
@@ -562,17 +558,15 @@ class DataModel{
   }
 
   void addMinutesToPlaying(BuildContext context, int i) {
-    if(taskPlayingId==null&&activityPlayingId==null){
+    if(currentPlaying==null){
 
-    }else if(taskPlayingId==null){
+    }else if(currentPlaying is Activity){
       //activity is playing
-      Activity playing = findActivityById(activityPlayingId);
-      playing.trackedStart.last=playing.trackedStart.last.subtract(Duration(minutes: i));
-      activity(findObjectIndexById(playing), playing, context, CUD.Update);
-    }else if(activityPlayingId==null){
-      Task playing = findTaskById(taskPlayingId);
-      playing.trackedStart.last=playing.trackedStart.last.subtract(Duration(minutes: i));
-      task(findObjectIndexById(playing), playing, context, CUD.Update);
+      currentPlaying.trackedStart.last=currentPlaying.trackedStart.last.subtract(Duration(minutes: i));
+      activity(findObjectIndexById(currentPlaying), currentPlaying, context, CUD.Update);
+    }else if(currentPlaying is Task){
+      currentPlaying.trackedStart.last=currentPlaying.trackedStart.last.subtract(Duration(minutes: i));
+      task(findObjectIndexById(currentPlaying), currentPlaying, context, CUD.Update);
     }
   }
 

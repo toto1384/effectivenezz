@@ -34,7 +34,7 @@ getTextFromDuration(Duration duration){
 }
 
 getDateName(DateTime dateTime){
-  if(dateTime==null)return "No date";
+  if(dateTime==null)return "Not set";
   if(dateTime.day==DateTime.now().day&&dateTime.month==DateTime.now().month&&dateTime.year==DateTime.now().year){
     return 'Today';
   }else if(dateTime.day-1==DateTime.now().day&&dateTime.month-1==DateTime.now().month&&dateTime.year-1==DateTime.now().year){
@@ -47,7 +47,7 @@ getDateName(DateTime dateTime){
 }
 
 getTimeName(DateTime dateTime){
-  if(dateTime==null)return "No time";
+  if(dateTime==null)return "Not set";
   return "${dateTime.hour}:${dateTime.minute}";
 }
 

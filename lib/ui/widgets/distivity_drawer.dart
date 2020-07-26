@@ -24,13 +24,8 @@ class _DistivityDrawerState extends State<DistivityDrawer> {
 
   bool showCals = false;
 
-  bool isMinimal;
-
   @override
   Widget build(BuildContext context) {
-    if(isMinimal==null&&MyApp.dataModel.prefs!=null){
-      isMinimal=MyApp.dataModel.prefs.getAppMode();
-    }
 
     return Drawer(
         elevation: 10,
@@ -97,7 +92,7 @@ class _DistivityDrawerState extends State<DistivityDrawer> {
                     )
                 ],
               ),
-              title: getText(isMinimal?"Calendars":'Calendar(Plan)',color: locked?Colors.blueGrey:Colors.white),
+              title: getText("Calendars",color: locked?Colors.blueGrey:Colors.white),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[

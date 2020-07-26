@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:auto_size_text_field/auto_size_text_field.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -70,6 +71,13 @@ Widget getBasicLinedBorder(Widget child,{Color color,bool smallRadius}){
     elevation: 0,
     color: color??MyColors.color_black,
     child: child,
+  );
+}
+
+Widget getSubtitle(String text,{bool isCentered}){
+  return Padding(
+    padding: const EdgeInsets.only(left: 15,bottom: 20,top: 8),
+    child: getText(text,textType: TextType.textTypeSubtitle,isCentered: isCentered??true),
   );
 }
 
@@ -172,14 +180,16 @@ Widget getFlareCheckbox(bool enabled,{Function(bool) onCallbackCompleted,Functio
     );
   }
 
-getTextField(TextEditingController textEditingController,{String hint,@required int width,
-  TextInputType textInputType,bool focus,Function(String) onChanged,int variant,TextType textType}){
+Widget getTextField(TextEditingController textEditingController,{String hint,
+  TextInputType textInputType,bool focus,Function(String) onChanged,int variant,TextType textType,bool small}){
 
     if(textType==null)textType=TextType.textTypeNormal;
 
     if(focus==null){
       focus = false;
     }
+
+    if(small ==null)small=false;
 
     if(variant==null){
       variant=1;
@@ -190,25 +200,27 @@ getTextField(TextEditingController textEditingController,{String hint,@required 
     }
 
   return Container(
-    width: (width.toDouble()),
-    child: Card(
-      shape: getShape(smallRadius: false),
+    constraints: BoxConstraints(maxWidth: MyApp.dataModel.screenWidth),
+    decoration: BoxDecoration(
       color: variant==1?MyColors.color_black:Colors.transparent,
-      elevation: 0,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 2),
-        child: TextFormField(
-          onChanged: (str){onChanged(str);},
-          autofocus: focus,
-          keyboardType: textInputType,
-          controller: textEditingController,
-          maxLines: 1000,
-          minLines: 1,
-          style: TextStyle(fontSize: textType.size,color: Colors.white,fontWeight: textType.fontWeight),
-          decoration: InputDecoration.collapsed(
-            hintText: hint??'',
-            hintStyle: TextStyle(fontSize: textType.size,color: MyColors.getIconTextGray(),fontWeight: textType.fontWeight),
-          ),
+      borderRadius: BorderRadius.circular(100),
+    ),
+    child: Padding(
+      padding: EdgeInsets.symmetric(horizontal: 10,vertical: 2),
+      child: AutoSizeTextField(
+        onChanged: (str){onChanged(str);},
+        autofocus: focus,
+        keyboardType: textInputType,
+        controller: textEditingController,
+        maxLines: 1000,
+        minLines: 1,
+        style: TextStyle(fontSize: textType.size,color: Colors.white,fontWeight: textType.fontWeight),
+        decoration: InputDecoration(
+          hintText: hint??'',
+          isDense: true,
+          focusedBorder: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          hintStyle: TextStyle(fontSize: textType.size,color: MyColors.getIconTextGray(),fontWeight: textType.fontWeight),
         ),
       ),
     ),
@@ -257,7 +269,7 @@ getSwitchable({@required String text,bool disabled,@required bool checked,@requi
           onChanged: onCheckedChanged,
           value: checked,
         ),),
-      getPadding(getText(text)),
+      Flexible(child: getPadding(getText(text))),
     ],
 
   );

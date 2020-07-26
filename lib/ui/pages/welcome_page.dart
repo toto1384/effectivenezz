@@ -7,7 +7,6 @@ import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
 import 'package:effectivenezz/utils/complex/buttons_complex.dart';
 import 'package:effectivenezz/utils/complex/widget_complex.dart';
-import 'package:effectivenezz/utils/distivity_page.dart';
 import 'package:flutter/material.dart';
 
 
@@ -19,7 +18,7 @@ class WelcomePage extends StatefulWidget {
   _WelcomePageState createState() => _WelcomePageState();
 }
 
-class _WelcomePageState extends DistivityPageState<WelcomePage> {
+class _WelcomePageState extends State<WelcomePage> {
 
   int currentPage = 0;
 
@@ -33,7 +32,6 @@ class _WelcomePageState extends DistivityPageState<WelcomePage> {
     return WillPopScope(
       onWillPop: ()=>customOnBackPressed(context),
       child: Scaffold(
-        key: scaffoldKey,
         drawer: DistivityDrawer(),
         body: Center(
           child: Column(

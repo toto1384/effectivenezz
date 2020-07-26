@@ -5,6 +5,7 @@ import 'package:effectivenezz/objects/task.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
+import 'package:effectivenezz/utils/basic/values_utils.dart';
 import 'package:effectivenezz/utils/basic/widgets_basic.dart';
 import 'package:effectivenezz/utils/complex/overflows_complex.dart';
 import 'package:effectivenezz/utils/date_n_strings.dart';
@@ -25,11 +26,9 @@ class TaskListItem extends StatefulWidget {
 }
 
 class _TaskListItemState extends State<TaskListItem> with AfterLayoutMixin{
-  bool isMinimal;
 
   @override
   void initState() {
-    isMinimal=MyApp.dataModel.prefs.getAppMode();
     super.initState();
   }
 
@@ -43,70 +42,74 @@ class _TaskListItemState extends State<TaskListItem> with AfterLayoutMixin{
   @override
   Widget build(BuildContext context) {
 
-    return ListTile(
-      onTap: (){
-        if(widget.minimal??false){
-          widget.onTap();
-        }else{
-          showObjectDetailsBottomSheet(getGlobalContext(context), widget.task,widget.selectedDate);
-        }
-      },
-      leading: GestureDetector(
-        child: getIcon(widget.task.isCheckedOnDate(widget.selectedDate??getTodayFormated())?Icons.check_circle_outline:Icons.radio_button_unchecked,color: widget.task.color,size: 35),
+    return Card(
+      color: MyColors.color_black,
+      shape: getShape(),
+      child: ListTile(
         onTap: (){
-          if(widget.task.isCheckedOnDate(widget.selectedDate??getTodayFormated())){
-            widget.task.unCheckOnDate(widget.selectedDate??getTodayFormated());
+          if(widget.minimal??false){
+            widget.onTap();
           }else{
-            widget.task.checks.add(widget.selectedDate??getTodayFormated());
+            showObjectDetailsBottomSheet(getGlobalContext(context), widget.task,widget.selectedDate);
           }
-          MyApp.dataModel.task(MyApp.dataModel.findObjectIndexById(widget.task), widget.task, context, CUD.Update);
         },
-      ),
-      subtitle: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          getBasicLinedBorder(Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4,vertical: 2),
-            child: getText("${formatDouble(widget.task.value.toDouble())}\$/h",textType: TextType.textTypeSubNormal,
-              color:  getValueColor(widget.task.value)),
-          )),
-          Visibility(
-            visible: widget.task.description!='',
-            child: getBasicLinedBorder(Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4,vertical: 2),
-              child: getIcon(Icons.receipt,size: 10),
-            )),
-          ),
-        ],
-      ),
-      title: getText(widget.task.name),
-      onLongPress: ()=>showAddEditObjectBottomSheet(
-          context, selectedDate: widget.selectedDate,
-          add: false,index: MyApp.dataModel.findObjectIndexById(widget.task),
-          object: widget.task,scheduled: widget.task.getScheduled(context)[0],isTask: true
-      ),
-      trailing: Visibility(
-        visible: !(widget.minimal??false),
-        child: Padding(
-          padding: const EdgeInsets.all(4),
-          child: getBasicLinedBorder(GestureDetector(
-            onTap: (){
-              MyApp.dataModel.setPlaying(context, MyApp.dataModel.taskPlayingId==(widget.task.id)?null:widget.task);
-              ifStartTimer();
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(3),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  getIcon(MyApp.dataModel.taskPlayingId==(widget.task.id)?Icons.stop:Icons.play_arrow),
-                  getText(isMinimal?getTextFromDuration(widget.task.getTimeLeft(context)):getStringSchedule()),
-                ],
-              ),
-            ),
-          )),
+        leading: GestureDetector(
+          child: getIcon(widget.task.isCheckedOnDate(widget.selectedDate??getTodayFormated())?Icons.check_circle_outline:Icons.radio_button_unchecked,color: widget.task.color,size: 35),
+          onTap: (){
+            if(widget.task.isCheckedOnDate(widget.selectedDate??getTodayFormated())){
+              widget.task.unCheckOnDate(widget.selectedDate??getTodayFormated());
+            }else{
+              widget.task.checks.add(widget.selectedDate??getTodayFormated());
+            }
+            MyApp.dataModel.task(MyApp.dataModel.findObjectIndexById(widget.task), widget.task, context, CUD.Update);
+          },
         ),
-      )
+        subtitle: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            getBasicLinedBorder(Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4,vertical: 2),
+              child: getText("${formatDouble(widget.task.value.toDouble())}\$/h",textType: TextType.textTypeSubNormal,
+                color:  getValueColor(widget.task.value)),
+            ),color: MyColors.color_black_darker),
+            Visibility(
+              visible: widget.task.description!='',
+              child: getBasicLinedBorder(Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4,vertical: 2),
+                child: getIcon(Icons.receipt,size: 10),
+              ),color: MyColors.color_black_darker),
+            ),
+          ],
+        ),
+        title: getText(widget.task.name),
+        onLongPress: ()=>showAddEditObjectBottomSheet(
+            context, selectedDate: widget.selectedDate,
+            add: false,index: MyApp.dataModel.findObjectIndexById(widget.task),
+            object: widget.task,scheduled: widget.task.getScheduled(context)[0],isTask: true
+        ),
+        trailing: Visibility(
+          visible: !(widget.minimal??false),
+          child: Padding(
+            padding: const EdgeInsets.all(4),
+            child: getBasicLinedBorder(GestureDetector(
+              onTap: (){
+                MyApp.dataModel.setPlaying(context, MyApp.dataModel.currentPlaying==(widget.task)?null:widget.task);
+                ifStartTimer();
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(3),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    getIcon(MyApp.dataModel.currentPlaying==(widget.task)?Icons.stop:Icons.play_arrow),
+                    getText(getTextFromDuration(widget.task.getTimeLeft(context))),
+                  ],
+                ),
+              ),
+            ),color: MyColors.color_black_darker),
+          ),
+        )
+      ),
     );
   }
 
@@ -135,7 +138,7 @@ class _TaskListItemState extends State<TaskListItem> with AfterLayoutMixin{
     ifStartTimer();
   }
   ifStartTimer(){
-    if(isMinimal&&MyApp.dataModel.taskPlayingId==(widget.task.id)){
+    if(MyApp.dataModel.currentPlaying==(widget.task)){
       _everySecond = Timer.periodic(Duration(seconds: 1), (Timer t) {
         setState(() {
         });

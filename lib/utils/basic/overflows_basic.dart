@@ -29,7 +29,7 @@ showDistivityDialog(BuildContext context,{@required List<Widget> actions ,@requi
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              getPadding(getText(title,textType: TextType.textTypeSubtitle),vertical: 20,horizontal: 0),
+              getSubtitle(title),
               stateGetter(context,(func){
                 setState((){
                   func();

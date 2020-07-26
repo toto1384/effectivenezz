@@ -15,10 +15,17 @@ import 'package:url_launcher/url_launcher.dart';
 launchPage(BuildContext context , Widget page,{bool fullScreenDialog}){
   print("launching page ${page.runtimeType}");
   Navigator.push(context, MaterialPageRoute(
+    settings: RouteSettings(
+      name: page.runtimeType.toString()
+    ),
     builder: (context){
       return page;
     }
   ,fullscreenDialog: fullScreenDialog??false));
+}
+
+Color getContrastColor(Color color){
+  return (color??Colors.white).computeLuminance() > 0.5 ? Colors.black : Colors.white;
 }
 
 bool isShowingPage(BuildContext context,Type type){

@@ -44,7 +44,7 @@ class _TrackPageState extends DistivityPageState<TrackPage> {
             },
           ),
         ),subtitle: getTabBar(
-            items: [MyApp.dataModel.prefs.getAppMode()?'Sort by Value':"Upcoming","Sort By Calendar"],
+            items: ['Sort by Value',"Upcoming"],
             selected: [pageIndex],
             onSelected:(i,b){
               setState(() {
@@ -69,8 +69,7 @@ class _TrackPageState extends DistivityPageState<TrackPage> {
             }
           });
         }),
-        bottomNavigationBar: MyApp.dataModel!=null?(MyApp.dataModel.activityPlayingId!=null
-            ||MyApp.dataModel.taskPlayingId!=null)?DistivitySecondaryItem():null:null,
+        bottomNavigationBar: MyApp.dataModel!=null?(MyApp.dataModel.currentPlaying!=null)?DistivitySecondaryItem():null:null,
         body: PageView(
           onPageChanged: (i){
             setState(() {
@@ -79,9 +78,8 @@ class _TrackPageState extends DistivityPageState<TrackPage> {
           },
           controller: pageController,
           children: <Widget>[
-            MyApp.dataModel.prefs.getAppMode()?sortByMoneyTasksAndActivities(context, scrollController, selectedDate,):
+            sortByMoneyTasksAndActivities(context, scrollController, selectedDate,),
             upcomingTasksAndActivities(context,scrollController,selectedDate,),
-            getSortByCalendarListView(context,selectedDate,controller: scrollController,),
           ],
         ),
       ),

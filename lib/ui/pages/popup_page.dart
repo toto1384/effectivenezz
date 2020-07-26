@@ -2,7 +2,6 @@ import 'package:effectivenezz/main.dart';
 import 'package:effectivenezz/ui/pages/track_page.dart';
 import 'package:effectivenezz/ui/widgets/distivity_secondary_item.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
-import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
 import 'package:effectivenezz/utils/basic/widgets_basic.dart';
@@ -42,14 +41,11 @@ class _PopupPageState extends DistivityPageState<PopupPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: getText("Record new entry",textType: TextType.textTypeSubtitle),
-                  ),
+                  getSubtitle("Record new entry"),
                   Padding(
                     padding: const EdgeInsets.all(10.0),
                     child: Container(
-                      constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height/2,maxWidth: MediaQuery.of(context).size.width-100),
+                      constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height/2,maxWidth: MyApp.dataModel.screenWidth-100),
                       child: SingleChildScrollView(
                         child: getSortByCalendarListView(context, getTodayFormated(),areMinimal: true,onSelected: (e){
                               MyApp.dataModel.setPlaying(context, e);
@@ -60,7 +56,7 @@ class _PopupPageState extends DistivityPageState<PopupPage> {
                       ),
                     ),
                   ),
-                  if(MyApp.dataModel.activityPlayingId!=null||MyApp.dataModel.taskPlayingId!=null)
+                  if(MyApp.dataModel.currentPlaying!=null)
                     Padding(
                       padding: const EdgeInsets.all(15.0),
                       child: DistivitySecondaryItem(),

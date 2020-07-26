@@ -1,7 +1,6 @@
 
 import 'package:effectivenezz/main.dart';
 import 'package:effectivenezz/ui/widgets/distivity_drawer.dart';
-import 'package:effectivenezz/ui/widgets/distivity_fab.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
 import 'package:effectivenezz/utils/basic/widgets_basic.dart';
@@ -45,8 +44,8 @@ class _ManageCalendarsState extends DistivityPageState<ManageCalendars> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 Container(
-                  width: MediaQuery.of(context).size.width-50,
-                  height: MediaQuery.of(context).size.width-50,
+                  width: MyApp.dataModel.screenWidth-50,
+                  height: MyApp.dataModel.screenWidth-50,
                   child: SvgPicture.asset(AssetsPath.emptyView)
                 ),
                 getText('No calendars')

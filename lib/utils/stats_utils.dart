@@ -38,7 +38,42 @@ getMetricName(Metric metric){
   }
 }
 
-Widget getMetricWidget(BuildContext context,Metric metric, StatPeriod statPeriod,DateTime dateTime,bool big){
+enum Size{
+  Small,Medium,Large
+}
+
+TextType getTextTypeFromSize(Size size){
+  switch(size){
+
+    case Size.Small:
+      return TextType.textTypeNormal;
+      break;
+    case Size.Medium:
+      return TextType.textTypeSubtitle;
+      break;
+    case Size.Large:
+      return TextType.textTypeTitle;
+      break;
+  }
+  return TextType.textTypeNormal;
+}
+
+getLineChartSizeFromSize(BuildContext context , Size size){
+  switch(size){
+
+    case Size.Small:
+      return MyApp.dataModel.screenWidth/10;
+      break;
+    case Size.Medium:
+      return MyApp.dataModel.screenWidth/5;
+      break;
+    case Size.Large:
+      return null;
+      break;
+  }
+}
+
+Widget getMetricWidget(BuildContext context,Metric metric, StatPeriod statPeriod,DateTime dateTime,Size big){
   switch(metric){
 
     case Metric.focus:
@@ -52,7 +87,7 @@ Widget getMetricWidget(BuildContext context,Metric metric, StatPeriod statPeriod
           tracked.forEach((element) {averageFocusMinutes=averageFocusMinutes+element.duration;});
           if(averageFocusMinutes!=0)averageFocusMinutes=averageFocusMinutes/tracked.length;
 
-          return getText("${minuteOfDayToHourMinuteString(averageFocusMinutes.toInt(),true)}",textType: big?TextType.textTypeGigant:TextType.textTypeSubtitle);
+          return getText("${minuteOfDayToHourMinuteString(averageFocusMinutes.toInt(),true)}",textType: getTextTypeFromSize(big));
           break;
         case StatPeriod.week:
         case StatPeriod.month:
@@ -68,7 +103,7 @@ Widget getMetricWidget(BuildContext context,Metric metric, StatPeriod statPeriod
             data.add(DateValueObject(element,averageFocusMinutes.toInt()));
           });
 
-          return LineChart(data: data,width: !big?MediaQuery.of(context).size.width/10:null,);
+          return LineChart(data: data,width: getLineChartSizeFromSize(context, big),);
           break;
       }
 
@@ -91,7 +126,7 @@ Widget getMetricWidget(BuildContext context,Metric metric, StatPeriod statPeriod
           });
           if(averageHourValue!=0)averageHourValue=averageHourValue/minutesTracked;
 
-          return getText(formatDouble(averageHourValue)+'\$',textType: big?TextType.textTypeGigant:TextType.textTypeSubtitle);
+          return getText(formatDouble(averageHourValue)+'\$',textType: getTextTypeFromSize(big));
           break;
         case StatPeriod.week:
         case StatPeriod.month:
@@ -111,7 +146,7 @@ Widget getMetricWidget(BuildContext context,Metric metric, StatPeriod statPeriod
 
             data.add(DateValueObject(element,averageHourValue.toInt()));
           });
-          return LineChart(data: data,width: !big?MediaQuery.of(context).size.width/10:null,);
+          return LineChart(data: data,width:  getLineChartSizeFromSize(context, big),);
           break;
       }
 
@@ -122,13 +157,29 @@ Widget getMetricWidget(BuildContext context,Metric metric, StatPeriod statPeriod
       MyApp.dataModel.getTimeStamps(context, dateTimes: calculateSelectedDates(statPeriod, dateTime),tracked: true);
 
       return PieChart(
-        size: big?400:100,
+        size: getPieChartSizeFromSize(big),
         data: TimeStamp.totalMinutesPerTrackable(tracked),
       );
 
       break;
   }
   return Center();
+}
+
+double getPieChartSizeFromSize(Size size){
+  switch(size){
+    
+    case Size.Small:
+      return 100;
+      break;
+    case Size.Medium:
+      return 250;
+      break;
+    case Size.Large:
+      return 400;
+      break;
+  }
+  return 0;
 }
 
 List<DateTime> calculateSelectedDates(StatPeriod statPeriod, DateTime dateTime){

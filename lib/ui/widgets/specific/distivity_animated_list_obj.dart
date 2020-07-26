@@ -26,10 +26,11 @@ class DistivityAnimatedListObj extends StatefulWidget {
   final IndexedWidgetBuilder getHeader;
   final GetHeaderSelectedDate getHeaderSelectedDate;
   final bool scrollable;
+  final Widget additionalButton;
 
   const DistivityAnimatedListObj(
       {Key key, this.areMinimal, this.onSelected,@required this.whatToShow, this.scrollController,@required this.headerItemCount,
-        @required this.isObjectSuitableForHeader,@required this.getHeader,@required this.getHeaderSelectedDate, this.scrollable}) : super(key: key);
+        @required this.isObjectSuitableForHeader,@required this.getHeader,@required this.getHeaderSelectedDate, this.scrollable, this.additionalButton}) : super(key: key);
 
 
 
@@ -58,13 +59,21 @@ class _DistivityAnimatedListObjState extends State<DistivityAnimatedListObj> {
 
     return !visible ? getEmptyView(
         context, "No upcoming tasks and activities") : (widget.scrollable??true)?
-    ListView.builder(itemCount: widget.headerItemCount, itemBuilder:(ctx, ind)=>logik(ind),controller: widget.scrollController,)
-        :Column(children: List.generate(widget.headerItemCount, logik),);
+    ListView.builder(itemCount: widget.headerItemCount+(widget.additionalButton!=null?1:0), itemBuilder:(ctx, ind)=>logik(ind),controller: widget.scrollController,)
+        :Column(children: List.generate(widget.headerItemCount+(widget.additionalButton!=null?1:0), logik),);
   }
 
   Widget logik(ind){
     List<Task> tasks = [];
     List<Activity> activities = [];
+
+    if(widget.additionalButton!=null){
+      if(ind==widget.headerItemCount){
+        print('got here');
+        //display
+        return widget.additionalButton;
+      }
+    }
 
     if(tasks.length==0&&(widget.whatToShow==WhatToShow.All||widget.whatToShow==WhatToShow.Tasks))
       MyApp.dataModel.tasks.forEach((item) {

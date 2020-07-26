@@ -36,7 +36,7 @@ class Scheduled{
     this.startTime,@required this.durationInMins,@required this.repeatRule,@required this.repeatValue,this.repeatUntil,this.id});
 
 
-  getEndTime(){
+  DateTime getEndTime(){
     if(startTime==null)return null;
     return startTime.add(Duration(minutes: durationInMins));
   }
@@ -270,6 +270,7 @@ class Scheduled{
   }
   dynamic parent;
   getParent(){
+    print('get parent');
     if(parent==null){
       if(isParentTask){
         parent= MyApp.dataModel.findTaskById(parentId);
@@ -330,6 +331,7 @@ class Scheduled{
 
 
   DateTime getCurrentStartTime(){
+    if(startTime==null)return null;
     switch(repeatRule){
 
       case RepeatRule.None:

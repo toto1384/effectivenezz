@@ -66,13 +66,14 @@ class _PlanVsTrackedPageState extends DistivityPageState<PlanVsTrackedPage>{
         }),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         color: MyColors.color_black,
-        expandedHeight: 250,
+//        expandedHeight: 250,
         trailing: getSelectedViewIconButton(context, selectedView, (s){
           setState(() {
             selectedView=s;
           });
         }),
         appBarWidget: Column(
+          key: GlobalKey(),
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -133,7 +134,7 @@ class _PlanVsTrackedPageState extends DistivityPageState<PlanVsTrackedPage>{
         break;
       default:
         return Container(
-          width: MediaQuery.of(context).size.width-10,
+          width: MyApp.dataModel.screenWidth-10,
           height: heightPerMinute*60*24+100,
           child: PageView.builder(itemBuilder: (ctx,ind){
             return DistivityCalendarWidget(

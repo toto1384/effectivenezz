@@ -13,6 +13,7 @@ import 'package:effectivenezz/utils/basic/widgets_basic.dart';
 import 'package:effectivenezz/utils/complex/widget_complex.dart';
 import 'package:effectivenezz/utils/date_n_strings.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -45,7 +46,7 @@ showAddEditObjectBottomSheet(
       object=Task(
         name: '',
         tags: [],
-        isValueMultiply: false,
+        valueMultiply: false,
         isParentCalendar: true,
         checks: [],
         parentId: -1,
@@ -79,9 +80,11 @@ showAddEditObjectBottomSheet(
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              getPadding(getTextField(
-                  nameEditingController, width: 200,hint: 'Name goes here',
-                  textInputType: TextInputType.text,variant: 2,textType: TextType.textTypeSubtitle),),
+              Flexible(
+                child: getTextField(
+                    nameEditingController, hint: 'Name goes here',
+                    textInputType: TextInputType.text,variant: 2,textType: TextType.textTypeSubtitle),
+              ),
               IconButton(
                 icon: getIcon(Icons.send,size: TextType.textTypeSubtitle.size*1.5),
                 onPressed: (){
@@ -152,12 +155,16 @@ showAddEditObjectBottomSheet(
           ),
           //set icon
           if(object is Activity)
-            IconButton(
-              icon: getIcon(object.icon??Icons.not_interested),
-              onPressed: (){
+            ListTile(
+              leading: CircleAvatar(
+                child: getIcon(object.icon??Icons.not_interested,color: getContrastColor(object.color),size: 18),
+                backgroundColor: object.color,
+                maxRadius: 15,
+              ),
+              onTap: (){
                 FlutterIconPicker.showIconPicker(
                     context,
-                    title: getText("Pick Icon",textType: TextType.textTypeSubtitle),
+                    title: getSubtitle("Pick Icon"),
                     showTooltips: true,
                     iconPackMode: IconPack.material,
                     backgroundColor: MyColors.color_black,
@@ -168,14 +175,11 @@ showAddEditObjectBottomSheet(
                   object.icon=value;
                 }));
               },
+              title: getText('Set Icon'),
             ),
 
-
           getDivider(),
-          Padding(
-            padding: const EdgeInsets.only(left: 15,bottom: 20,top: 8),
-            child: getText('Schedule'+(object is Task?' task':' activity'),textType: TextType.textTypeSubtitle,underline: true),
-          ),
+          getSubtitle('Schedule'+(object is Task?' task':' activity')),
           scheduledEditor(context, scheduled, (sc){
             ss((){
               scheduled=sc;
@@ -208,11 +212,11 @@ showAddEditObjectBottomSheet(
                   leading: CircleAvatar(
                     maxRadius: 15,
                     backgroundColor: object.color,
-                    child: getIcon(Icons.attach_money),
+                    child: getIcon(Icons.attach_money,color: getContrastColor(object.color)),
                   ),
                   title: getText('Set value(${formatDouble(object.value.toDouble()??0)}\$/hour)'),
                   onTap: (){
-                    showHourValuePopup(context, value: object.value.toDouble(), isMultiply: object.isValueMultiply, onSelectedValueAndBool: (v,i){
+                    showHourValuePopup(context, value: object.value.toDouble(), isMultiply: object.valueMultiply, onSelectedValueAndBool: (v,i){
                       ss((){
                         object.value=v;
                         object.isValueMultiply=i;
@@ -223,7 +227,7 @@ showAddEditObjectBottomSheet(
               ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 30),
-                child: Center(child: getTextField(descriptionEditingController, width: MediaQuery.of(context).size.width.toInt()-16,textInputType: TextInputType.multiline,hint: 'Description goes here'),),
+                child: Center(child: getTextField(descriptionEditingController,textInputType: TextInputType.multiline,hint: 'Description goes here'),),
               ),
             ],
           ),
@@ -285,16 +289,12 @@ showReplacePlayableBottomSheet(BuildContext context,dynamic currentPlaying){
   String title = (currentPlaying is Task)?"Replace Task":"Replace Activity";
 
   Function(dynamic) onSelected = (obj){
-    MyApp.dataModel.activityPlayingId=null;
-    MyApp.dataModel.taskPlayingId=null;
-
     obj.trackedStart.add(currentPlaying.trackedStart.last);
 
+    MyApp.dataModel.currentPlaying=obj;
     if(obj is Task){
-      MyApp.dataModel.taskPlayingId=obj.id;
       MyApp.dataModel.task(MyApp.dataModel.findObjectIndexById(obj), obj, context, CUD.Update);
     }else if(obj is Activity){
-      MyApp.dataModel.activityPlayingId=obj.id;
       MyApp.dataModel.activity(MyApp.dataModel.findObjectIndexById(obj), obj, context, CUD.Update);
     }
 
@@ -305,6 +305,17 @@ showReplacePlayableBottomSheet(BuildContext context,dynamic currentPlaying){
     }else if(currentPlaying is Activity){
       MyApp.dataModel.activity(MyApp.dataModel.findObjectIndexById(currentPlaying), currentPlaying, context, CUD.Update);
     }
+
+    if(!kIsWeb){
+        MyApp.dataModel.notificationHelper.displayNotification(
+          id: 0,
+          title: obj.name,
+          body: "For more info in a popup tap me(beta)",
+          payload: "tracked",
+          color: obj.color,
+        );
+    }
+
     Navigator.pop(context);
   };
 
@@ -315,7 +326,7 @@ showReplacePlayableBottomSheet(BuildContext context,dynamic currentPlaying){
         Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            getText(title,textType: TextType.textTypeSubtitle),
+            getSubtitle(title),
             getInfoIcon(
                 context, "By selecting any Task or Activity from this list, they will replace the timestamp from "+
                 "${getTimeName((currentPlaying.trackedStart??[getTodayFormated()]).last)} • ${getDateName((currentPlaying.trackedStart??[getTodayFormated()]).last)},"+
@@ -349,7 +360,6 @@ showObjectDetailsBottomSheet(BuildContext context, dynamic object,DateTime selec
         Padding(
           padding: const EdgeInsets.all(15.0),
           child: Row(
-            mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               if(!isActivity)
@@ -364,7 +374,9 @@ showObjectDetailsBottomSheet(BuildContext context, dynamic object,DateTime selec
                     MyApp.dataModel.task(MyApp.dataModel.tasks.indexOf(object), object, context, CUD.Update);
                   },
                 ),
-              Container(width: MediaQuery.of(context).size.width/1.65,child: getText(object.name,textType: TextType.textTypeSubtitle,)),
+              Flexible(
+                child: getSubtitle(object.name,isCentered: false),
+              ),
               getButton("Edit", onPressed: (){
                 Navigator.pop(context);
                 showAddEditObjectBottomSheet(
@@ -392,10 +404,10 @@ showObjectDetailsBottomSheet(BuildContext context, dynamic object,DateTime selec
             Navigator.pop(context);
           },
         ),
-        getText("Tracked",textType: TextType.textTypeSubtitle),
-        if(object.trackedStart.length==0)
-          getEmptyView(context, "No timestamps")
-      ]+getTrackedIntervalsWidget(context,object, object.color),
+//        getSubtitle("Tracked"),
+//        if(object.trackedStart.length==0)
+//          getEmptyView(context, "No timestamps")
+      ]//+getTrackedIntervalsWidget(context,object, object.color),
     );
   });
 }
@@ -418,7 +430,7 @@ showEditTimestampsBottomSheet(BuildContext context, {@required dynamic object,in
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              getText("Edit timestamp",textType: TextType.textTypeSubtitle),
+              getSubtitle("Edit timestamp"),
               getButton("Done", onPressed: (){
                 object.trackedStart[indexTimestamp]=startTime;
                 if(object.trackedStart.length==object.trackedEnd.length){
@@ -428,13 +440,7 @@ showEditTimestampsBottomSheet(BuildContext context, {@required dynamic object,in
                     if(indexTimestamp==object.trackedStart.length-1){
                       //can set active
                       object.trackedEnd.removeLast();
-                      if(object is Task){
-                        MyApp.dataModel.activityPlayingId=null;
-                        MyApp.dataModel.taskPlayingId=object.id;
-                      }else if(object is Activity){
-                        MyApp.dataModel.activityPlayingId=object.id;
-                        MyApp.dataModel.taskPlayingId=null;
-                      }
+                      MyApp.dataModel.currentPlaying=object;
                     }else{
                       print("something wrong happened in edit timestamps");
                     }
@@ -451,8 +457,7 @@ showEditTimestampsBottomSheet(BuildContext context, {@required dynamic object,in
                     if(indexTimestamp==object.trackedStart.length-1){
                       //need to add the new timestamp since is at the end
                       object.trackedEnd.add(endTime);
-                      MyApp.dataModel.taskPlayingId=null;
-                      MyApp.dataModel.activityPlayingId=null;
+                      MyApp.dataModel.currentPlaying=null;
                     }else{
                       //update with new timestamp
                       object.trackedEnd[indexTimestamp]= (endTime);
@@ -490,9 +495,9 @@ showEditTimestampsBottomSheet(BuildContext context, {@required dynamic object,in
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
                     Container(
-                      width: MediaQuery.of(context).size.width/3,
+                      width: MyApp.dataModel.screenWidth/3,
                       child: Card(
-                        shape: getShape(subtleBorder: true,smallRadius: false),
+                        shape: getShape(subtleBorder: false,smallRadius: false),
                         color: MyColors.color_black,
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 10),
@@ -548,9 +553,9 @@ showEditTimestampsBottomSheet(BuildContext context, {@required dynamic object,in
                     ),
                     getIcon(Icons.chevron_right),
                     endTime==null?getText("Active"):Container(
-                      width: MediaQuery.of(context).size.width/3,
+                      width: MyApp.dataModel.screenWidth/3,
                       child: Card(
-                        shape: getShape(subtleBorder: true,smallRadius: false),
+                        shape: getShape(subtleBorder: false,smallRadius: false),
                         color: MyColors.color_black,
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 10),
@@ -646,10 +651,7 @@ showSelectParentBottomSheet(BuildContext context,{@required dynamic taskOrActivi
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: getText('Select parent',textType: TextType.textTypeSubtitle),
-            ),
+            getSubtitle('Select parent'),
             Visibility(
               visible: taskOrActivity is Task,
               child: PopupMenuButton(
@@ -769,7 +771,7 @@ showRepeatEditBottomSheet(
           ),
         ),
         if(repeatRule==RepeatRule.EveryXDays)
-          getTextField(valueEditingController, width: 300,focus: true,textInputType: TextInputType.number),
+          getTextField(valueEditingController,focus: true,textInputType: TextInputType.number),
         if(repeatRule==RepeatRule.EveryXWeeks||repeatRule==RepeatRule.EveryXMonths)
           Column(
             mainAxisSize: MainAxisSize.min,
@@ -825,7 +827,7 @@ showAddEditCalendarBottomSheet(BuildContext context,{ECalendar eCalendar,int ind
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            getPadding(getTextField(nameEditingController, width: 300,hint: 'Name goes here',focus: true,
+            getPadding(getTextField(nameEditingController, hint: 'Name goes here',focus: true,
                 variant: 2,textType: TextType.textTypeSubtitle),),
             IconButton(
               icon: getIcon(Icons.send,size: TextType.textTypeSubtitle.size*1.5),
@@ -866,7 +868,7 @@ showAddEditCalendarBottomSheet(BuildContext context,{ECalendar eCalendar,int ind
         Padding(
           padding: const EdgeInsets.only(bottom: 15,left: 10,right: 10),
           child: Center(
-            child: getTextField(descriptionEditingController, width: MediaQuery.of(context).size.width.toInt()-40,textInputType: TextInputType.multiline,hint: 'Description goes here'),
+            child: getTextField(descriptionEditingController, textInputType: TextInputType.multiline,hint: 'Description goes here'),
           ),
         )
       ],

@@ -6,6 +6,8 @@ import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/date_n_strings.dart';
 import 'package:flutter/material.dart';
 
+import '../../../main.dart';
+
 class BarChart extends StatelessWidget {
   final List<DateValueObject> data;
   final bool animate;
@@ -20,8 +22,8 @@ class BarChart extends StatelessWidget {
       data.add(DateValueObject(getTodayFormated(),0));
     }
     return Container(
-      width: width??MediaQuery.of(context).size.width-30,
-      height: width==null?MediaQuery.of(context).size.width/16*9:width/16*9,
+      width: width??MyApp.dataModel.screenWidth-30,
+      height: width==null?MyApp.dataModel.screenWidth/16*9:width/16*9,
       child: new charts.BarChart(
         [
           charts.Series<DateValueObject, String>(

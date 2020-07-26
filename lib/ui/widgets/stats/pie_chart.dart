@@ -4,59 +4,110 @@
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:effectivenezz/main.dart';
 import 'package:effectivenezz/objects/name_value_object.dart';
+import 'package:effectivenezz/utils/basic/utils.dart';
+import 'package:effectivenezz/utils/basic/values_utils.dart';
+import 'package:effectivenezz/utils/basic/widgets_basic.dart';
 import 'package:effectivenezz/utils/date_n_strings.dart';
 import 'package:flutter/material.dart';
 
-class PieChart extends StatelessWidget {
+class PieChart extends StatefulWidget{
+
   final List<NameValueObject> data;
   final bool animate;
   final double size;
 
   PieChart({@required this.data,this.animate,@required this.size});
 
+  @override
+  State<StatefulWidget> createState() {return PieChartState();}
+}
+
+
+class PieChartState extends State<PieChart> {
+
+  String getPercentTracked(int duration){
+    int totalDuration = 0;
+
+    widget.data.forEach((element) {
+      totalDuration+=element.value;
+    });
+
+    return "${formatDouble((100 / totalDuration)*duration)}%";
+  }
 
   @override
   Widget build(BuildContext context) {
-    if(data.length==0){
-      data.add(NameValueObject("NO",1));
+    if(widget.data.length==0){
+      widget.data.add(NameValueObject("NO",1));
     }
-    return Container(
-      width: size,
-      height: size,
-      child: new charts.PieChart([
+    return Stack(
+      children: [
+        Container(
+          width: widget.size,
+          height: widget.size,
+          child: new charts.PieChart([
             new charts.Series<NameValueObject, int>(
               id: 'Sales',
-              domainFn: (NameValueObject sales, _) => (data??<NameValueObject>[]).indexOf(sales),
+              domainFn: (NameValueObject sales, _) => (widget.data??<NameValueObject>[]).indexOf(sales),
               measureFn: (NameValueObject sales, _) => sales.value,
-              data: data??<NameValueObject>[],
+              data: widget.data??<NameValueObject>[],
+              insideLabelStyleAccessorFn: (NameValueObject sales, _)=> charts.TextStyleSpec(
+                  color: charts.ColorUtil.fromDartColor(getContrastColor(MyApp.dataModel.findObjectColorByName(sales.name)))
+              ),
+
               colorFn: (NameValueObject sales,_)=>charts.ColorUtil.fromDartColor(MyApp.dataModel.findObjectColorByName(sales.name)),
               // Set a label accessor to control the text of the arc label.
-              labelAccessorFn: (NameValueObject row, _) => '${row.name} - ${getTextFromDuration(Duration(minutes: row.value))}%',
+              labelAccessorFn: (NameValueObject row, _) => '${row.name}',
             )
           ],
-          animate: animate,
-          // Configure the width of the pie slices to 60px. The remaining space in
-          // the chart will be left as a hole in the center.
-          //
-          // [ArcLabelDecorator] will automatically position the label inside the
-          // arc if the label will fit. If the label will not fit, it will draw
-          // outside of the arc with a leader line. Labels can always display
-          // inside or outside using [LabelPosition].
-          //
-          // Text style for inside / outside can be controlled independently by
-          // setting [insideLabelStyleSpec] and [outsideLabelStyleSpec].
-          //
-          // Example configuring different styles for inside/outside:
-          //       new charts.ArcLabelDecorator(
-          //          insideLabelStyleSpec: new charts.TextStyleSpec(...),
-          //          outsideLabelStyleSpec: new charts.TextStyleSpec(...)),
-          defaultRenderer: new charts.ArcRendererConfig(
-              arcWidth: (size~/6).toInt(),
-
-              arcRendererDecorators: [new charts.ArcLabelDecorator(
-                  labelPosition: charts.ArcLabelPosition.inside)])),
+              animate: false,
+              selectionModels: [
+                charts.SelectionModelConfig(
+                  type: charts.SelectionModelType.info,
+                  updatedListener: (model) async{
+                    if (model.selectedDatum.isNotEmpty) {
+                      setState(() {
+                        text = "${model.selectedDatum.first.datum.name}\n\n"
+                            "${getTextFromDuration(Duration(minutes:model.selectedDatum.first.datum.value))} Hours spent"
+                            "\n${getPercentTracked(model.selectedDatum.first.datum.value)} of total";
+                      });
+                    }
+                  },
+                ),
+              ],
+              defaultRenderer: new charts.ArcRendererConfig(
+                  arcRendererDecorators: [new charts.ArcLabelDecorator(
+                      labelPosition: charts.ArcLabelPosition.inside)])),
+        ),
+        Positioned(
+          top: widget.size/2-30,
+          left: 0,
+          right: 0,
+          child: Center(
+            child: Visibility(
+              visible: text!='',
+              child: Card(
+               shape: getShape(),
+               color: MyColors.color_black,
+               child: InkWell(
+                 onTap: (){
+                   setState(() {
+                     text='';
+                   });
+                 },
+                 child: Padding(
+                   padding: const EdgeInsets.all(8.0),
+                   child: getText(text,isCentered: true),
+                 ),
+               ),
+              ),
+            ),
+          ),
+        )
+      ],
     );
   }
+  String text = '';
 
 
 }

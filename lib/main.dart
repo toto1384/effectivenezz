@@ -1,4 +1,3 @@
-import 'package:effectivenezz/ui/pages/set_type_page.dart';
 import 'package:effectivenezz/ui/pages/track_page.dart';
 import 'package:effectivenezz/ui/widgets/distivity_restart_widget.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
@@ -36,6 +35,7 @@ class MyAppState extends State<MyApp> {
 
 
   static ss(BuildContext context){
+    print('ss called');
     final DistivityPageState state =
     context.findAncestorStateOfType<DistivityPageState>();
     if(state!=null){
@@ -63,21 +63,19 @@ class MyAppState extends State<MyApp> {
         future: init(),
         builder: (ctx,AsyncSnapshot snap){
           if(snap.hasData){
-            if(MyApp.dataModel.prefs.getAppMode()==null){
-              //showpopup
-              return SetTypePage();
-            }
-
             return TrackPage();
           }else{
             return Scaffold(body: Center(child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
-                Container(
-                    width: 200,
-                    height: 200,
-                    child: Image.asset(AssetsPath.icon)),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                      width: 200,
+                      height: 200,
+                      child: Image.asset(AssetsPath.icon)),
+                ),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(15),
                   child: Container(height:10,width: 100,child: LinearProgressIndicator())

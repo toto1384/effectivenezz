@@ -2,6 +2,7 @@ import 'package:demoji/demoji.dart';
 import 'package:effectivenezz/objects/activity.dart';
 import 'package:effectivenezz/objects/scheduled.dart';
 import 'package:effectivenezz/objects/task.dart';
+import 'package:effectivenezz/ui/pages/quick_start_page.dart';
 import 'package:effectivenezz/ui/widgets/platform_svg.dart';
 import 'package:effectivenezz/ui/widgets/specific/distivity_animated_list_obj.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
@@ -13,7 +14,6 @@ import 'package:effectivenezz/utils/basic/widgets_basic.dart';
 import 'package:effectivenezz/utils/distivity_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_xlider/flutter_xlider.dart';
-import 'package:simple_speed_dial/simple_speed_dial.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../../main.dart';
@@ -103,9 +103,7 @@ getWelcomePresentation(BuildContext context, int currentPage,
                       child: Image.asset(
                         assetPaths[index], width: 300, height: 300,),
                     ),
-                    getText(texts[index], textType: TextType.textTypeSubtitle,
-                        isCentered: true,
-                        maxLines: 3),
+                    getSubtitle(texts[index],),
                   ],
                 )),
             controller: pageController,
@@ -129,7 +127,7 @@ getWelcomePresentation(BuildContext context, int currentPage,
   );
 }
 
-Center getEmptyView(BuildContext context, String text) {
+Center getEmptyView(BuildContext context, String text,{bool beginButton}) {
   return Center(
     child: Padding(
       padding: const EdgeInsets.only(bottom: 100),
@@ -138,20 +136,16 @@ Center getEmptyView(BuildContext context, String text) {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Container(
-                constraints: BoxConstraints(maxWidth: MediaQuery
-                    .of(context)
-                    .size
-                    .width - 50, maxHeight: MediaQuery
-                    .of(context)
-                    .size
-                    .width - 50),
+                constraints: BoxConstraints(maxWidth: MyApp.dataModel.screenWidth - 50, maxHeight: MyApp.dataModel.screenWidth - 50),
                 child: PlatformSvg.asset(AssetsPath.emptyView)
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: getText(
-                  text, textType: TextType.textTypeSubtitle, isCentered: true),
-            )
+            getSubtitle(text),
+            getPadding(getButton(
+              'Quick start',
+              onPressed: (){
+                launchPage(context, QuickStartPage());
+              }
+            ),vertical:15),
           ],
         ),
       ),
@@ -253,6 +247,7 @@ Widget getAppBar(String title,
       Widget subtitle,
       bool smallSubtitle,
       String tooltip,
+      GlobalKey key,
     }) {
   if (centered == null) {
     centered = false;
@@ -269,10 +264,8 @@ Widget getAppBar(String title,
     backEnabled = false;
   }
   return PreferredSize(
-    preferredSize: Size(MediaQuery
-        .of(context)
-        .size
-        .width, smallSubtitle ? 100 : 150),
+    key: key,
+    preferredSize: Size(MyApp.dataModel.screenWidth, smallSubtitle ? 100 : 150),
     child: getPadding(Align(
       alignment: centered ? Alignment.bottomCenter : Alignment.bottomLeft,
       child: Column(
@@ -416,11 +409,7 @@ upcomingTasksAndActivities(BuildContext context, ScrollController controller,
         return Container(
           child: Row(
             children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: getText(ind == 7 ? "No date" : getDateName(listDate),
-                    textType: TextType.textTypeSubtitle),
-              ),
+              getSubtitle(ind == 7 ? "No date" : getDateName(listDate)),
             ],
           ), color: MyColors.color_black_darker,
         );
@@ -440,35 +429,86 @@ upcomingTasksAndActivities(BuildContext context, ScrollController controller,
     );
 }
 
+bool showing = false;
+
 sortByMoneyTasksAndActivities(BuildContext context, ScrollController controller,
     DateTime selectedDate,) {
 
-  return DistivityAnimatedListObj(
-    getHeader: (ctx,ind){
-      return Container(
-        child: Row(
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: getText("\$${figures(15-ind.toDouble())}",
-                  textType: TextType.textTypeSubtitle),
+  return StatefulBuilder(
+    builder: (context, ss) {
+      return DistivityAnimatedListObj(
+        getHeader: (ctx,ind){
+          return Container(
+            child: Row(
+              children: <Widget>[
+                getSubtitle("\$${formatDouble(figures(15-ind.toDouble()))}"),
+              ],
+            ), color: MyColors.color_black_darker,
+          );
+        },
+        additionalButton: Container(
+          width: MediaQuery.of(context).size.width,
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: getButton(showing?'Hide low value entries':'Show low value entries', onPressed: (){
+                if(showing==true){
+                  ss((){
+                    showing=false;
+                  });
+                  return;
+                }
+                showDistivityDialog(context, actions: [
+                  getButton('Show', onPressed: (){
+                    ss((){
+                      showing=!showing;
+                    });
+                    Navigator.pop(context);
+                  },variant: 2),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: getButton('Return to excellence', onPressed: ()=>Navigator.pop(context)),
+                  ),
+                ], title: 'Show low value entries?', stateGetter: (ctx,ss){
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      getText('Below 0\$ activities will only make you feel good and will not make you happy. Time for yourself'
+                        ' should be about your relatives, journaling, reading, exercising and meditation. These will actually make '
+                        'you happy. \n Watch this video, it explains this concept better'),
+                      Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: YoutubePlayer(
+                          controller: YoutubePlayerController(
+                            initialVideoId: 'u_zMDLQgFrM',
+                            flags: YoutubePlayerFlags(
+                              autoPlay: false
+                            )
+                          ),
+
+                        ),
+                      ),
+                    ],
+                  );
+                });
+              }),
             ),
-          ],
-        ), color: MyColors.color_black_darker,
+          ),
+        ),
+        getHeaderSelectedDate: (ind){
+          return [selectedDate];
+        },
+        headerItemCount: showing?15:9,
+        isObjectSuitableForHeader: (item, ind){
+          if(item.value == figures(15.0-ind.toDouble()).toInt()){
+            return true;
+          }return false;
+        },
+        whatToShow: WhatToShow.All,
+        areMinimal: false,
+        scrollController: controller,
       );
-    },
-    getHeaderSelectedDate: (ind){
-      return [selectedDate];
-    },
-    headerItemCount: 15,
-    isObjectSuitableForHeader: (item, ind){
-      if(item.value == figures(15-ind.toDouble())){
-        return true;
-      }return false;
-    },
-    whatToShow: WhatToShow.All,
-    areMinimal: false,
-    scrollController: controller,
+    }
   );
 }
 
@@ -503,33 +543,48 @@ getDurationWidgetForScheduled(BuildContext context,{
   @required Function ss
 }){
   
-  return getButton(
-    scheduled.durationInMins == null
-        ? "Set duration"
-        : "${minuteOfDayToHourMinuteString(scheduled.durationInMins,true)}",
-    onPressed: () {
-      showPickDurationBottomSheet(context, (d) {
-        ss(() {
-          scheduled.durationInMins = (d??Duration.zero).inMinutes;
-          onScheduledChange(scheduled);
-        });
-      });
-    },
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    children: <Widget>[
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 8),
+        child: getText('Duration'),
+      ),
+      getButton(
+        scheduled.durationInMins == null
+            ? "Set duration"
+            : "${minuteOfDayToHourMinuteString(scheduled.durationInMins,true)}",
+        onPressed: () {
+          showPickDurationBottomSheet(context, (d) {
+            ss(() {
+              scheduled.durationInMins = (d??Duration.zero).inMinutes;
+              onScheduledChange(scheduled);
+            });
+          });
+        },
+      ),
+    ],
   );
 }
 
 
 getDateTimeEditWidgetForScheduled(BuildContext context,{
   @required Function(Scheduled) onScheduledChange,
-  @required Function ss,
   @required Scheduled scheduled,
   @required bool isStartTime,
+  String text,
 }){
   return Padding(
     padding: const EdgeInsets.all(8.0),
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
+        Flexible(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 8),
+            child: getText(text??(isStartTime?'Starts':'Ends'),maxLines: 3),
+          ),
+        ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: getButton(
@@ -543,28 +598,26 @@ getDateTimeEditWidgetForScheduled(BuildContext context,{
                     if (scheduled.startTime == null) {
                       scheduled.startTime = getTodayFormated();
                     }
-                    ss(() {
-                      if(time==null){
-                        scheduled.startTime=null;
+                    if(time==null){
+                      scheduled.startTime=null;
+                    }else{
+                      if(isStartTime){
+                        scheduled.startTime = DateTime(
+                            scheduled.startTime.year,
+                            scheduled.startTime.month,
+                            scheduled.startTime.day, time.hour,
+                            time.minute);
                       }else{
-                        if(isStartTime){
-                          scheduled.startTime = DateTime(
-                              scheduled.startTime.year,
-                              scheduled.startTime.month,
-                              scheduled.startTime.day, time.hour,
-                              time.minute);
-                        }else{
-                          scheduled.durationInMins = DateTime(
-                              scheduled.getEndTime().year,
-                              scheduled.getEndTime().month,
-                              scheduled.getEndTime().day,
-                              time.hour,
-                              time.minute
-                          ).difference(scheduled.startTime).inMinutes;
-                        }
+                        scheduled.durationInMins = DateTime(
+                            scheduled.getEndTime().year,
+                            scheduled.getEndTime().month,
+                            scheduled.getEndTime().day,
+                            time.hour,
+                            time.minute
+                        ).difference(scheduled.startTime).inMinutes;
                       }
-                      onScheduledChange(scheduled);
-                    });
+                    }
+                    onScheduledChange(scheduled);
                   });
             },
           ),
@@ -581,24 +634,22 @@ getDateTimeEditWidgetForScheduled(BuildContext context,{
               if (scheduled.startTime == null) {
                 scheduled.startTime = getTodayFormated();
               }
-              ss(() {
-                if(date==null){
-                  scheduled.startTime=null;
+              if(date==null){
+                scheduled.startTime=null;
+              }else{
+                if(isStartTime){
+                  scheduled.startTime = DateTime(
+                      date.year, date.month, date.day,
+                      scheduled.startTime.hour,
+                      scheduled.startTime.minute);
                 }else{
-                  if(isStartTime){
-                    scheduled.startTime = DateTime(
-                        date.year, date.month, date.day,
-                        scheduled.startTime.hour,
-                        scheduled.startTime.minute);
-                  }else{
-                    scheduled.durationInMins = DateTime(
-                        date.year, date.month, date.day,
-                        scheduled.getEndTime().hour, scheduled.getEndTime().minute
-                    ).difference(scheduled.startTime).inMinutes;
-                  }
+                  scheduled.durationInMins = DateTime(
+                      date.year, date.month, date.day,
+                      scheduled.getEndTime().hour, scheduled.getEndTime().minute
+                  ).difference(scheduled.startTime).inMinutes;
                 }
-                onScheduledChange(scheduled);
-              });
+              }
+              onScheduledChange(scheduled);
             });
           },
         ),
@@ -615,43 +666,15 @@ scheduledEditor(BuildContext context,Scheduled scheduled, Function(Scheduled) on
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            //duration
-            if(MyApp.dataModel.prefs.getAppMode())
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 8),
-                    child: getText('Duration'),
-                  ),
-                  getDurationWidgetForScheduled(context, scheduled: scheduled,
-                      onScheduledChange: onScheduledChange, ss: ss),
-                ],
-              ),
             //starts
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 8),
-                  child: getText(MyApp.dataModel.prefs.getAppMode()?'Starts':'From'),
-                ),
-                getDateTimeEditWidgetForScheduled(context, onScheduledChange: onScheduledChange,
-                    ss: ss, scheduled: scheduled, isStartTime: true)
-              ],
+            getDateTimeEditWidgetForScheduled(context, onScheduledChange: onScheduledChange,
+                scheduled: scheduled, isStartTime: true),
+            getDurationWidgetForScheduled(context, scheduled: scheduled,
+                onScheduledChange: onScheduledChange, ss: ss),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 0),
+              child: getText("(Ends on ${getStringFromDate(scheduled.getEndTime())})"),
             ),
-            if(!MyApp.dataModel.prefs.getAppMode())
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 8),
-                    child: getText('To'),
-                  ),
-                  getDateTimeEditWidgetForScheduled(context, onScheduledChange: onScheduledChange,
-                      ss: ss, scheduled: scheduled, isStartTime: false)
-                ],
-              ),
             repeatEditor(context, scheduled, (sc){
               ss((){
                 scheduled=sc;
@@ -662,216 +685,6 @@ scheduledEditor(BuildContext context,Scheduled scheduled, Function(Scheduled) on
       },
     );
   }
-  return StatefulBuilder(
-    builder: (ctx,ss){
-      return MyApp.dataModel.prefs.getAppMode()?Center(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        getText("End time:"),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            )
-          ],
-        ),
-      ):
-      Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Container(
-                    width: MediaQuery
-                        .of(context)
-                        .size
-                        .width / 3,
-                    child: Card(
-                      shape: getShape(subtleBorder: true, smallRadius: false),
-                      color: MyColors.color_black,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: Center(
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              GestureDetector(
-                                onTap: () {
-                                  showDistivityTimePicker(context,
-                                    TimeOfDay.fromDateTime(scheduled.startTime ?? getTodayFormated()),
-                                      onTimeSelected: (time) {
-                                        ss(() {
-                                          if (scheduled.startTime == null)
-                                            scheduled.startTime = getTodayFormated();
-                                          if(time==null){
-                                            scheduled.startTime=null;
-                                          }else{
-                                            scheduled.startTime = DateTime(
-                                                scheduled.startTime.year,
-                                                scheduled.startTime.month,
-                                                scheduled.startTime.day, time.hour,
-                                                time.minute);
-                                          }
-                                          onScheduledChange(scheduled);
-                                        });
-                                      });
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.all(5.0),
-                                  child: getText(
-                                      scheduled.startTime == null ? 'No time' : '${scheduled
-                                          .startTime.hour}:${scheduled.startTime
-                                          .minute}'),
-                                ),
-                              ),
-                              getText('•'),
-                              GestureDetector(
-                                onTap: () {
-                                  showDistivityDatePicker(
-                                      context, onDateSelected: (date) {
-                                    if (scheduled.startTime == null) {
-                                      scheduled.startTime = getTodayFormated();
-                                    }
-                                    ss(() {
-                                      if(date==null){
-                                        scheduled.startTime=null;
-                                      }else{
-                                        scheduled.startTime = DateTime(
-                                            date.year, date.month, date.day,
-                                            scheduled.startTime.hour,
-                                            scheduled.startTime.minute);
-                                      }
-                                      onScheduledChange(scheduled);
-                                    });
-                                  });
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.all(5.0),
-                                  child: getText(
-                                      scheduled.startTime == null ? 'No date' : '${scheduled
-                                          .startTime.day}:${scheduled.startTime
-                                          .month}:${scheduled.startTime.year}'),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  getIcon(Icons.chevron_right),
-                  Container(
-                    width: MediaQuery
-                        .of(context)
-                        .size
-                        .width / 3,
-                    child: Card(
-                      shape: getShape(subtleBorder: true, smallRadius: false),
-                      color: MyColors.color_black,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: Center(
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              GestureDetector(
-                                onTap: () {
-                                  showDistivityTimePicker(context, TimeOfDay.fromDateTime(scheduled.getEndTime() ?? getTodayFormated()),
-                                      onTimeSelected: (time) {
-                                        if (scheduled.startTime == null) {
-                                          scheduled.startTime = getTodayFormated();
-                                        }
-                                        ss(() {
-                                          if(time==null){
-                                            scheduled.startTime=null;
-                                          }else{
-                                            scheduled.durationInMins = DateTime(
-                                                scheduled.getEndTime().year,
-                                                scheduled.getEndTime().month,
-                                                scheduled.getEndTime().day,
-                                                time.hour,
-                                                time.minute
-                                            ).difference(scheduled.startTime).inMinutes;
-                                          }
-                                          onScheduledChange(scheduled);
-                                        });
-                                      });
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.all(5.0),
-                                  child: getText(
-                                      scheduled.startTime == null ? 'No time' : '${scheduled
-                                          .getEndTime()
-                                          .hour}:${scheduled
-                                          .getEndTime()
-                                          .minute}'),
-                                ),
-                              ),
-                              getText('•'),
-                              GestureDetector(
-                                onTap: () {
-                                  showDistivityDatePicker(
-                                      context, onDateSelected: (date) {
-                                    if (scheduled.startTime == null) {
-                                      scheduled.startTime = getTodayFormated();
-                                    }
-                                    ss(() {
-                                      if(date==null){
-                                        scheduled.startTime=null;
-                                      }else{
-                                        scheduled.durationInMins = DateTime(
-                                            date.year, date.month, date.day,
-                                            scheduled.getEndTime().hour, scheduled.getEndTime().minute
-                                        ).difference(scheduled.startTime).inMinutes;
-                                      }
-                                      onScheduledChange(scheduled);
-                                    });
-                                  });
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.all(5.0),
-                                  child: getText(
-                                      scheduled.startTime == null ? 'No date' : '${scheduled
-                                          .getEndTime()
-                                          .day}:${scheduled
-                                          .getEndTime()
-                                          .month}:${scheduled
-                                          .getEndTime()
-                                          .year}'),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          getText("Duration: ${minuteOfDayToHourMinuteString(scheduled.durationInMins,true)}"),
-        ],
-      );
-    },
-  );
 }
 
 
@@ -941,10 +754,9 @@ getSortByCalendarListView(BuildContext context,
                       : MyApp.dataModel.eCalendars[ind].color,
                 ),
               ),
-              getText(ind == MyApp.dataModel.eCalendars.length
+              getSubtitle(ind == MyApp.dataModel.eCalendars.length
                   ? "No calendar"
-                  : MyApp.dataModel.eCalendars[ind].name,
-                textType: TextType.textTypeSubtitle,),
+                  : MyApp.dataModel.eCalendars[ind].name),
             ],
           ),
         ),

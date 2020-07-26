@@ -46,17 +46,17 @@ class _DistivityFABState extends State<DistivityFAB> with TickerProviderStateMix
       child: SpeedDial(
         controller: animation,
         child: getIcon(Icons.add),
-        openBackgroundColor: MyColors.color_black,
-        closedBackgroundColor: MyColors.color_black,
+        openBackgroundColor: MyColors.color_gray_darker,
+        closedBackgroundColor: MyColors.color_gray_darker,
         speedDialChildren: <SpeedDialChild>[
           SpeedDialChild(
-            backgroundColor: MyColors.color_black,
+            backgroundColor: MyColors.color_gray_darker,
             label: 'Add Event',
             child: getIcon(Icons.event),
             onPressed: ()=>showAddEditObjectBottomSheet(context, selectedDate: getTodayFormated(), add: true,isTask: false),
           ),
           SpeedDialChild(
-            backgroundColor: MyColors.color_black,
+            backgroundColor: MyColors.color_gray_darker,
             label: 'Add Task',
             child: getIcon(Icons.event_available),
             onPressed: ()=>showAddEditObjectBottomSheet(context, selectedDate: getTodayFormated(), add: true,isTask: true),

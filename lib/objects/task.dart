@@ -42,14 +42,19 @@ class Task{
   bool isParentCalendar;
   String description;
   int value;
-  bool isValueMultiply;
+  bool valueMultiply;
 
   List<DateTime> blackListedDates;
 
 
   Task({this.id, @required this.name,@required this.trackedEnd,@required this.trackedStart,
     @required this.parentId,this.description,@required this.isParentCalendar,
-    @required this.value, this.color,@required this.checks,@required this.isValueMultiply,@required this.tags,this.blackListedDates});
+    @required this.value, this.color,@required this.checks,@required this.valueMultiply,
+    @required this.tags,this.blackListedDates}){
+    if(color==null){
+      color=MyApp.dataModel.findParentColor(this);
+    }
+  }
 
 
   static List<int> tagsFromString(String tags){
@@ -107,7 +112,7 @@ class Task{
       taskDescription: description,
       taskId:id,
       taskIsParentCalendar: isParentCalendar?1:0,
-      taskValueMultiply: isValueMultiply?1:0,
+      taskValueMultiply: valueMultiply?1:0,
       taskTags: stringFromTags(),
       taskBlacklistedDates:stringFromDateTimes(blackListedDates),
     };
@@ -125,7 +130,7 @@ class Task{
       description: map[taskDescription]??'',
       id: map[taskId],
       isParentCalendar: map[taskIsParentCalendar]==1,
-      isValueMultiply: map[taskValueMultiply]==1,
+      valueMultiply: map[taskValueMultiply]==1,
       tags: tagsFromString(map[taskTags]),
       blackListedDates: dateTimesFromString(map[taskBlacklistedDates]),
     );

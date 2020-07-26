@@ -304,7 +304,7 @@ class MobileDB extends DatabaseHelper{
             color: Colors.yellow,
             trackedEnd: [],
             trackedStart: [],
-            isValueMultiply: false,
+            valueMultiply: false,
             checks: []
           ),scheduleds: [Scheduled(
             repeatRule: RepeatRule.EveryXDays,
@@ -338,7 +338,7 @@ class MobileDB extends DatabaseHelper{
             trackedEnd: [],
             color: Colors.teal,
             trackedStart: [],
-            isValueMultiply: false,
+            valueMultiply: false,
             checks: [],
             isParentCalendar: true,
           ),scheduleds: [Scheduled(

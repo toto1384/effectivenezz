@@ -4,6 +4,7 @@ import 'package:effectivenezz/main.dart';
 import 'package:effectivenezz/objects/timestamp.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
+import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
 import 'package:effectivenezz/utils/basic/widgets_basic.dart';
 import 'package:effectivenezz/utils/complex/overflows_complex.dart';
@@ -123,7 +124,7 @@ class _DistivityCalendarWidgetState extends State<DistivityCalendarWidget> {
                                     borderRadius: BorderRadius.circular(5),
                                   ),
                                   child: Center(
-                                    child: getText(forDayTimestamps[i].name,textType: TextType.textTypeNormal,maxLines: 2,sizeMultiplier: widget.heightPerMinute/5,color: forDayTimestamps[i].color==Colors.white?MyColors.color_black_darker:Colors.white),
+                                    child: getText(forDayTimestamps[i].name,textType: TextType.textTypeNormal,maxLines: 2,sizeMultiplier: widget.heightPerMinute/5,color: getContrastColor(forDayTimestamps[i].color)),
                                   ),
                                 ),
                               )
@@ -170,7 +171,7 @@ class _DistivityCalendarWidgetState extends State<DistivityCalendarWidget> {
                                       borderRadius: BorderRadius.circular(5),
                                     ),
                                     child: Center(
-                                      child: getText(forDayTimestamps[i].name,textType: TextType.textTypeNormal,maxLines: 2,sizeMultiplier: widget.heightPerMinute/5,color: forDayTimestamps[i].color==Colors.white?MyColors.color_black_darker:Colors.white),
+                                      child: getText(forDayTimestamps[i].name,textType: TextType.textTypeNormal,maxLines: 2,sizeMultiplier: widget.heightPerMinute/5,color: getContrastColor(forDayTimestamps[i].color)),
                                     ),
                                   ),
                                 ),
@@ -190,7 +191,7 @@ class _DistivityCalendarWidgetState extends State<DistivityCalendarWidget> {
                     return new Positioned(
                         top: pos.top,
                         left: 20,
-                        width: MediaQuery.of(context).size.width,
+                        width: MyApp.dataModel.screenWidth,
                         height: 30,
                         child: Row(
                           children: <Widget>[
@@ -199,7 +200,7 @@ class _DistivityCalendarWidgetState extends State<DistivityCalendarWidget> {
                               backgroundColor: Colors.white,
                             ),
                             Container(
-                              width: MediaQuery.of(context).size.width-50,
+                              width: MyApp.dataModel.screenWidth-50,
                               height: 3,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.only(

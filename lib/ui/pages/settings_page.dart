@@ -1,4 +1,3 @@
-import 'package:effectivenezz/ui/pages/set_type_page.dart';
 import 'package:effectivenezz/ui/pages/users_n_data.dart';
 import 'package:effectivenezz/ui/widgets/distivity_drawer.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
@@ -39,12 +38,6 @@ class _SettingsPageState extends DistivityPageState<SettingsPage>{
                 onTap: (){
                   launchPage(context, UsersNData());
                 },
-                trailing: getIcon(Icons.chevron_right),
-              ),
-              ListTile(
-                leading: getIcon(Icons.burst_mode),
-                title: getText("Set app mode"),
-                onTap: ()=>launchPage(context, SetTypePage()),
                 trailing: getIcon(Icons.chevron_right),
               ),
               getDivider(),

@@ -34,11 +34,13 @@ class TimeStamp{
   }
 
   getParent(){
+    print('timestamp get parent');
     return isTask?MyApp.dataModel.findTaskById(parentId):MyApp.dataModel.findActivityById(parentId);
   }
 
   List<TimeStamp> splitTimestampForCalendarSupport(){
     List<TimeStamp> toreturn = [];
+    if(startTime==null)return toreturn;
 
     int differenceBetweenTracked = onlyDayFormat(getEndTime()??(getTodayFormated().add(Duration(minutes: duration)))).difference(onlyDayFormat(startTime??getTodayFormated())).inDays;
 

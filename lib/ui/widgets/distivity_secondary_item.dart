@@ -8,7 +8,6 @@ import 'package:effectivenezz/utils/basic/values_utils.dart';
 import 'package:effectivenezz/utils/basic/widgets_basic.dart';
 import 'package:effectivenezz/utils/complex/overflows_complex.dart';
 import 'package:effectivenezz/utils/date_n_strings.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../main.dart';
@@ -20,8 +19,6 @@ class DistivitySecondaryItem extends StatefulWidget {
 }
 
 class _DistivitySecondaryItemState extends State<DistivitySecondaryItem> with AfterLayoutMixin,TickerProviderStateMixin {
-
-  dynamic currentPlaying;
 
   @override
   void dispose() {
@@ -37,53 +34,47 @@ class _DistivitySecondaryItemState extends State<DistivitySecondaryItem> with Af
 
   @override
   Widget build(BuildContext context) {
-    if(MyApp.dataModel.taskPlayingId!=null){
-      currentPlaying=MyApp.dataModel.findTaskById(MyApp.dataModel.taskPlayingId);
-    }
-    if(MyApp.dataModel.activityPlayingId!=null){
-      currentPlaying=MyApp.dataModel.findActivityById(MyApp.dataModel.activityPlayingId);
-    }
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(7),
           topRight: Radius.circular(7)
         ),
-        color: MyColors.color_black,
+        color: MyColors.color_black_darker,
       ),
-      width: MediaQuery.of(context).size.width-100,
+      width: MyApp.dataModel.screenWidth-100,
       child: Padding(
         padding: const EdgeInsets.all(5),
         child: Row(
           children: <Widget>[
-            if(currentPlaying is Task)
+            if(MyApp.dataModel.currentPlaying is Task)
               IconButton(
-                icon: getIcon(currentPlaying.isCheckedOnDate(getTodayFormated())?Icons.check_circle_outline:Icons.radio_button_unchecked,color: currentPlaying.color),
+                icon: getIcon(MyApp.dataModel.currentPlaying.isCheckedOnDate(getTodayFormated())?Icons.check_circle_outline:Icons.radio_button_unchecked,color: MyApp.dataModel.currentPlaying.color),
                 onPressed: (){
-                  if(currentPlaying.isCheckedOnDate(getTodayFormated())){
-                    currentPlaying.unCheckOnDate(getTodayFormated());
+                  if(MyApp.dataModel.currentPlaying.isCheckedOnDate(getTodayFormated())){
+                    MyApp.dataModel.currentPlaying.unCheckOnDate(getTodayFormated());
                   }else{
-                    currentPlaying.checks.add(getTodayFormated());
+                    MyApp.dataModel.currentPlaying.checks.add(getTodayFormated());
                   }
-                  MyApp.dataModel.task(MyApp.dataModel.findObjectIndexById(currentPlaying), currentPlaying, context, CUD.Update);
+                  MyApp.dataModel.task(MyApp.dataModel.findObjectIndexById(MyApp.dataModel.currentPlaying), MyApp.dataModel.currentPlaying, context, CUD.Update);
                 },
               ),
             Container(
               constraints: BoxConstraints(maxWidth: 110),
               child: GestureDetector(
                   onTap: (){
-                    showReplacePlayableBottomSheet(context,currentPlaying);
+                    showReplacePlayableBottomSheet(context,MyApp.dataModel.currentPlaying);
                   },
                   child: Padding(
-                    padding: EdgeInsets.only(left: ((currentPlaying is Task)?0:20),top: 10,bottom: 10),
-                    child: getText(currentPlaying.name,color: currentPlaying.color,maxLines: 2),
+                    padding: EdgeInsets.only(left: ((MyApp.dataModel.currentPlaying is Task)?0:20),top: 10,bottom: 10),
+                    child: getText(MyApp.dataModel.currentPlaying.name,color: MyApp.dataModel.currentPlaying.color,maxLines: 2),
                   )
               ),
             ),
 
             GestureDetector(
               onTap: (){
-                showEditTimestampsBottomSheet(context, object: currentPlaying,);
+                showEditTimestampsBottomSheet(context, object: MyApp.dataModel.currentPlaying,);
               },
               child: Padding(
                 padding: const EdgeInsets.only(left: 10),
@@ -93,7 +84,7 @@ class _DistivitySecondaryItemState extends State<DistivitySecondaryItem> with Af
               ),
             ),
             Row(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 IconButton(icon: getIcon(Icons.stop,), onPressed: (){
                   MyApp.dataModel.setPlaying(context, null,);
@@ -142,7 +133,7 @@ class _DistivitySecondaryItemState extends State<DistivitySecondaryItem> with Af
   void afterFirstLayout(BuildContext context) {
     _everySecond = Timer.periodic(Duration(seconds: 1), (Timer t) {
       setState(() {
-        tracked = getTextFromDuration(getTodayFormated().difference(currentPlaying.trackedStart.last));
+        tracked = getTextFromDuration(getTodayFormated().difference(MyApp.dataModel.currentPlaying.trackedStart.last));
       });
     });
   }

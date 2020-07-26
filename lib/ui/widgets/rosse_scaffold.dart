@@ -1,6 +1,6 @@
+import 'package:after_layout/after_layout.dart';
 import 'package:effectivenezz/ui/widgets/distivity_drawer.dart';
 import 'package:effectivenezz/utils/basic/widgets_basic.dart';
-import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
 import 'package:effectivenezz/utils/complex/widget_complex.dart';
 import 'package:effectivenezz/utils/distivity_page.dart';
@@ -18,7 +18,6 @@ class RosseScaffold extends StatefulWidget {
   final Color color;
   final Widget fab;
   final Widget bottomAppBar;
-  final double expandedHeight;
   final Key scaffoldKey;
   final bool hideMenu;
   final FloatingActionButtonLocation floatingActionButtonLocation;
@@ -27,7 +26,7 @@ class RosseScaffold extends StatefulWidget {
 //  final Widget subtitle
 
 
-  RosseScaffold(this.title,{Key key, this.bottomAppBar,this.expandedHeight,
+  RosseScaffold(this.title,{Key key, this.bottomAppBar,
     this.scaffoldKey,this.fab,this.color,this.backEnabled, this.hideMenu, this.appBarWidget,
     @required this.body, this.floatingActionButtonLocation, this.trailing, this.toolTip,
     this.scrollController}):super(key:key);
@@ -36,7 +35,7 @@ class RosseScaffold extends StatefulWidget {
   _RosseScaffoldState createState() => _RosseScaffoldState();
 }
 
-class _RosseScaffoldState extends State<RosseScaffold> with TickerProviderStateMixin<RosseScaffold> {
+class _RosseScaffoldState extends State<RosseScaffold> with TickerProviderStateMixin<RosseScaffold>,AfterLayoutMixin {
 
 
   @override
@@ -50,11 +49,17 @@ class _RosseScaffoldState extends State<RosseScaffold> with TickerProviderStateM
     _hideFabAnimation.dispose();
     super.dispose();
   }
-  
+
+  Container appBar ;
+  GlobalKey key = GlobalKey();
+  Size size = Size(0,100);
 
   @override
   Widget build(BuildContext context) {
-
+    appBar= Container(
+      key: key,
+      child: widget.appBarWidget,
+    );
     return getSmallScreen();
   }
 
@@ -119,7 +124,7 @@ class _RosseScaffoldState extends State<RosseScaffold> with TickerProviderStateM
               actions: <Widget>[
                 widget.trailing??Center()
               ],
-              expandedHeight: widget.expandedHeight??100,
+//              expandedHeight: widget.expandedHeight??100,
               floating: true,
               backgroundColor: Colors.transparent,
               flexibleSpace: FlexibleSpaceBar(
@@ -128,17 +133,18 @@ class _RosseScaffoldState extends State<RosseScaffold> with TickerProviderStateM
                   title: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      getText(widget.title,textType: TextType.textTypeSubtitle,maxLines: 3,isCentered: true),
+                      getSubtitle(widget.title),
                       Visibility(child: getInfoIcon(context, widget.toolTip),
                         visible: widget.toolTip != null,),
                     ],
                   ),
                   background: Stack(
                     children: <Widget>[
-                      Center(child: widget.appBarWidget)
+                      Center(child: appBar)
                     ],
                   )
               ),
+              expandedHeight: size.height+(widget.title==""?100:200),
             ),
             SliverToBoxAdapter(
               child: Container(
@@ -151,6 +157,13 @@ class _RosseScaffoldState extends State<RosseScaffold> with TickerProviderStateM
       ),
       bottomNavigationBar: widget.bottomAppBar,
     );
+  }
+
+  @override
+  void afterFirstLayout(BuildContext context) {
+    setState(() {
+      size=key.currentContext.size;
+    });
   }
 
 }

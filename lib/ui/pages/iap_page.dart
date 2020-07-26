@@ -61,8 +61,7 @@ class _IAPScreenState extends DistivityPageState<IAPScreen> {
                     selected=sel;
                   }
                 });
-              }),),
-        expandedHeight: 150,
+              }),key: GlobalKey()),
         hideMenu: true,
         body: selected==0?SingleChildScrollView(
           child: Column(
@@ -85,10 +84,10 @@ class _IAPScreenState extends DistivityPageState<IAPScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Center(child: getText('The \'Effective Executive\'',textType: TextType.textTypeTitle,isCentered: true)),
-                          getText('What you get?',isCentered: true,textType: TextType.textTypeSubtitle),
+                          getSubtitle('What you get?'),
                           Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Center(child: YoutubePlayer(controller: controller,width: MediaQuery.of(context).size.width/1.5,)),
+                            child: Center(child: YoutubePlayer(controller: controller,width: MyApp.dataModel.screenWidth/1.5,)),
                           ),
                           Padding(
                             padding: const EdgeInsets.only(top: 15),
@@ -138,10 +137,7 @@ class _IAPScreenState extends DistivityPageState<IAPScreen> {
         ):ListView(
           shrinkWrap: true,
           children: [
-            Center(child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: getText('Alexandru Totolici, CEO',textType: TextType.textTypeSubtitle),
-            )),
+            Center(child: getSubtitle('Alexandru Totolici, CEO')),
             Padding(
               padding: const EdgeInsets.only(top: 20,left: 15,right: 15),
               child: getText('About 6 months ago I was watching a video by Nathaniel Drew, who tried tracking his time for 7 days. At the end of the experiment, I(and he too) was blown away by how chaotic his day was. This amazed me. We all think of ourselves as productivity machines, but even in our best days our outputs aren’t that high. So I wanted to make time tracking and time managing an easy thing to do by anyone'),
