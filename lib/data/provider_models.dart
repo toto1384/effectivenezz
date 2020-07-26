@@ -49,21 +49,29 @@ class DataModel{
 
   static Future<DataModel> init(BuildContext context)async{
     DataModel dataModel = DataModel();
+    print(1);
     dataModel.screenWidth=MediaQuery.of(context).size.width;
     dataModel.databaseHelper = (kIsWeb?WebDb():await MobileDB.getDatabase(context));
     dataModel.prefs = await Prefs.getInstance();
+    print(2);
     dataModel.driveHelper= await DriveHelper.init(context);
+    print(3);
     dataModel.scheduleds= await dataModel.databaseHelper.queryAllScheduled();
     dataModel.tasks=await dataModel.databaseHelper.queryAllTasks();
     dataModel.activities = await dataModel.databaseHelper.queryAllActivities();
     dataModel.eCalendars = await dataModel.databaseHelper.queryAllECalendars();
     dataModel.tags=await dataModel.databaseHelper.queryAllTags();
+    print(4);
     dataModel.populatePlaying();
+    print(5);
     if(!kIsWeb)dataModel.initNotificationsWithCorrectContext(context);
+    print(6);
 
     if(!kIsWeb)dataModel.scheduleEveryDay(context);
+    print(7);
 
     if(!kIsWeb)dataModel.setupDrift();
+    print(8);
 
 
     return dataModel;

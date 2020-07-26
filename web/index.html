@@ -12,6 +12,32 @@
   <meta name="apple-mobile-web-app-title" content="effectivenezz">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
+
+  <!-- The core Firebase JS SDK is always required and must be listed first -->
+  <script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-app.js"></script>
+
+  <!-- TODO: Add SDKs for Firebase products that you want to use
+    https://firebase.google.com/docs/web/setup#available-libraries -->
+  <script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-analytics.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-remote-config.js"></script>
+
+  <script>
+    // Your web app's Firebase configuration
+    var firebaseConfig = {
+      apiKey: "AIzaSyC1DAq1s9JHrXtil63fBF3I-nwJheLxm9o",
+      authDomain: "effectivenezz.firebaseapp.com",
+      databaseURL: "https://effectivenezz.firebaseio.com",
+      projectId: "effectivenezz",
+      storageBucket: "effectivenezz.appspot.com",
+      messagingSenderId: "907727965927",
+      appId: "1:907727965927:web:db3cf5cf712513d30e1c42",
+      measurementId: "G-2YKCZ8DYK9"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    firebase.analytics();
+  </script>
+
 <!--  <script>-->
 <!--    "use strict";-->
 

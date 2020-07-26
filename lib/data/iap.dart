@@ -1,5 +1,5 @@
 import 'package:effectivenezz/ui/widgets/distivity_restart_widget.dart';
-import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:firebase_remote_config_hybrid/firebase_remote_config_hybrid.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -10,7 +10,7 @@ import '../main.dart';
 class IAPHelper{
 
 
-  final RemoteConfig remoteConfig;
+  final FirebaseRemoteConfig remoteConfig;
 
   IAPHelper(this.remoteConfig);
 
@@ -24,14 +24,15 @@ class IAPHelper{
       Purchases.addPurchaserInfoUpdateListener((purchaserInfo){
       });
     }
+    print(11);
+    IAPHelper iapHelper = IAPHelper(await FirebaseRemoteConfig.instance);
 
-    IAPHelper iapHelper = IAPHelper(await RemoteConfig.instance);
-
-    final defaults = <String, dynamic>{'skip_purchases': '0'};
-    await iapHelper.remoteConfig.setDefaults(defaults);
-
-    await iapHelper.remoteConfig.fetch(expiration: const Duration(hours: 5));
+    print(12);
+    await iapHelper.remoteConfig.fetch();
+    print(13);
     await iapHelper.remoteConfig.activateFetched();
+    print(14);
+
 
     return iapHelper;
   }

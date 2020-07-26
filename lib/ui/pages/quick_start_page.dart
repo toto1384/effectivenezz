@@ -18,30 +18,6 @@ class QuickStartPage extends StatefulWidget {
 
 class _QuickStartPageState extends State<QuickStartPage> {
 
-  Activity sleep = Activity(
-    name: "Sleep",
-    parentCalendarId: 1000,
-    value: 10,
-    trackedEnd: [],
-    tags: [],
-    trackedStart: [],
-    valueMultiply: false,
-    icon: Icons.hotel,
-    id: 1000
-  );
-
-  Activity exercise = Activity(
-      name: "Exercise",
-      parentCalendarId: 1001,
-      value: 1000,
-      trackedEnd: [],
-      tags: [],
-      trackedStart: [],
-      valueMultiply: false,
-      icon: Icons.fitness_center,
-      id: 1001,
-      description: null
-  );
 
   List<Scheduled> meals = [
     Scheduled(
@@ -290,9 +266,30 @@ class _QuickStartPageState extends State<QuickStartPage> {
       ), context, CUD.Create);
     }
 
-    await MyApp.dataModel.activity(-1, sleep, context, CUD.Create,addWith: sleepScheduled);//sleep
+    await MyApp.dataModel.activity(-1, Activity(
+        name: "Sleep",
+        parentCalendarId: 1000,
+        value: 10,
+        trackedEnd: [],
+        tags: [],
+        trackedStart: [],
+        valueMultiply: false,
+        icon: Icons.hotel,
+        id: 1000
+    ), context, CUD.Create,addWith: sleepScheduled);//sleep
     await saveMeals();//meals
-    await MyApp.dataModel.activity(-1, exercise, context, CUD.Create,addWith: exerciseScheduled);//exercise
+    await MyApp.dataModel.activity(-1, Activity(
+        name: "Exercise",
+        parentCalendarId: 1001,
+        value: 1000,
+        trackedEnd: [],
+        tags: [],
+        trackedStart: [],
+        valueMultiply: false,
+        icon: Icons.fitness_center,
+        id: 1001,
+        description: null
+    ), context, CUD.Create,addWith: exerciseScheduled);//exercise
     if(taskEditingController.text!='')await MyApp.dataModel.task(-1, Task(
       parentId: 1010,
       value: 1000,
