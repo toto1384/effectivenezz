@@ -101,6 +101,7 @@ deleteDb(BuildContext context)async{
       yesString: "DELETE EVERYTHING",
       noString: "Cancel",
       onYesPressed: ()async{
+        MyApp.dataModel.notificationHelper.cancelAllNotifications();
         MyApp.dataModel.databaseHelper.deleteEveryThing().then((value) {
           showDistivityDialog(
               context,

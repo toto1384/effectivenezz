@@ -51,9 +51,6 @@ class Task{
     @required this.parentId,this.description,@required this.isParentCalendar,
     @required this.value, this.color,@required this.checks,@required this.valueMultiply,
     @required this.tags,this.blackListedDates}){
-    if(color==null){
-      color=MyApp.dataModel.findParentColor(this);
-    }
   }
 
 

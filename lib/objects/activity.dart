@@ -46,9 +46,6 @@ class Activity {
   Activity({ this.id, @required this.name,@required this.trackedStart,@required this.trackedEnd,
     @required this.parentCalendarId,this.description,@required this.value,
     this.color,@required this.valueMultiply,this.icon,@required this.tags,this.blacklistedDates}){
-    if(color==null){
-      color=MyApp.dataModel.findParentColor(this);
-    }
   }
 
   List<Scheduled> _scheduled = [];

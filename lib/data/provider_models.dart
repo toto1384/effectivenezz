@@ -33,7 +33,7 @@ class DataModel{
 
   DatabaseHelper databaseHelper;
 
-  double screenWidth;
+  double screenWidth=400;
 
   Prefs prefs;
   DriveHelper driveHelper;
@@ -228,13 +228,18 @@ class DataModel{
       currentPlaying=null;
     }
     //Start playing
-    if(playing!=null)playing.trackedStart.add(getTodayFormated());
-    if(playing is Activity){
-      activity(findObjectIndexById(playing), playing, context, CUD.Update);
-    }else if(playing is Task){
-      task(findObjectIndexById(playing), playing, context, CUD.Update);
+    if(playing!=null) {
+      playing.trackedStart.add(getTodayFormated());
+      if(playing is Activity){
+        activity(findObjectIndexById(playing), playing, context, CUD.Update);
+      }else if(playing is Task){
+        task(findObjectIndexById(playing), playing, context, CUD.Update);
+      }
     }
+
+
     currentPlaying=playing;
+    //notifications
     if(!kIsWeb){
       if(playing==null){
         notificationHelper.cancelNotification(0);
@@ -578,6 +583,11 @@ class DataModel{
     }
   }
 
+  isPlaying(dynamic object){
+    if(currentPlaying==null)return false;
+    if(currentPlaying.id==object.id)return true;
+    return false;
+  }
 
   Map<String,List<Map>> toDriveData(){
     Map<String,List<Map>> driveData = Map();

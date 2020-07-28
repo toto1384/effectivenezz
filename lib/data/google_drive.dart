@@ -187,6 +187,7 @@ class DriveHelper{
 
       String bytesString = utf8.decode(bytes);
       Map<String,List> map = Map.from(jsonDecode(bytesString));
+      MyApp.dataModel.notificationHelper.cancelAllNotifications();
       await MyApp.dataModel.databaseHelper.saveFromDriveData(map);
 
       showDistivityDialog(buildContext, actions: [getButton('Refresh', onPressed: (){

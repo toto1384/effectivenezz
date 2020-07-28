@@ -81,34 +81,40 @@ showAddEditObjectBottomSheet(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Flexible(
-                child: getTextField(
-                    nameEditingController, hint: 'Name goes here',
-                    textInputType: TextInputType.text,variant: 2,textType: TextType.textTypeSubtitle),
+                child: Padding(
+                  padding: const EdgeInsets.all(7),
+                  child: getTextField(
+                      nameEditingController, hint: 'Name goes here',
+                      textInputType: TextInputType.text,variant: 2,textType: TextType.textTypeSubtitle),
+                ),
               ),
-              IconButton(
-                icon: getIcon(Icons.send,size: TextType.textTypeSubtitle.size*1.5),
-                onPressed: (){
-                  if(scheduled.durationInMins<0){
-                    Fluttertoast.showToast(
-                        msg: "End time can not be sooner than start time",
-                        toastLength: Toast.LENGTH_LONG,
-                        gravity: ToastGravity.CENTER,
-                        timeInSecForIosWeb: 3,
-                        backgroundColor: MyColors.color_black,
-                        textColor: Colors.white,
-                        fontSize: 16.0
-                    );
-                  }else{
-                    object.name = nameEditingController.text;
-                    object.description = descriptionEditingController.text;
-                    if(object is Task){
-                      MyApp.dataModel.task(index, object, context, add?CUD.Create:CUD.Update,addWith: scheduled);
+              Padding(
+                padding: const EdgeInsets.all(7),
+                child: IconButton(
+                  icon: getIcon(Icons.send,size: TextType.textTypeSubtitle.size*1.5),
+                  onPressed: (){
+                    if(scheduled.durationInMins<0){
+                      Fluttertoast.showToast(
+                          msg: "End time can not be sooner than start time",
+                          toastLength: Toast.LENGTH_LONG,
+                          gravity: ToastGravity.CENTER,
+                          timeInSecForIosWeb: 3,
+                          backgroundColor: MyColors.color_black,
+                          textColor: Colors.white,
+                          fontSize: 16.0
+                      );
                     }else{
-                      MyApp.dataModel.activity(index, object, context, add?CUD.Create:CUD.Update,addWith: scheduled);
+                      object.name = nameEditingController.text;
+                      object.description = descriptionEditingController.text;
+                      if(object is Task){
+                        MyApp.dataModel.task(index, object, context, add?CUD.Create:CUD.Update,addWith: scheduled);
+                      }else{
+                        MyApp.dataModel.activity(index, object, context, add?CUD.Create:CUD.Update,addWith: scheduled);
+                      }
+                      Navigator.pop(context);
                     }
-                    Navigator.pop(context);
-                  }
-                },
+                  },
+                ),
               ),
             ],
           ),
@@ -157,8 +163,8 @@ showAddEditObjectBottomSheet(
           if(object is Activity)
             ListTile(
               leading: CircleAvatar(
-                child: getIcon(object.icon??Icons.not_interested,color: getContrastColor(object.color),size: 18),
-                backgroundColor: object.color,
+                child: getIcon(object.icon??Icons.not_interested,color: getContrastColor(object.color??Colors.white),size: 18),
+                backgroundColor: object.color??Colors.white,
                 maxRadius: 15,
               ),
               onTap: (){
@@ -187,14 +193,17 @@ showAddEditObjectBottomSheet(
           }),
           getDivider(),
           ExpansionTile(
-            title: getText('Advanced',textType: TextType.textTypeSubtitle,underline: true),
+            title: Padding(
+              padding: const EdgeInsets.all(7),
+              child: getText('Advanced',textType: TextType.textTypeSubtitle,underline: true),
+            ),
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.only(top: 10),
+                padding: const EdgeInsets.only(top: 10,left: 7),
                 child: ListTile(
                   leading: CircleAvatar(
                     maxRadius: 15,
-                    backgroundColor: object.color,
+                    backgroundColor: object.color??Colors.white,
                   ),
                   title: getText('Set Color'),
                   onTap: (){
@@ -207,11 +216,11 @@ showAddEditObjectBottomSheet(
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(top: 10),
+                padding: const EdgeInsets.only(top: 10,left: 7),
                 child: ListTile(
                   leading: CircleAvatar(
                     maxRadius: 15,
-                    backgroundColor: object.color,
+                    backgroundColor: object.color??Colors.white,
                     child: getIcon(Icons.attach_money,color: getContrastColor(object.color)),
                   ),
                   title: getText('Set value(${formatDouble(object.value.toDouble()??0)}\$/hour)'),
@@ -226,7 +235,7 @@ showAddEditObjectBottomSheet(
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(bottom: 30),
+                padding: const EdgeInsets.only(bottom: 30,top: 10,right: 20,left: 20),
                 child: Center(child: getTextField(descriptionEditingController,textInputType: TextInputType.multiline,hint: 'Description goes here'),),
               ),
             ],
@@ -432,7 +441,7 @@ showEditTimestampsBottomSheet(BuildContext context, {@required dynamic object,in
             children: <Widget>[
               getSubtitle("Edit timestamp"),
               getButton("Done", onPressed: (){
-                object.trackedStart[indexTimestamp]=startTime;
+                object.trackedStart[indexTimestamp]=startTime??object.trackedStart[indexTimestamp];
                 if(object.trackedStart.length==object.trackedEnd.length){
                   //not active
                   if(endTime==null){
@@ -514,7 +523,6 @@ showEditTimestampsBottomSheet(BuildContext context, {@required dynamic object,in
                                       }
                                       ss((){
                                         if(time==null){
-                                          startTime=null;
                                         }else startTime = DateTime(startTime.year,startTime.month,startTime.day,time.hour,time.minute);
                                       });
                                     });
@@ -533,7 +541,6 @@ showEditTimestampsBottomSheet(BuildContext context, {@required dynamic object,in
                                       }
                                       ss((){
                                         if(date==null){
-                                          startTime=null;
                                         }else startTime = DateTime(
                                             date.year,date.month,date.day,startTime.hour,startTime.minute
                                         );
@@ -574,7 +581,6 @@ showEditTimestampsBottomSheet(BuildContext context, {@required dynamic object,in
                                           }
                                           ss((){
                                             if(time==null){
-                                              endTime=null;
                                             }else endTime = DateTime(
                                                 endTime.year,
                                                 endTime.month,
@@ -599,7 +605,6 @@ showEditTimestampsBottomSheet(BuildContext context, {@required dynamic object,in
                                       }
                                       ss((){
                                         if(date==null){
-                                          endTime=null;
                                         }else{
                                           endTime = DateTime(
                                               date.year,date.month,date.day,
@@ -814,7 +819,7 @@ showAddEditCalendarBottomSheet(BuildContext context,{ECalendar eCalendar,int ind
 
   if(index==null)index=MyApp.dataModel.eCalendars.length;
 
-  if(eCalendar==null)eCalendar=ECalendar(name: '',parentId: -1,show: true,color: Colors.transparent,
+  if(eCalendar==null)eCalendar=ECalendar(name: '',parentId: -1,show: true,color: Colors.white,
     description: '',value: 0,themesStart: [],themesEnd: []);
 
   TextEditingController nameEditingController = TextEditingController(text: eCalendar.name);
@@ -827,8 +832,10 @@ showAddEditCalendarBottomSheet(BuildContext context,{ECalendar eCalendar,int ind
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            getPadding(getTextField(nameEditingController, hint: 'Name goes here',focus: true,
-                variant: 2,textType: TextType.textTypeSubtitle),),
+            Flexible(
+              child: getTextField(nameEditingController, hint: 'Name goes here',focus: true,
+                  variant: 2,textType: TextType.textTypeSubtitle),
+            ),
             IconButton(
               icon: getIcon(Icons.send,size: TextType.textTypeSubtitle.size*1.5),
               onPressed: (){

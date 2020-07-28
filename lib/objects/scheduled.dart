@@ -5,6 +5,7 @@ import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:effectivenezz/utils/date_n_strings.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 
 
@@ -56,6 +57,10 @@ class Scheduled{
   }
 
   Map<String,dynamic> toMap(){
+    if(repeatRule!=RepeatRule.None&&startTime==null){
+      repeatRule=RepeatRule.None;
+      Fluttertoast.showToast(msg: 'Because there was no start or end time, the repeat rule was set to none');
+    }
     return {
       scheduledId:id,
       scheduledParentId: parentId,

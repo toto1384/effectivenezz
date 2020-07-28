@@ -328,7 +328,7 @@ getEmojiSlider(double value, Function(double) onChanged,double size){
             inactiveTrackBarHeight: 10,
             activeTrackBar: BoxDecoration(
               borderRadius: BorderRadius.circular(15),
-              color: Colors.white
+              color: Colors.white,
             ),
             inactiveTrackBar: BoxDecoration(
               color: MyColors.color_gray_lighter,
@@ -517,7 +517,7 @@ repeatEditor(BuildContext context,Scheduled scheduled, Function(Scheduled) onSch
     mainAxisSize: MainAxisSize.min,
     children: <Widget>[
       Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10),
         child: getText('Repeats'),
       ),
       getButton(
@@ -547,7 +547,7 @@ getDurationWidgetForScheduled(BuildContext context,{
     mainAxisSize: MainAxisSize.min,
     children: <Widget>[
       Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10),
         child: getText('Duration'),
       ),
       getButton(
@@ -563,6 +563,14 @@ getDurationWidgetForScheduled(BuildContext context,{
           });
         },
       ),
+      Flexible(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Visibility(
+            visible: scheduled.startTime!=null,
+              child: getText("(Ends on ${getStringFromDate(scheduled.getEndTime())})")),
+        ),
+      )
     ],
   );
 }
@@ -574,87 +582,84 @@ getDateTimeEditWidgetForScheduled(BuildContext context,{
   @required bool isStartTime,
   String text,
 }){
-  return Padding(
-    padding: const EdgeInsets.all(8.0),
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Flexible(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 8),
-            child: getText(text??(isStartTime?'Starts':'Ends'),maxLines: 3),
-          ),
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    children: <Widget>[
+      Flexible(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 15),
+          child: getText(text??(isStartTime?'Starts':'Ends'),maxLines: 3),
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: getButton(
-            getTimeName(isStartTime?scheduled.startTime:scheduled.getEndTime()),
-            onPressed: () {
-              showDistivityTimePicker(context,
-                  TimeOfDay.fromDateTime(
-                      (isStartTime?scheduled.startTime:scheduled.getEndTime()) ?? getTodayFormated()
-                  ),
-                  onTimeSelected: (time) {
-                    if (scheduled.startTime == null) {
-                      scheduled.startTime = getTodayFormated();
-                    }
-                    if(time==null){
-                      scheduled.startTime=null;
-                    }else{
-                      if(isStartTime){
-                        scheduled.startTime = DateTime(
-                            scheduled.startTime.year,
-                            scheduled.startTime.month,
-                            scheduled.startTime.day, time.hour,
-                            time.minute);
-                      }else{
-                        scheduled.durationInMins = DateTime(
-                            scheduled.getEndTime().year,
-                            scheduled.getEndTime().month,
-                            scheduled.getEndTime().day,
-                            time.hour,
-                            time.minute
-                        ).difference(scheduled.startTime).inMinutes;
-                      }
-                    }
-                    onScheduledChange(scheduled);
-                  });
-            },
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(15),
-          child: getText('•'),
-        ),
-        getButton(
-          getDateName(isStartTime?scheduled.startTime:scheduled.getEndTime()),
+      ),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: getButton(
+          getTimeName(isStartTime?scheduled.startTime:scheduled.getEndTime()),
           onPressed: () {
-            showDistivityDatePicker(
-                context, onDateSelected: (date) {
-              if (scheduled.startTime == null) {
-                scheduled.startTime = getTodayFormated();
-              }
-              if(date==null){
-                scheduled.startTime=null;
-              }else{
-                if(isStartTime){
-                  scheduled.startTime = DateTime(
-                      date.year, date.month, date.day,
-                      scheduled.startTime.hour,
-                      scheduled.startTime.minute);
-                }else{
-                  scheduled.durationInMins = DateTime(
-                      date.year, date.month, date.day,
-                      scheduled.getEndTime().hour, scheduled.getEndTime().minute
-                  ).difference(scheduled.startTime).inMinutes;
-                }
-              }
-              onScheduledChange(scheduled);
-            });
+            showDistivityTimePicker(context,
+                TimeOfDay.fromDateTime(
+                    (isStartTime?scheduled.startTime:scheduled.getEndTime()) ?? getTodayFormated()
+                ),
+                onTimeSelected: (time) {
+                  if (scheduled.startTime == null) {
+                    scheduled.startTime = getTodayFormated();
+                  }
+                  if(time==null){
+                    scheduled.startTime=null;
+                  }else{
+                    if(isStartTime){
+                      scheduled.startTime = DateTime(
+                          scheduled.startTime.year,
+                          scheduled.startTime.month,
+                          scheduled.startTime.day, time.hour,
+                          time.minute);
+                    }else{
+                      scheduled.durationInMins = DateTime(
+                          scheduled.getEndTime().year,
+                          scheduled.getEndTime().month,
+                          scheduled.getEndTime().day,
+                          time.hour,
+                          time.minute
+                      ).difference(scheduled.startTime).inMinutes;
+                    }
+                  }
+                  onScheduledChange(scheduled);
+                });
           },
         ),
-      ],
-    ),
+      ),
+      Padding(
+        padding: const EdgeInsets.all(15),
+        child: getText('•'),
+      ),
+      getButton(
+        getDateName(isStartTime?scheduled.startTime:scheduled.getEndTime()),
+        onPressed: () {
+          showDistivityDatePicker(
+              context, onDateSelected: (date) {
+            if (scheduled.startTime == null) {
+              scheduled.startTime = getTodayFormated();
+            }
+            if(date==null){
+              scheduled.startTime=null;
+            }else{
+              if(isStartTime){
+                scheduled.startTime = DateTime(
+                    date.year, date.month, date.day,
+                    scheduled.startTime.hour,
+                    scheduled.startTime.minute);
+              }else{
+                scheduled.durationInMins = DateTime(
+                    date.year, date.month, date.day,
+                    scheduled.getEndTime().hour, scheduled.getEndTime().minute
+                ).difference(scheduled.startTime).inMinutes;
+              }
+            }
+            onScheduledChange(scheduled);
+          });
+        },
+      ),
+    ],
   );
 }
 
@@ -669,12 +674,8 @@ scheduledEditor(BuildContext context,Scheduled scheduled, Function(Scheduled) on
             //starts
             getDateTimeEditWidgetForScheduled(context, onScheduledChange: onScheduledChange,
                 scheduled: scheduled, isStartTime: true),
-            getDurationWidgetForScheduled(context, scheduled: scheduled,
-                onScheduledChange: onScheduledChange, ss: ss),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 0),
-              child: getText("(Ends on ${getStringFromDate(scheduled.getEndTime())})"),
-            ),
+            getPadding(getDurationWidgetForScheduled(context, scheduled: scheduled,
+                onScheduledChange: onScheduledChange, ss: ss),horizontal: 0),
             repeatEditor(context, scheduled, (sc){
               ss((){
                 scheduled=sc;

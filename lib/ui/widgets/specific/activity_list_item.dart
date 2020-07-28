@@ -109,7 +109,7 @@ class _ActivityListItemState extends State<ActivityListItem> with AfterLayoutMix
                       padding: const EdgeInsets.all(4.0),
                       child: getBasicLinedBorder(InkWell(
                         onTap: (){
-                          MyApp.dataModel.setPlaying(context, MyApp.dataModel.currentPlaying==widget.activity?null:widget.activity);
+                          MyApp.dataModel.setPlaying(context, MyApp.dataModel.isPlaying(widget.activity)?null:widget.activity);
                           ifStartTimer();
                         },
                         child: Padding(
@@ -117,7 +117,7 @@ class _ActivityListItemState extends State<ActivityListItem> with AfterLayoutMix
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
-                              getIcon(MyApp.dataModel.currentPlaying==widget.activity?Icons.stop:Icons.play_arrow),
+                              getIcon(MyApp.dataModel.isPlaying(widget.activity)?Icons.stop:Icons.play_arrow),
                               getText(getTextFromDuration(widget.activity.getTimeLeft(context))),
                             ],
                           ),
@@ -182,7 +182,7 @@ class _ActivityListItemState extends State<ActivityListItem> with AfterLayoutMix
       ifStartTimer();
     }
     ifStartTimer(){
-      if(MyApp.dataModel.currentPlaying==(widget.activity)){
+      if(MyApp.dataModel.isPlaying(widget.activity)){
         _everySecond = Timer.periodic(Duration(seconds: 1), (Timer t) {
           setState(() {
           });

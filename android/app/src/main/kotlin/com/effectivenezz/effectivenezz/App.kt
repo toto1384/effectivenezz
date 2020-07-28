@@ -21,12 +21,6 @@ class App : FlutterApplication() {
         super.onCreate()
         updateAndroidSecurityProvider()
         Drift.setupDrift(this, "yr4ewu8np62t")
-
-        Drift.setLoggerListener(object: LoggerListener {
-            override fun logMessage(message: String) {
-                Log.d("DRIFT_SDK", message)
-            }
-        })
     }
 
 

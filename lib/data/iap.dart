@@ -18,7 +18,6 @@ class IAPHelper{
 
   static Future<IAPHelper> init(BuildContext context,String id) async {
     if(!kIsWeb){
-      await Purchases.setDebugLogsEnabled(true);
       await Purchases.setup("NhStgtRStPcvQuPQvlLIjuoIaSyKSrDB",appUserId: id);
 
       Purchases.addPurchaserInfoUpdateListener((purchaserInfo){
