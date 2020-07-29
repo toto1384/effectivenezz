@@ -140,6 +140,7 @@ Center getEmptyView(BuildContext context, String text,{bool beginButton}) {
                 child: PlatformSvg.asset(AssetsPath.emptyView)
             ),
             getSubtitle(text),
+            if(beginButton??true)
             getPadding(getButton(
               'Quick start',
               onPressed: (){
@@ -581,84 +582,97 @@ getDateTimeEditWidgetForScheduled(BuildContext context,{
   @required Scheduled scheduled,
   @required bool isStartTime,
   String text,
+  bool onlyTime,
+  Widget trailing,
 }){
   return Row(
-    mainAxisSize: MainAxisSize.min,
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: <Widget>[
       Flexible(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 15),
-          child: getText(text??(isStartTime?'Starts':'Ends'),maxLines: 3),
-        ),
-      ),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: getButton(
-          getTimeName(isStartTime?scheduled.startTime:scheduled.getEndTime()),
-          onPressed: () {
-            showDistivityTimePicker(context,
-                TimeOfDay.fromDateTime(
-                    (isStartTime?scheduled.startTime:scheduled.getEndTime()) ?? getTodayFormated()
-                ),
-                onTimeSelected: (time) {
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Flexible(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 15),
+                child: getText(text??(isStartTime?'Starts':'Ends'),maxLines: 3),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: getButton(
+                getTimeName(isStartTime?scheduled.startTime:scheduled.getEndTime()),
+                onPressed: () {
+                  showDistivityTimePicker(context,
+                      TimeOfDay.fromDateTime(
+                          (isStartTime?scheduled.startTime:scheduled.getEndTime()) ?? getTodayFormated()
+                      ),
+                      onTimeSelected: (time) {
+                        if (scheduled.startTime == null) {
+                          scheduled.startTime = getTodayFormated();
+                        }
+                        if(time==null){
+                          scheduled.startTime=null;
+                        }else{
+                          if(isStartTime){
+                            scheduled.startTime = DateTime(
+                                scheduled.startTime.year,
+                                scheduled.startTime.month,
+                                scheduled.startTime.day, time.hour,
+                                time.minute);
+                          }else{
+                            scheduled.durationInMins = DateTime(
+                                scheduled.getEndTime().year,
+                                scheduled.getEndTime().month,
+                                scheduled.getEndTime().day,
+                                time.hour,
+                                time.minute
+                            ).difference(scheduled.startTime).inMinutes;
+                          }
+                        }
+                        onScheduledChange(scheduled);
+                      });
+                },
+              ),
+            ),
+            if(!(onlyTime??false))
+            Padding(
+              padding: const EdgeInsets.all(15),
+              child: getText('•'),
+            ),
+            if(!(onlyTime??false))
+            getButton(
+              getDateName(isStartTime?scheduled.startTime:scheduled.getEndTime()),
+              onPressed: () {
+                showDistivityDatePicker(
+                    context, onDateSelected: (date) {
                   if (scheduled.startTime == null) {
                     scheduled.startTime = getTodayFormated();
                   }
-                  if(time==null){
+                  if(date==null){
                     scheduled.startTime=null;
                   }else{
                     if(isStartTime){
                       scheduled.startTime = DateTime(
-                          scheduled.startTime.year,
-                          scheduled.startTime.month,
-                          scheduled.startTime.day, time.hour,
-                          time.minute);
+                          date.year, date.month, date.day,
+                          scheduled.startTime.hour,
+                          scheduled.startTime.minute);
                     }else{
                       scheduled.durationInMins = DateTime(
-                          scheduled.getEndTime().year,
-                          scheduled.getEndTime().month,
-                          scheduled.getEndTime().day,
-                          time.hour,
-                          time.minute
+                          date.year, date.month, date.day,
+                          scheduled.getEndTime().hour, scheduled.getEndTime().minute
                       ).difference(scheduled.startTime).inMinutes;
                     }
                   }
                   onScheduledChange(scheduled);
                 });
-          },
+              },
+            ),
+          ],
         ),
       ),
-      Padding(
-        padding: const EdgeInsets.all(15),
-        child: getText('•'),
-      ),
-      getButton(
-        getDateName(isStartTime?scheduled.startTime:scheduled.getEndTime()),
-        onPressed: () {
-          showDistivityDatePicker(
-              context, onDateSelected: (date) {
-            if (scheduled.startTime == null) {
-              scheduled.startTime = getTodayFormated();
-            }
-            if(date==null){
-              scheduled.startTime=null;
-            }else{
-              if(isStartTime){
-                scheduled.startTime = DateTime(
-                    date.year, date.month, date.day,
-                    scheduled.startTime.hour,
-                    scheduled.startTime.minute);
-              }else{
-                scheduled.durationInMins = DateTime(
-                    date.year, date.month, date.day,
-                    scheduled.getEndTime().hour, scheduled.getEndTime().minute
-                ).difference(scheduled.startTime).inMinutes;
-              }
-            }
-            onScheduledChange(scheduled);
-          });
-        },
-      ),
+      if(trailing!=null)
+        trailing
     ],
   );
 }

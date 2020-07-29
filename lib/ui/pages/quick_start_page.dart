@@ -4,11 +4,13 @@ import 'package:effectivenezz/objects/calendar.dart';
 import 'package:effectivenezz/objects/scheduled.dart';
 import 'package:effectivenezz/objects/task.dart';
 import 'package:effectivenezz/ui/pages/track_page.dart';
+import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
 import 'package:effectivenezz/utils/basic/widgets_basic.dart';
 import 'package:effectivenezz/utils/complex/widget_complex.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class QuickStartPage extends StatefulWidget {
@@ -36,6 +38,7 @@ class _QuickStartPageState extends State<QuickStartPage> {
         tags: [],
         trackedEnd: [],
         value: 0,
+        color: Colors.brown,
         name: 'Meal #${i+1}',
         parentCalendarId: 1000,
         id: 10000+i,
@@ -88,22 +91,31 @@ class _QuickStartPageState extends State<QuickStartPage> {
               setState(() {
                 sleepScheduled=sch;
               });
-            },isStartTime: true,scheduled: sleepScheduled,text:'I go to sleep at'),
+            },isStartTime: true,scheduled: sleepScheduled,text:'I go to sleep at',onlyTime: true,),
             getDateTimeEditWidgetForScheduled(context,onScheduledChange: (sch){
               setState(() {
                 sleepScheduled=sch;
               });
-            },isStartTime: false,scheduled: sleepScheduled,text: 'I wake up at'),
+            },isStartTime: false,onlyTime:true,scheduled: sleepScheduled,text: 'I wake up at'),
             getDivider(),
             getSubtitle('Schedule your meals'),
             Column(
               mainAxisSize: MainAxisSize.min,
               children: List.generate(meals.length, (index) {
                 return getDateTimeEditWidgetForScheduled(context,onScheduledChange: (sch){
-                  setState(() {
-                    meals[index]=sch;
-                  });
-                },isStartTime: true,scheduled: meals[index],text: "#${index+1} meal at:");
+                    setState(() {
+                      meals[index]=sch;
+                    });
+                  },isStartTime: true,scheduled: meals[index],text: "#${index+1} meal at:",onlyTime: true,
+                  trailing: IconButton(
+                    icon: getIcon(Icons.delete),
+                    onPressed: (){
+                      setState(() {
+                        meals.removeAt(index);
+                      });
+                    },
+                  )
+                );
               }),
             ),
             Center(
@@ -126,7 +138,7 @@ class _QuickStartPageState extends State<QuickStartPage> {
               setState(() {
                 exerciseScheduled=sch;
               });
-            },isStartTime: true,scheduled: exerciseScheduled,text: 'I exercise at'),
+            },isStartTime: true,onlyTime:true,scheduled: exerciseScheduled,text: 'I exercise at'),
             getDivider(),
 
             getSubtitle('Growth'),
@@ -143,17 +155,36 @@ class _QuickStartPageState extends State<QuickStartPage> {
 
             Padding(
               padding: const EdgeInsets.all(15),
-              child: Text.rich(
+              child: kIsWeb?Wrap(
+                direction: Axis.horizontal,
+                children: [
+                  getText('What\'s that one activtiy that if I do everyday for',),
+                  Container(
+                    width: 100,
+                    child: Padding(
+                      padding: const EdgeInsets.all(2),
+                      child: getTextField(
+                          activityDurationEditingController, hint: 'hours',small: true),
+                    ),
+                  ),
+                  getText(' hours will change my life in 6 months'),
+                ],
+              ):Text.rich(
                 TextSpan(children: <InlineSpan>[
                   TextSpan(text: 'What\'s that one activtiy that if I do everyday for',style: TextStyle(
                       color: Colors.white,
                       fontWeight: TextType.textTypeNormal.fontWeight,
                       fontSize: TextType.textTypeNormal.size,
-                  )),
-                  WidgetSpan(child: Container(
+                  ),),
+                  WidgetSpan(
+                   alignment: PlaceholderAlignment.middle,
+                   child: Container(
                     width: 100,
-                    child: getTextField(
-                      activityDurationEditingController, hint: 'hours',small: true),
+                    child: Padding(
+                      padding: const EdgeInsets.all(2),
+                      child: getTextField(
+                        activityDurationEditingController, hint: 'hours',small: true),
+                    ),
                   ),),
                   TextSpan(text: ' hours will change my life in 6 months',style: TextStyle(
                     color: Colors.white,
@@ -163,24 +194,27 @@ class _QuickStartPageState extends State<QuickStartPage> {
                 ],),textAlign: TextAlign.center,
               ),
             ),
-
             Padding(
               padding: const EdgeInsets.all(15.0),
               child: getTextField(activityEditingController,hint: 'Activity name',),
             ),
             getDivider(),
+            getSubtitle('Daily review'),
             getDateTimeEditWidgetForScheduled(context,onScheduledChange: (sch){
               setState(() {
                 reviewScheduled=sch;
               });
-            },isStartTime: true,scheduled: reviewScheduled,text: 'When would you like to review your day?(15-30m)'),
+            },isStartTime: true,onlyTime:true,scheduled: reviewScheduled,text: 'When would you like to review your day?(15-30m)'),
             getDivider(),
-            getSwitchable(text: 'I spend time on social media, gaming or Netflix',
-                checked: addAddictions, onCheckedChanged: (c){
-                  setState(() {
-                    addAddictions=c;
-                  });
-                }, isCheckboxOrSwitch: true),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: getSwitchable(text: 'I spend time on social media, gaming or Netflix',
+                  checked: addAddictions, onCheckedChanged: (c){
+                    setState(() {
+                      addAddictions=c;
+                    });
+                  }, isCheckboxOrSwitch: true),
+            ),
           ],
         ),
       ),
@@ -241,6 +275,7 @@ class _QuickStartPageState extends State<QuickStartPage> {
         trackedEnd: [],
         tags: [],
         trackedStart: [],
+        color: Colors.grey,
         valueMultiply: false,
         icon: Icons.phone_android
       ), context, CUD.Create);
@@ -252,6 +287,7 @@ class _QuickStartPageState extends State<QuickStartPage> {
           tags: [],
           trackedStart: [],
           valueMultiply: false,
+          color: Colors.grey,
           icon: Icons.tv
       ), context, CUD.Create);
       await MyApp.dataModel.activity(-1, Activity(
@@ -260,6 +296,7 @@ class _QuickStartPageState extends State<QuickStartPage> {
           parentCalendarId: 1005,
           trackedEnd: [],
           tags: [],
+          color: Colors.grey,
           trackedStart: [],
           valueMultiply: false,
           icon: Icons.gamepad,
@@ -272,6 +309,7 @@ class _QuickStartPageState extends State<QuickStartPage> {
         value: 10,
         trackedEnd: [],
         tags: [],
+        color: Colors.brown,
         trackedStart: [],
         valueMultiply: false,
         icon: Icons.hotel,
@@ -283,6 +321,7 @@ class _QuickStartPageState extends State<QuickStartPage> {
         parentCalendarId: 1001,
         value: 1000,
         trackedEnd: [],
+        color: Colors.green,
         tags: [],
         trackedStart: [],
         valueMultiply: false,
@@ -297,6 +336,7 @@ class _QuickStartPageState extends State<QuickStartPage> {
       valueMultiply: false,
       trackedStart: [],
       tags: [],
+      color: Colors.red,
       trackedEnd: [],
       checks: [],
       isParentCalendar: true,
@@ -305,7 +345,7 @@ class _QuickStartPageState extends State<QuickStartPage> {
       repeatRule: RepeatRule.EveryXDays,
       repeatValue: 1,
       durationInMins: 60,
-      startTime: sleepScheduled.getEndTime(),
+      startTime: sleepScheduled.getEndTime()??getTodayFormated(),
       isParentTask: true,
       parentId: 10
     ));//task
@@ -317,6 +357,7 @@ class _QuickStartPageState extends State<QuickStartPage> {
       valueMultiply: false,
       name: activityEditingController.text,
       value: 1000,
+      color: Colors.red,
       parentCalendarId: 1010,
       id: 11,
       icon: Icons.work,
@@ -326,7 +367,7 @@ class _QuickStartPageState extends State<QuickStartPage> {
       repeatValue: 1,
       repeatRule: RepeatRule.EveryXDays,
       parentId: 11,
-      startTime: sleepScheduled.getEndTime().add(Duration(hours: 1)),
+      startTime: (sleepScheduled.getEndTime()??getTodayFormated()).add(Duration(hours: 1)),
     ));//activity
     await MyApp.dataModel.task(-1, Task(
       id: 12,
@@ -340,12 +381,12 @@ class _QuickStartPageState extends State<QuickStartPage> {
       isParentCalendar: true,
       checks: [],
       color: Colors.blue,
-      description: "ANSWER THESE QUESTIONS ON A PIECE OF PAPER!\N\N\N"
-          "Look at your calendar,Have you spend your week on the right things?\NWhy?\N"
+      description: "ANSWER THESE QUESTIONS ON A PIECE OF PAPER!\n\n\n"
+          "Look at your calendar,Have you spend your week on the right things?\nWhy?\n"
           "Did you followed your schedule?\nIf not, Why?\n"
-          "Look at your metrics!\nWere you focused?\nWas your time of great value today?\n"
+          "Look at your metrics!\nWere you focused?\nWas your time of great value today?\n\n"
           "So, are you happy with your current results?\nWhat you can change to do better?\n"
-          "How much did you spend on addictions?\n How can you become more disciplined to do less of them?\n"
+          "How much did you spend on addictions?\nHow can you become more disciplined to do less of them?\n"
           "What are you doing different from your role models and for those that accomplish your goals?\n"
           "How much time did you spend building something that no one asked for?\n"
           "If you had a heart attack tomorrow and have to work only 2 hours a day, what will you work on?\n"

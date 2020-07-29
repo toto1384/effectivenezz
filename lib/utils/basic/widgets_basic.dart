@@ -251,7 +251,7 @@ FlatButton getButton(String text,{int variant,@required Function onPressed}){
   );
 }
 
-getSwitchable({@required String text,bool disabled,@required bool checked,@required Function(bool) onCheckedChanged, @required bool isCheckboxOrSwitch}){
+Widget getSwitchable({@required String text,bool disabled,@required bool checked,@required Function(bool) onCheckedChanged, @required bool isCheckboxOrSwitch}){
   if(disabled ==null){
     disabled=false;
   }

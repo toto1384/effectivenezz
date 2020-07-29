@@ -13,6 +13,7 @@ void main() {
   runApp(
     DistivityRestartWidget(
       child: MaterialApp(
+        title: getTitle(),
           debugShowCheckedModeBanner: false,
           darkTheme: getAppDarkTheme(),
           themeMode: ThemeMode.dark,
@@ -20,6 +21,15 @@ void main() {
       )
     ),
   );
+}
+
+getTitle(){
+  if(MyApp.dataModel!=null){
+    if(MyApp.dataModel.currentPlaying!=null){
+      return "${MyApp.dataModel.currentPlaying} is Tracked";
+    }
+  }
+  return 'Effectivenezz';
 }
 
 class MyApp extends StatefulWidget {

@@ -12,6 +12,7 @@ import 'package:effectivenezz/utils/basic/values_utils.dart';
 import 'package:effectivenezz/utils/basic/widgets_basic.dart';
 import 'package:effectivenezz/utils/complex/widget_complex.dart';
 import 'package:effectivenezz/utils/date_n_strings.dart';
+import 'package:effectivenezz/utils/distivity_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -228,7 +229,7 @@ showAddEditObjectBottomSheet(
                     showHourValuePopup(context, value: object.value.toDouble(), isMultiply: object.valueMultiply, onSelectedValueAndBool: (v,i){
                       ss((){
                         object.value=v;
-                        object.isValueMultiply=i;
+                        object.valueMultiply=i;
                       });
                     });
                   },
@@ -365,6 +366,7 @@ showObjectDetailsBottomSheet(BuildContext context, dynamic object,DateTime selec
   showDistivityModalBottomSheet(context, (ctx,ss){
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Padding(
           padding: const EdgeInsets.all(15.0),
@@ -396,9 +398,14 @@ showObjectDetailsBottomSheet(BuildContext context, dynamic object,DateTime selec
             ],
           ),
         ),
-        getText(object.description),
         getDivider(),
-        getText("${formatDouble(object.value.toDouble())} \$/hour"),
+        getSubtitle('Description'),
+        Padding(
+          padding: const EdgeInsets.all(15),
+          child: getText(object.description),
+        ),
+        getDivider(),
+        getSubtitle("${(object is Task)?"Task":"Activity"} value: ${formatDouble(object.value.toDouble())} \$/hour"),
         ListTile(
           leading: getIcon(Icons.delete_outline),
           title: getText('Delete task'),
@@ -411,6 +418,22 @@ showObjectDetailsBottomSheet(BuildContext context, dynamic object,DateTime selec
                   MyApp.dataModel.findObjectIndexById(object), object, context, CUD.Delete,withScheduleds: true);
             }
             Navigator.pop(context);
+          },
+        ),
+        ListTile(
+          leading: getIcon(Icons.av_timer),
+          title: getText('See tracking history'),
+          onTap: (){
+            showDistivityModalBottomSheet(context, (ctx,ss){
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  getText("Tracked",textType: TextType.textTypeSubtitle),
+                  if(object.trackedStart.length==0)
+                    getEmptyView(context, "No timestamps",beginButton: false)
+                ]+getTrackedIntervalsWidget(context,object, object.color),
+              );
+            });
           },
         ),
 //        getSubtitle("Tracked"),
@@ -838,10 +861,10 @@ showAddEditCalendarBottomSheet(BuildContext context,{ECalendar eCalendar,int ind
             ),
             IconButton(
               icon: getIcon(Icons.send,size: TextType.textTypeSubtitle.size*1.5),
-              onPressed: (){
+              onPressed: ()async{
                 eCalendar.name=nameEditingController.text;
                 eCalendar.description= descriptionEditingController.text;
-                MyApp.dataModel.eCalendar(index, eCalendar, context, add?CUD.Create:CUD.Update);
+                await MyApp.dataModel.eCalendar(index, eCalendar, context, add?CUD.Create:CUD.Update);
                 Navigator.pop(context);
               },
             ),

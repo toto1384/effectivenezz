@@ -30,7 +30,7 @@ class NotificationHelper{
     notificationHelper.context=context;
 
     notificationHelper.flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-    var initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
+    var initializationSettingsAndroid = AndroidInitializationSettings('effectivenezz_logo');
     var initializationSettingsIOS = IOSInitializationSettings(
       requestSoundPermission: false,
       requestBadgePermission: false,
@@ -48,7 +48,9 @@ class NotificationHelper{
 
   void _configureSelectNotificationSubject() {
     selectNotificationSubject.stream.listen((String payload){
-      if(payload=='tracked') launchPage(context,PopupPage());
+      if(payload=='tracked') {
+        launchPage(context,PopupPage());
+      }
     });
   }
 

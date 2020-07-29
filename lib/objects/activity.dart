@@ -45,8 +45,7 @@ class Activity {
 
   Activity({ this.id, @required this.name,@required this.trackedStart,@required this.trackedEnd,
     @required this.parentCalendarId,this.description,@required this.value,
-    this.color,@required this.valueMultiply,this.icon,@required this.tags,this.blacklistedDates}){
-  }
+    this.color,@required this.valueMultiply,this.icon,@required this.tags,this.blacklistedDates});
 
   List<Scheduled> _scheduled = [];
 
@@ -116,7 +115,7 @@ class Activity {
       activityParentCalendarId: parentCalendarId,
       activityName:name,
       activityTrackedEnd:stringFromDateTimes(trackedEnd),
-      activityColor: color==null?Colors.white.value:color.value,
+      activityColor: color==null?MyApp.dataModel.findParentColor(this).value:color.value,
       activityDescription: description,
       activityId:id,
       activityIcon:icon!=null?icon.codePoint:null,

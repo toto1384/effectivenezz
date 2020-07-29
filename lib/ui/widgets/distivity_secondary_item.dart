@@ -42,7 +42,7 @@ class _DistivitySecondaryItemState extends State<DistivitySecondaryItem> with Af
         ),
         color: MyColors.color_black_darker,
       ),
-      width: MyApp.dataModel.screenWidth-100,
+      width: (MyApp.dataModel.screenWidth??400)-100,
       child: Padding(
         padding: const EdgeInsets.all(5),
         child: Row(
@@ -59,16 +59,18 @@ class _DistivitySecondaryItemState extends State<DistivitySecondaryItem> with Af
                   MyApp.dataModel.task(MyApp.dataModel.findObjectIndexById(MyApp.dataModel.currentPlaying), MyApp.dataModel.currentPlaying, context, CUD.Update);
                 },
               ),
-            Container(
-              constraints: BoxConstraints(maxWidth: 110),
-              child: GestureDetector(
-                  onTap: (){
-                    showReplacePlayableBottomSheet(context,MyApp.dataModel.currentPlaying);
-                  },
-                  child: Padding(
-                    padding: EdgeInsets.only(left: ((MyApp.dataModel.currentPlaying is Task)?0:20),top: 10,bottom: 10),
-                    child: getText(MyApp.dataModel.currentPlaying.name,color: MyApp.dataModel.currentPlaying.color,maxLines: 2),
-                  )
+            Flexible(
+              child: Container(
+                constraints: BoxConstraints(maxWidth: 110),
+                child: GestureDetector(
+                    onTap: (){
+                      showReplacePlayableBottomSheet(context,MyApp.dataModel.currentPlaying);
+                    },
+                    child: Padding(
+                      padding: EdgeInsets.only(left: ((MyApp.dataModel.currentPlaying is Task)?0:20),top: 10,bottom: 10),
+                      child: getText(MyApp.dataModel.currentPlaying.name,color: MyApp.dataModel.currentPlaying.color,maxLines: 2),
+                    )
+                ),
               ),
             ),
 

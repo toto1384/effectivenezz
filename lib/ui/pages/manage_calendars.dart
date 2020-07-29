@@ -1,4 +1,5 @@
 
+import 'package:after_layout/after_layout.dart';
 import 'package:effectivenezz/main.dart';
 import 'package:effectivenezz/ui/widgets/distivity_drawer.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
@@ -13,12 +14,22 @@ import 'package:flutter_svg/svg.dart';
 
 class ManageCalendars extends StatefulWidget {
   @override
-  _ManageCalendarsState createState() => _ManageCalendarsState();
+  ManageCalendarsState createState() => ManageCalendarsState();
 }
 
-class _ManageCalendarsState extends DistivityPageState<ManageCalendars> {
+class ManageCalendarsState extends DistivityPageState<ManageCalendars> with AfterLayoutMixin {
 
   ScrollController scrollController= ScrollController();
+
+  @override
+  void afterFirstLayout(BuildContext context) {
+    super.afterFirstLayout(context);
+    DistivityPageState.listCallback.listen((object, d) {
+      setState(() {
+
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

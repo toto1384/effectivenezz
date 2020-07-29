@@ -11,7 +11,7 @@ class PlatformSvg {
         alignment = Alignment.center,
         String semanticsLabel}) {
     if (kIsWeb) {
-      return Image.network("/assets/$assetName",
+      return Image.asset(assetName,
           width: width,
           height: height,
           fit: fit,

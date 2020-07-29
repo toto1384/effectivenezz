@@ -291,8 +291,10 @@ class DataModel{
         break;
       case CUD.Delete:
         tasks.remove(event);
-        if(event.id==currentPlaying.id){
-          setPlaying(context, null);
+        if(currentPlaying!=null){
+          if(event.id==currentPlaying.id){
+            setPlaying(context, null);
+          }
         }
         await databaseHelper.deleteTask(event.id);
         if(withScheduleds){
@@ -312,16 +314,11 @@ class DataModel{
     switch(cud){
       case CUD.Create:
         activities.add(event);
-        print(1);
         int addedId = await databaseHelper.insertActivity(event);
-        print(2);
         activities[activities.length-1].id= addedId;
-        print(3);
         if(addWith!=null){
           addWith.parentId=addedId;
-          print(4);
           await scheduled(0, addWith, context, cud);
-          print(5);
         }
         DistivityPageState.listCallback.notifyAdd(event);
         break;
@@ -340,8 +337,10 @@ class DataModel{
           }
         }
         activities.remove(event);
-        if(event.id==currentPlaying.id){
-          setPlaying(context, null);
+        if(currentPlaying!=null){
+          if(event.id==currentPlaying.id){
+            setPlaying(context, null);
+          }
         }
         await databaseHelper.deleteActivity(event.id);
         if(withScheduleds){
@@ -361,10 +360,12 @@ class DataModel{
       case CUD.Create:
         eCalendars.add(eCalendar);
         eCalendars[eCalendars.length-1].id= await databaseHelper.insertECalendar(eCalendar);
+        DistivityPageState.listCallback.notifyAdd(eCalendar);
         break;
       case CUD.Update:
         eCalendars[index]=eCalendar;
         await databaseHelper.updateECalendar(eCalendar);
+        DistivityPageState.listCallback.notifyUpdated(eCalendar);
         break;
       case CUD.Delete:
         for(int i = 0 ; i<tasks.length ; i++){
@@ -379,9 +380,9 @@ class DataModel{
         }
         eCalendars.removeAt(index);
         await databaseHelper.deleteECalendar(eCalendar.id);
+        DistivityPageState.listCallback.notifyRemoved(eCalendar);
         break;
     }
-    MyAppState.ss(context);
   }
 
   //SIMPLIFIED CRUD METHODS

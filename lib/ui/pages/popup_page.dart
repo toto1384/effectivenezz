@@ -34,34 +34,40 @@ class _PopupPageState extends DistivityPageState<PopupPage> {
         child: Scaffold(
           backgroundColor: Colors.transparent,
           body: Center(
-            child: Card(
-              elevation: 20,
-              shape: getShape(),
-              color: MyColors.color_black_darker,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  getSubtitle("Record new entry"),
-                  Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Container(
-                      constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height/2,maxWidth: MyApp.dataModel.screenWidth-100),
-                      child: SingleChildScrollView(
-                        child: getSortByCalendarListView(context, getTodayFormated(),areMinimal: true,onSelected: (e){
-                              MyApp.dataModel.setPlaying(context, e);
-                              MinimizeApp.minimizeApp();
-                              Navigator.pop(context);
-                          launchPage(context, TrackPage());
-                        },scrollable: false),
+            child: GestureDetector(
+              onTap: (){},
+              child: Card(
+                elevation: 20,
+                shape: getShape(),
+                color: MyColors.color_black_darker,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: getSubtitle("Record new entry"),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Container(
+                        constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height/2,maxWidth: MyApp.dataModel.screenWidth-100),
+                        child: SingleChildScrollView(
+                          child: getSortByCalendarListView(context, getTodayFormated(),areMinimal: true,onSelected: (e){
+                                MyApp.dataModel.setPlaying(context, e);
+                                MinimizeApp.minimizeApp();
+                                Navigator.pop(context);
+                            launchPage(context, TrackPage());
+                          },scrollable: false),
+                        ),
                       ),
                     ),
-                  ),
-                  if(MyApp.dataModel.currentPlaying!=null)
-                    Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: DistivitySecondaryItem(),
-                    ),
-                ],
+                    if(MyApp.dataModel.currentPlaying!=null)
+                      Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: DistivitySecondaryItem(),
+                      ),
+                  ],
+                ),
               ),
             ),
           ),

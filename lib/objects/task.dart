@@ -105,7 +105,7 @@ class Task{
       taskName:name,
       taskChecks:stringFromDateTimes(checks),
       taskTrackedEnd:stringFromDateTimes(trackedEnd),
-      taskColor: color==null?Colors.white.value:color.value,
+      taskColor: color==null?MyApp.dataModel.findParentColor(this).value:color.value,
       taskDescription: description,
       taskId:id,
       taskIsParentCalendar: isParentCalendar?1:0,

@@ -5,6 +5,7 @@ import 'package:effectivenezz/utils/basic/overflows_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:effectivenezz/utils/basic/widgets_basic.dart';
 import 'package:effectivenezz/utils/distivity_page.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -101,7 +102,7 @@ deleteDb(BuildContext context)async{
       yesString: "DELETE EVERYTHING",
       noString: "Cancel",
       onYesPressed: ()async{
-        MyApp.dataModel.notificationHelper.cancelAllNotifications();
+        if(!kIsWeb)MyApp.dataModel.notificationHelper.cancelAllNotifications();
         MyApp.dataModel.databaseHelper.deleteEveryThing().then((value) {
           showDistivityDialog(
               context,
