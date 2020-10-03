@@ -4,9 +4,9 @@
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:effectivenezz/main.dart';
 import 'package:effectivenezz/objects/name_value_object.dart';
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
-import 'package:effectivenezz/utils/basic/widgets_basic.dart';
 import 'package:effectivenezz/utils/date_n_strings.dart';
 import 'package:flutter/material.dart';
 
@@ -97,7 +97,7 @@ class PieChartState extends State<PieChart> {
                  },
                  child: Padding(
                    padding: const EdgeInsets.all(8.0),
-                   child: getText(text,isCentered: true),
+                   child: GText(text,isCentered: true),
                  ),
                ),
               ),

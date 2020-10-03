@@ -3,12 +3,13 @@ import 'dart:async';
 import 'package:after_layout/after_layout.dart';
 import 'package:effectivenezz/objects/activity.dart';
 import 'package:effectivenezz/objects/task.dart';
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gicon.dart';
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
 import 'package:effectivenezz/ui/widgets/specific/task_list_item.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
-import 'package:effectivenezz/utils/basic/widgets_basic.dart';
 import 'package:effectivenezz/utils/complex/overflows_complex.dart';
 import 'package:effectivenezz/utils/date_n_strings.dart';
 import 'package:flutter/material.dart';
@@ -68,33 +69,33 @@ class _ActivityListItemState extends State<ActivityListItem> with AfterLayoutMix
               leading: CircleAvatar(
                 maxRadius: 20,
                 backgroundColor: widget.activity.color,
-                child: getIcon(widget.activity.icon,color: getContrastColor(widget.activity.color)),
+                child: GIcon(widget.activity.icon,color: getContrastColor(widget.activity.color)),
               ),
               subtitle: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  getBasicLinedBorder(Padding(
+                  Card(child:Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4,vertical: 2),
-                    child: getText("${formatDouble(widget.activity.value.toDouble())}\$/h",textType: TextType.textTypeSubNormal,
+                    child: GText("${formatDouble(widget.activity.value.toDouble())}\$/h",textType: TextType.textTypeSubNormal,
                       color:  getValueColor(widget.activity.value)),
                   ),color: MyColors.color_black_darker),
                   Visibility(
                     visible: childs.length!=0,
-                    child: getBasicLinedBorder(Padding(
+                    child: Card(child:Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4,vertical: 2),
-                      child: getText("${childs.length} childs",textType: TextType.textTypeSubNormal),
+                      child: GText("${childs.length} childs",textType: TextType.textTypeSubNormal),
                     ),color: MyColors.color_black_darker),
                   ),
                   Visibility(
                     visible: widget.activity.description!='',
-                    child: getBasicLinedBorder(Padding(
+                    child: Card(child:Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4,vertical: 2),
-                      child: getIcon(Icons.receipt,size: 10),
+                      child: GIcon(Icons.receipt,size: 10),
                     ),color: MyColors.color_black_darker),
                   ),
                 ],
               ),
-              title: getText(widget.activity.name),
+              title: GText(widget.activity.name),
               onLongPress: ()=>showAddEditObjectBottomSheet(
                   context, selectedDate: widget.selectedDate,
                   add: false,index: MyApp.dataModel.findObjectIndexById(widget.activity),
@@ -107,7 +108,7 @@ class _ActivityListItemState extends State<ActivityListItem> with AfterLayoutMix
                   children: <Widget>[
                     Padding(
                       padding: const EdgeInsets.all(4.0),
-                      child: getBasicLinedBorder(InkWell(
+                      child: Card(child:InkWell(
                         onTap: (){
                           MyApp.dataModel.setPlaying(context, MyApp.dataModel.isPlaying(widget.activity)?null:widget.activity);
                           ifStartTimer();
@@ -117,8 +118,8 @@ class _ActivityListItemState extends State<ActivityListItem> with AfterLayoutMix
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
-                              getIcon(MyApp.dataModel.isPlaying(widget.activity)?Icons.stop:Icons.play_arrow),
-                              getText(getTextFromDuration(widget.activity.getTimeLeft(context))),
+                              GIcon(MyApp.dataModel.isPlaying(widget.activity)?Icons.stop:Icons.play_arrow),
+                              GText(getTextFromDuration(widget.activity.getTimeLeft(context))),
                             ],
                           ),
                         ),
@@ -127,7 +128,7 @@ class _ActivityListItemState extends State<ActivityListItem> with AfterLayoutMix
                     Visibility(
                       visible: false,
                       child: IconButton(
-                        icon: getIcon(includeChilds?Icons.arrow_drop_up:Icons.arrow_drop_down),
+                        icon: GIcon(includeChilds?Icons.arrow_drop_up:Icons.arrow_drop_down),
                         onPressed: (){
                           setState(() {
                             includeChilds=!includeChilds;

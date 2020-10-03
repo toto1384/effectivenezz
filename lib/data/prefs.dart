@@ -41,10 +41,32 @@ class Prefs{
   }
 
 
+  Future<bool> isFirstTime(String page)async{
+    bool toreturn =((sharedPreferences.getBool(_PrefsValues.firstTime+page))??true);
+    if(toreturn==true){
+      await sharedPreferences.setBool(_PrefsValues.firstTime+page, false);
+    }
+    return toreturn;
+  }
+
+
+  getPromoCode(){
+    String intSelectedView =sharedPreferences.getString(_PrefsValues.promoCode)??"";
+    return intSelectedView;
+  }
+
+  setPromoCode(String selectedView)async{
+    await sharedPreferences.setString(_PrefsValues.promoCode, selectedView);
+  }
+
 
 }
 
 class _PrefsValues{
   static final heightPerMinute='hpm';
   static final selectedView = "sv";
+  
+  static final promoCode ='pc';
+
+  static final firstTime="ft";
 }

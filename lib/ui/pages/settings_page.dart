@@ -1,9 +1,10 @@
 import 'package:effectivenezz/ui/pages/users_n_data.dart';
-import 'package:effectivenezz/ui/widgets/distivity_drawer.dart';
+import 'package:effectivenezz/ui/widgets/basics/distivity_drawer.dart';
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gicon.dart';
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
+import 'package:effectivenezz/ui/widgets/specific/gwidgets/gapp_bar.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
-import 'package:effectivenezz/utils/basic/widgets_basic.dart';
-import 'package:effectivenezz/utils/complex/widget_complex.dart';
 import 'package:effectivenezz/utils/distivity_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -26,41 +27,41 @@ class _SettingsPageState extends DistivityPageState<SettingsPage>{
       child: Scaffold(
         key: scaffoldKey,
         drawer: DistivityDrawer(),
-        appBar: getAppBar('Settings',context: context,drawerEnabled: true),
+        appBar: GAppBar('Settings',drawerEnabled: true),
         body: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: MyApp.dataModel.driveHelper!=null?<Widget>[
               ListTile(
-                leading: getIcon(Icons.person),
-                title: getText('Users and Data'),
+                leading: GIcon(Icons.person),
+                title: GText('Users and Data'),
                 onTap: (){
                   launchPage(context, UsersNData());
                 },
-                trailing: getIcon(Icons.chevron_right),
+                trailing: GIcon(Icons.chevron_right),
               ),
-              getDivider(),
+              Divider(),
               if(!kIsWeb)
                 ListTile(
-                  leading: getIcon(Icons.feedback),
-                  title: getText("Send feedback"),
+                  leading: GIcon(Icons.feedback),
+                  title: GText("Send feedback"),
                   onTap: (){
                     MyApp.dataModel.launchFeedback(context);
                   },
                 ),
               if(!kIsWeb)
                 ListTile(
-                  leading: getIcon(Icons.star_half),
-                  title: getText("Rate us :))"),
-                  trailing: getIcon(Icons.chevron_right),
+                  leading: GIcon(Icons.star_half),
+                  title: GText("Rate us :))"),
+                  trailing: GIcon(Icons.chevron_right),
                   onTap: (){
                     LaunchReview.launch();
                   },
                 ),
               ListTile(
-                leading: getIcon(Icons.info_outline),
-                title: getText("About this app"),
+                leading: GIcon(Icons.info_outline),
+                title: GText("About this app"),
                 onTap: (){
                   showAboutDialog(
                     context: context,

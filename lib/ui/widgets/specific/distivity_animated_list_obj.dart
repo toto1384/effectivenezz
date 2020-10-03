@@ -1,11 +1,9 @@
-
-
 import 'package:effectivenezz/objects/activity.dart';
 import 'package:effectivenezz/objects/task.dart';
-import 'package:effectivenezz/ui/widgets/distivity_animated_list.dart';
+import 'package:effectivenezz/ui/widgets/basics/distivity_animated_list.dart';
+import 'package:effectivenezz/ui/widgets/specific/gwidgets/gempty_view.dart';
 import 'package:effectivenezz/ui/widgets/specific/task_list_item.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
-import 'package:effectivenezz/utils/complex/widget_complex.dart';
 import 'package:flutter/material.dart';
 import 'package:sticky_headers/sticky_headers/widget.dart';
 
@@ -57,8 +55,8 @@ class _DistivityAnimatedListObjState extends State<DistivityAnimatedListObj> {
     }
 
 
-    return !visible ? getEmptyView(
-        context, "No upcoming tasks and activities") : (widget.scrollable??true)?
+    return !visible ? GEmptyView(
+        "No upcoming tasks and activities") : (widget.scrollable??true)?
     ListView.builder(itemCount: widget.headerItemCount+(widget.additionalButton!=null?1:0), itemBuilder:(ctx, ind)=>logik(ind),controller: widget.scrollController,)
         :Column(children: List.generate(widget.headerItemCount+(widget.additionalButton!=null?1:0), logik),);
   }

@@ -1,7 +1,7 @@
 import 'package:effectivenezz/ui/pages/track_page.dart';
-import 'package:effectivenezz/ui/widgets/distivity_restart_widget.dart';
+import 'package:effectivenezz/ui/widgets/basics/distivity_restart_widget.dart';
+import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
-import 'package:effectivenezz/utils/basic/widgets_basic.dart';
 import 'package:effectivenezz/utils/distivity_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,7 +15,46 @@ void main() {
       child: MaterialApp(
         title: getTitle(),
           debugShowCheckedModeBanner: false,
-          darkTheme: getAppDarkTheme(),
+          darkTheme: ThemeData(
+            fontFamily: 'Montserrat',
+            unselectedWidgetColor: Colors.white,
+            canvasColor: MyColors.color_black_darker,
+            accentColor: Colors.white,
+            cursorColor: Colors.white,
+            snackBarTheme: SnackBarThemeData(
+              shape: getShape(subtleBorder: true),
+              backgroundColor: MyColors.color_black,
+            ),
+            dividerTheme: DividerThemeData(
+                endIndent: 20,indent: 20,color: Colors.white,space: 20,thickness: 1.5
+            ),
+            cardTheme: CardTheme(
+              shape: getShape(smallRadius: false),
+              elevation: 0,
+              color: MyColors.color_black,
+            ),
+            sliderTheme: SliderThemeData(
+              activeTrackColor: MyColors.color_primary,
+              inactiveTrackColor: MyColors.color_primary.withOpacity(0.3),
+              thumbColor: MyColors.color_primary,
+              trackHeight: 8,
+              overlayColor: MyColors.color_primary.withOpacity(0.3),
+              valueIndicatorColor: MyColors.color_black_darker,
+              activeTickMarkColor: Colors.transparent,
+              inactiveTickMarkColor: Colors.transparent,
+            ),
+            primaryColor: Colors.white,
+            primaryColorDark: Colors.white,
+            scaffoldBackgroundColor: MyColors.color_black_darker,
+            iconTheme: IconThemeData(
+                color: Colors.white
+            ),
+            bottomAppBarColor: MyColors.color_black_darker,
+            popupMenuTheme: PopupMenuThemeData(
+              shape: getShape(),
+              color: MyColors.color_black_darker,
+            ),
+          ),
           themeMode: ThemeMode.dark,
           home: MyApp(),
       )
@@ -53,14 +92,13 @@ class MyAppState extends State<MyApp> {
     }
   }
 
-  init()async{
-    if(MyApp.dataModel==null){
-      MyApp.dataModel=await DataModel.init(context);
-    }
-    return true;
-  }
+  Future<DataModel> futureDM ;
 
-  int progress = 0;
+  @override
+  void initState() {
+    super.initState();
+    futureDM= DataModel.init(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,9 +108,13 @@ class MyAppState extends State<MyApp> {
       systemNavigationBarColor: MyColors.color_black_darker
     ));
     return FutureBuilder(
-        future: init(),
+        future: futureDM,
         builder: (ctx,AsyncSnapshot snap){
           if(snap.hasData){
+            if(MyApp.dataModel==null){
+              MyApp.dataModel=snap.data;
+              MyApp.dataModel.screenWidth=MediaQuery.of(context).size.width;
+            }
             return TrackPage();
           }else{
             return Scaffold(body: Center(child: Column(

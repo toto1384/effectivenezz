@@ -2,11 +2,12 @@ import 'dart:async';
 
 import 'package:after_layout/after_layout.dart';
 import 'package:effectivenezz/objects/task.dart';
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gicon.dart';
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
-import 'package:effectivenezz/utils/basic/widgets_basic.dart';
 import 'package:effectivenezz/utils/complex/overflows_complex.dart';
 import 'package:effectivenezz/utils/date_n_strings.dart';
 import 'package:flutter/material.dart';
@@ -54,7 +55,7 @@ class _TaskListItemState extends State<TaskListItem> with AfterLayoutMixin{
           }
         },
         leading: GestureDetector(
-          child: getIcon(widget.task.isCheckedOnDate(widget.selectedDate??getTodayFormated())?Icons.check_circle_outline:Icons.radio_button_unchecked,color: widget.task.color,size: 35),
+          child: GIcon(widget.task.isCheckedOnDate(widget.selectedDate??getTodayFormated())?Icons.check_circle_outline:Icons.radio_button_unchecked,color: widget.task.color,size: 35),
           onTap: (){
             if(widget.task.isCheckedOnDate(widget.selectedDate??getTodayFormated())){
               widget.task.unCheckOnDate(widget.selectedDate??getTodayFormated());
@@ -67,21 +68,21 @@ class _TaskListItemState extends State<TaskListItem> with AfterLayoutMixin{
         subtitle: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            getBasicLinedBorder(Padding(
+            Card(child:Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4,vertical: 2),
-              child: getText("${formatDouble(widget.task.value.toDouble())}\$/h",textType: TextType.textTypeSubNormal,
+              child: GText("${formatDouble(widget.task.value.toDouble())}\$/h",textType: TextType.textTypeSubNormal,
                 color:  getValueColor(widget.task.value)),
             ),color: MyColors.color_black_darker),
             Visibility(
               visible: widget.task.description!='',
-              child: getBasicLinedBorder(Padding(
+              child: Card(child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4,vertical: 2),
-                child: getIcon(Icons.receipt,size: 10),
+                child: GIcon(Icons.receipt,size: 10),
               ),color: MyColors.color_black_darker),
             ),
           ],
         ),
-        title: getText(widget.task.name),
+        title: GText(widget.task.name),
         onLongPress: ()=>showAddEditObjectBottomSheet(
             context, selectedDate: widget.selectedDate,
             add: false,index: MyApp.dataModel.findObjectIndexById(widget.task),
@@ -91,7 +92,7 @@ class _TaskListItemState extends State<TaskListItem> with AfterLayoutMixin{
           visible: !(widget.minimal??false),
           child: Padding(
             padding: const EdgeInsets.all(4),
-            child: getBasicLinedBorder(GestureDetector(
+            child: Card(child:GestureDetector(
               onTap: (){
                 MyApp.dataModel.setPlaying(context, MyApp.dataModel.currentPlaying==(widget.task)?null:widget.task);
                 ifStartTimer();
@@ -101,8 +102,8 @@ class _TaskListItemState extends State<TaskListItem> with AfterLayoutMixin{
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    getIcon(MyApp.dataModel.currentPlaying==(widget.task)?Icons.stop:Icons.play_arrow),
-                    getText(getTextFromDuration(widget.task.getTimeLeft(context))),
+                    GIcon(MyApp.dataModel.currentPlaying==(widget.task)?Icons.stop:Icons.play_arrow),
+                    GText(getTextFromDuration(widget.task.getTimeLeft(context))),
                   ],
                 ),
               ),

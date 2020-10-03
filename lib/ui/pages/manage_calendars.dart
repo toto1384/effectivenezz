@@ -1,12 +1,13 @@
 
 import 'package:after_layout/after_layout.dart';
 import 'package:effectivenezz/main.dart';
-import 'package:effectivenezz/ui/widgets/distivity_drawer.dart';
+import 'package:effectivenezz/ui/widgets/basics/distivity_drawer.dart';
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gicon.dart';
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
+import 'package:effectivenezz/ui/widgets/specific/gwidgets/gapp_bar.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
-import 'package:effectivenezz/utils/basic/widgets_basic.dart';
 import 'package:effectivenezz/utils/complex/overflows_complex.dart';
-import 'package:effectivenezz/utils/complex/widget_complex.dart';
 import 'package:effectivenezz/utils/distivity_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -38,14 +39,14 @@ class ManageCalendarsState extends DistivityPageState<ManageCalendars> with Afte
         child: Scaffold(
           key: scaffoldKey,
           drawer: DistivityDrawer(),
-          appBar: getAppBar("Manage Calendars",context: context,drawerEnabled: true),
+          appBar: GAppBar("Manage Calendars",drawerEnabled: true),
           body: MyApp.dataModel.eCalendars.length!=0?ListView.builder(itemCount: MyApp.dataModel.eCalendars.length,itemBuilder: (ctx,ind){
             return ListTile(
               leading: CircleAvatar(
               backgroundColor: MyApp.dataModel.eCalendars[ind].color,
                 maxRadius: 15,
               ),
-              title: getText(MyApp.dataModel.eCalendars[ind].name),
+              title: GText(MyApp.dataModel.eCalendars[ind].name),
               onTap: (){
                 showAddEditCalendarBottomSheet(context,eCalendar: MyApp.dataModel.eCalendars[ind],index: ind,add: false);
               },
@@ -59,7 +60,7 @@ class ManageCalendarsState extends DistivityPageState<ManageCalendars> with Afte
                   height: MyApp.dataModel.screenWidth-50,
                   child: SvgPicture.asset(AssetsPath.emptyView)
                 ),
-                getText('No calendars')
+                GText('No calendars')
               ],
             ),
           ),
@@ -67,7 +68,7 @@ class ManageCalendarsState extends DistivityPageState<ManageCalendars> with Afte
             onPressed: (){
               showAddEditCalendarBottomSheet(context,add: true);
             },
-            child: getIcon(Icons.add),
+            child: GIcon(Icons.add),
             backgroundColor: MyColors.color_black,
           ),
         ),

@@ -1,7 +1,7 @@
-import 'package:effectivenezz/ui/widgets/distivity_drawer.dart';
+import 'package:effectivenezz/ui/widgets/basics/distivity_drawer.dart';
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
+import 'package:effectivenezz/ui/widgets/specific/gwidgets/gapp_bar.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
-import 'package:effectivenezz/utils/basic/widgets_basic.dart';
-import 'package:effectivenezz/utils/complex/widget_complex.dart';
 import 'package:effectivenezz/utils/distivity_page.dart';
 import 'package:flutter/material.dart';
 
@@ -20,8 +20,8 @@ class _TimeDoctorPageState extends DistivityPageState<TimeDoctorPage> {
       child: Scaffold(
         key: scaffoldKey,
         drawer: DistivityDrawer(),
-        body: Center(child: getText("Time doctor will be implemented in a future release")),
-        appBar: getAppBar("Time doctor",context: context,drawerEnabled: true),
+        body: Center(child: GText("Time doctor will be implemented in a future release")),
+        appBar: GAppBar("Time doctor",drawerEnabled: true),
       ),
     );
   }

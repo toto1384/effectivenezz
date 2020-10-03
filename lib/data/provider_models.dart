@@ -2,6 +2,7 @@
 
 import 'dart:io';
 
+import 'package:effectivenezz/data/database_helper.dart';
 import 'package:effectivenezz/data/notifications.dart';
 import 'package:effectivenezz/data/web_db.dart';
 import 'package:effectivenezz/objects/activity.dart';
@@ -10,6 +11,7 @@ import 'package:effectivenezz/objects/scheduled.dart';
 import 'package:effectivenezz/objects/tag.dart';
 import 'package:effectivenezz/objects/task.dart';
 import 'package:effectivenezz/objects/timestamp.dart';
+import 'package:effectivenezz/ui/pages/quick_start_page.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:effectivenezz/utils/distivity_page.dart';
@@ -20,11 +22,9 @@ import 'package:neat_periodic_task/neat_periodic_task.dart';
 
 import '../main.dart';
 import 'database.dart';
-import 'database_helper.dart';
-import 'google_drive.dart';
+import 'package:effectivenezz/data/drive_helper.dart';
 import 'prefs.dart';
 import 'package:flutter/services.dart';
-import 'package:effectivenezz/ui/pages/welcome_page.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
 
 class DataModel{
@@ -36,7 +36,7 @@ class DataModel{
   double screenWidth=400;
 
   Prefs prefs;
-  DriveHelper driveHelper;
+  GoogleDriveHelper driveHelper;
   NotificationHelper notificationHelper;
 
   dynamic currentPlaying;
@@ -50,30 +50,28 @@ class DataModel{
   static Future<DataModel> init(BuildContext context)async{
     DataModel dataModel = DataModel();
     print(1);
-    dataModel.screenWidth=MediaQuery.of(context).size.width;
-    dataModel.databaseHelper = (kIsWeb?WebDb():await MobileDB.getDatabase(context));
-    dataModel.prefs = await Prefs.getInstance();
     print(2);
-    dataModel.driveHelper= await DriveHelper.init(context);
+    dataModel.databaseHelper = (kIsWeb?WebDb():await MobileDB.getDatabase(context));
     print(3);
+    dataModel.prefs = await Prefs.getInstance();
+    print(4);
+    dataModel.driveHelper= await GoogleDriveHelper.init(context,dataModel.prefs);
+    print(5);
     dataModel.scheduleds= await dataModel.databaseHelper.queryAllScheduled();
     dataModel.tasks=await dataModel.databaseHelper.queryAllTasks();
     dataModel.activities = await dataModel.databaseHelper.queryAllActivities();
     dataModel.eCalendars = await dataModel.databaseHelper.queryAllECalendars();
     dataModel.tags=await dataModel.databaseHelper.queryAllTags();
-    print(4);
-    dataModel.populatePlaying();
-    print(5);
-    if(!kIsWeb)dataModel.initNotificationsWithCorrectContext(context);
     print(6);
+    dataModel.populatePlaying();
+    print(7);
+    if(!kIsWeb)dataModel.initNotificationsWithCorrectContext(context);
 
     if(!kIsWeb)dataModel.scheduleEveryDay(context);
-    print(7);
 
     if(!kIsWeb)dataModel.setupDrift();
-    print(8);
 
-
+    print(10);
     return dataModel;
   }
 
@@ -92,7 +90,7 @@ class DataModel{
     if(driveHelper.currentUser!=null){
       platform.invokeMethod('showConversationActivity',);
     }else{
-      launchPage(context,WelcomePage(driveHelper));
+      launchPage(context,QuickStartPage(driveHelper));
     }
   }
 

@@ -50,8 +50,7 @@ class Task{
   Task({this.id, @required this.name,@required this.trackedEnd,@required this.trackedStart,
     @required this.parentId,this.description,@required this.isParentCalendar,
     @required this.value, this.color,@required this.checks,@required this.valueMultiply,
-    @required this.tags,this.blackListedDates}){
-  }
+    @required this.tags,this.blackListedDates});
 
 
   static List<int> tagsFromString(String tags){

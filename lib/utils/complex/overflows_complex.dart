@@ -4,15 +4,24 @@ import 'package:effectivenezz/objects/activity.dart';
 import 'package:effectivenezz/objects/calendar.dart';
 import 'package:effectivenezz/objects/scheduled.dart';
 import 'package:effectivenezz/objects/task.dart';
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gbutton.dart';
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gicon.dart';
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gswitchable.dart';
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext_field.dart';
+import 'package:effectivenezz/ui/widgets/lists/gsort_by_calendar_list_view.dart';
+import 'package:effectivenezz/ui/widgets/specific/gwidgets/dates/gtracked_intervals_widget.dart';
+import 'package:effectivenezz/ui/widgets/specific/gwidgets/gempty_view.dart';
+import 'package:effectivenezz/ui/widgets/specific/gwidgets/ginfo_icon.dart';
+import 'package:effectivenezz/ui/widgets/specific/gwidgets/gtab_bar.dart';
+import 'package:effectivenezz/ui/widgets/specific/gwidgets/scheduled/gschedule_editor.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/overflows_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
 import 'package:effectivenezz/utils/basic/widgets_basic.dart';
-import 'package:effectivenezz/utils/complex/widget_complex.dart';
 import 'package:effectivenezz/utils/date_n_strings.dart';
-import 'package:effectivenezz/utils/distivity_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -84,7 +93,7 @@ showAddEditObjectBottomSheet(
               Flexible(
                 child: Padding(
                   padding: const EdgeInsets.all(7),
-                  child: getTextField(
+                  child: GTextField(
                       nameEditingController, hint: 'Name goes here',
                       textInputType: TextInputType.text,variant: 2,textType: TextType.textTypeSubtitle),
                 ),
@@ -92,7 +101,7 @@ showAddEditObjectBottomSheet(
               Padding(
                 padding: const EdgeInsets.all(7),
                 child: IconButton(
-                  icon: getIcon(Icons.send,size: TextType.textTypeSubtitle.size*1.5),
+                  icon: GIcon(Icons.send,size: TextType.textTypeSubtitle.size*1.5),
                   onPressed: (){
                     if(scheduled.durationInMins<0){
                       Fluttertoast.showToast(
@@ -127,7 +136,7 @@ showAddEditObjectBottomSheet(
                 maxRadius: 15,
                 backgroundColor: MyApp.dataModel.findParentColor(object),
               ),
-              title: getText(MyApp.dataModel.findParentName(object)),
+              title: GText(MyApp.dataModel.findParentName(object)),
               onTap: (){
                 showSelectParentBottomSheet(context, taskOrActivity: object, onSelected: (i,b){
                   ss((){
@@ -164,7 +173,7 @@ showAddEditObjectBottomSheet(
           if(object is Activity)
             ListTile(
               leading: CircleAvatar(
-                child: getIcon(object.icon??Icons.not_interested,color: getContrastColor(object.color??Colors.white),size: 18),
+                child: GIcon(object.icon??Icons.not_interested,color: getContrastColor(object.color??Colors.white),size: 18),
                 backgroundColor: object.color??Colors.white,
                 maxRadius: 15,
               ),
@@ -176,27 +185,27 @@ showAddEditObjectBottomSheet(
                     iconPackMode: IconPack.material,
                     backgroundColor: MyColors.color_black,
                     iconColor: Colors.white,
-                    closeChild: getButton("Close",onPressed: ()=>Navigator.pop(context))
+                    closeChild: GButton("Close",onPressed: ()=>Navigator.pop(context))
 
                 ).then((value) => ss((){
                   object.icon=value;
                 }));
               },
-              title: getText('Set Icon'),
+              title: GText('Set Icon'),
             ),
 
-          getDivider(),
+          Divider(),
           getSubtitle('Schedule'+(object is Task?' task':' activity')),
-          scheduledEditor(context, scheduled, (sc){
+          GScheduleEditor(scheduled, (sc){
             ss((){
               scheduled=sc;
             });
           }),
-          getDivider(),
+          Divider(),
           ExpansionTile(
             title: Padding(
               padding: const EdgeInsets.all(7),
-              child: getText('Advanced',textType: TextType.textTypeSubtitle,underline: true),
+              child: GText('Advanced',textType: TextType.textTypeSubtitle,underline: true),
             ),
             children: <Widget>[
               Padding(
@@ -206,7 +215,7 @@ showAddEditObjectBottomSheet(
                     maxRadius: 15,
                     backgroundColor: object.color??Colors.white,
                   ),
-                  title: getText('Set Color'),
+                  title: GText('Set Color'),
                   onTap: (){
                     showEditColorBottomSheet(context,object.color??MyApp.dataModel.findParentColor(object),(col){
                       ss((){
@@ -222,9 +231,9 @@ showAddEditObjectBottomSheet(
                   leading: CircleAvatar(
                     maxRadius: 15,
                     backgroundColor: object.color??Colors.white,
-                    child: getIcon(Icons.attach_money,color: getContrastColor(object.color)),
+                    child: GIcon(Icons.attach_money,color: getContrastColor(object.color)),
                   ),
-                  title: getText('Set value(${formatDouble(object.value.toDouble()??0)}\$/hour)'),
+                  title: GText('Set value(${formatDouble(object.value.toDouble()??0)}\$/hour)'),
                   onTap: (){
                     showHourValuePopup(context, value: object.value.toDouble(), isMultiply: object.valueMultiply, onSelectedValueAndBool: (v,i){
                       ss((){
@@ -237,7 +246,7 @@ showAddEditObjectBottomSheet(
               ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 30,top: 10,right: 20,left: 20),
-                child: Center(child: getTextField(descriptionEditingController,textInputType: TextInputType.multiline,hint: 'Description goes here'),),
+                child: Center(child: GTextField(descriptionEditingController,textInputType: TextInputType.multiline,hint: 'Description goes here'),),
               ),
             ],
           ),
@@ -249,7 +258,7 @@ showAddEditObjectBottomSheet(
 showHourValuePopup(BuildContext context,{@required double value,@required bool isMultiply,@required Function(int,bool) onSelectedValueAndBool}){
   value=backwardFigures(value);
 
-  showDistivityDialog(context, actions: [getButton("Set", onPressed: (){
+  showDistivityDialog(context, actions: [GButton("Set", onPressed: (){
     onSelectedValueAndBool(figures(value??0.0).toInt(),isMultiply);
     Navigator.pop(context);
   })], title: "Set \$/hour", stateGetter: (ctx,ss){
@@ -337,14 +346,13 @@ showReplacePlayableBottomSheet(BuildContext context,dynamic currentPlaying){
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             getSubtitle(title),
-            getInfoIcon(
-                context, "By selecting any Task or Activity from this list, they will replace the timestamp from "+
+            GInfoIcon(
+                "By selecting any Task or Activity from this list, they will replace the timestamp from "+
                 "${getTimeName((currentPlaying.trackedStart??[getTodayFormated()]).last)} • ${getDateName((currentPlaying.trackedStart??[getTodayFormated()]).last)},"+
                 " that is currently occupied by: ${currentPlaying.name}"),
           ],
         ),
-        getSortByCalendarListView(
-            context,
+        GSortByCalendarListView(
             getTodayFormated(),
             areMinimal: true,
             scrollable: false,
@@ -375,7 +383,7 @@ showObjectDetailsBottomSheet(BuildContext context, dynamic object,DateTime selec
             children: <Widget>[
               if(!isActivity)
                 IconButton(
-                  icon: getIcon(object.isCheckedOnDate(selectedDate)?Icons.check_circle_outline:Icons.radio_button_unchecked),
+                  icon: GIcon(object.isCheckedOnDate(selectedDate)?Icons.check_circle_outline:Icons.radio_button_unchecked),
                   onPressed: (){
                     if(object.isCheckedOnDate(selectedDate)){
                       object.unCheckOnDate(selectedDate);
@@ -388,7 +396,7 @@ showObjectDetailsBottomSheet(BuildContext context, dynamic object,DateTime selec
               Flexible(
                 child: getSubtitle(object.name,isCentered: false),
               ),
-              getButton("Edit", onPressed: (){
+              GButton("Edit", onPressed: (){
                 Navigator.pop(context);
                 showAddEditObjectBottomSheet(
                     context, selectedDate: selectedDate,
@@ -398,17 +406,17 @@ showObjectDetailsBottomSheet(BuildContext context, dynamic object,DateTime selec
             ],
           ),
         ),
-        getDivider(),
+        Divider(),
         getSubtitle('Description'),
         Padding(
           padding: const EdgeInsets.all(15),
-          child: getText(object.description),
+          child: GText(object.description),
         ),
-        getDivider(),
+        Divider(),
         getSubtitle("${(object is Task)?"Task":"Activity"} value: ${formatDouble(object.value.toDouble())} \$/hour"),
         ListTile(
-          leading: getIcon(Icons.delete_outline),
-          title: getText('Delete task'),
+          leading: GIcon(Icons.delete_outline),
+          title: GText('Delete task'),
           onTap: (){
             if(isActivity){
               MyApp.dataModel.activity(
@@ -421,17 +429,18 @@ showObjectDetailsBottomSheet(BuildContext context, dynamic object,DateTime selec
           },
         ),
         ListTile(
-          leading: getIcon(Icons.av_timer),
-          title: getText('See tracking history'),
+          leading: GIcon(Icons.av_timer),
+          title: GText('See tracking history'),
           onTap: (){
             showDistivityModalBottomSheet(context, (ctx,ss){
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  getText("Tracked",textType: TextType.textTypeSubtitle),
+                  GText("Tracked",textType: TextType.textTypeSubtitle),
                   if(object.trackedStart.length==0)
-                    getEmptyView(context, "No timestamps",beginButton: false)
-                ]+getTrackedIntervalsWidget(context,object, object.color),
+                    GEmptyView("No timestamps",),
+                  GTrackedIntervalsWidget(object)
+                ],
               );
             });
           },
@@ -463,7 +472,7 @@ showEditTimestampsBottomSheet(BuildContext context, {@required dynamic object,in
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               getSubtitle("Edit timestamp"),
-              getButton("Done", onPressed: (){
+              GButton("Done", onPressed: (){
                 object.trackedStart[indexTimestamp]=startTime??object.trackedStart[indexTimestamp];
                 if(object.trackedStart.length==object.trackedEnd.length){
                   //not active
@@ -507,7 +516,7 @@ showEditTimestampsBottomSheet(BuildContext context, {@required dynamic object,in
             ],
           ),
         ),
-        getSwitchable(text: "Not finished yet(Active)", checked: endTime==null, onCheckedChanged: (b){
+        GSwitchable(text: "Not finished yet(Active)", checked: endTime==null, onCheckedChanged: (b){
           ss((){
             if(b){
               endTime=null;
@@ -552,10 +561,10 @@ showEditTimestampsBottomSheet(BuildContext context, {@required dynamic object,in
                                   },
                                   child: Padding(
                                     padding: const EdgeInsets.all(5.0),
-                                    child: getText(startTime==null?'No time':'${startTime.hour}:${startTime.minute}'),
+                                    child: GText(startTime==null?'No time':'${startTime.hour}:${startTime.minute}'),
                                   ),
                                 ),
-                                getText('•'),
+                                GText('•'),
                                 GestureDetector(
                                   onTap: (){
                                     showDistivityDatePicker(context,onDateSelected: (date){
@@ -572,7 +581,7 @@ showEditTimestampsBottomSheet(BuildContext context, {@required dynamic object,in
                                   },
                                   child: Padding(
                                     padding: const EdgeInsets.all(5.0),
-                                    child: getText(startTime==null?'No date':'${startTime.day}:${startTime.month}:${startTime.year}'),
+                                    child: GText(startTime==null?'No date':'${startTime.day}:${startTime.month}:${startTime.year}'),
                                   ),
                                 ),
                               ],
@@ -581,8 +590,8 @@ showEditTimestampsBottomSheet(BuildContext context, {@required dynamic object,in
                         ),
                       ),
                     ),
-                    getIcon(Icons.chevron_right),
-                    endTime==null?getText("Active"):Container(
+                    GIcon(Icons.chevron_right),
+                    endTime==null?GText("Active"):Container(
                       width: MyApp.dataModel.screenWidth/3,
                       child: Card(
                         shape: getShape(subtleBorder: false,smallRadius: false),
@@ -616,10 +625,10 @@ showEditTimestampsBottomSheet(BuildContext context, {@required dynamic object,in
                                   },
                                   child: Padding(
                                     padding: const EdgeInsets.all(5.0),
-                                    child: getText(startTime==null?'No time':'${endTime.hour}:${endTime.minute}'),
+                                    child: GText(startTime==null?'No time':'${endTime.hour}:${endTime.minute}'),
                                   ),
                                 ),
-                                getText('•'),
+                                GText('•'),
                                 GestureDetector(
                                   onTap: (){
                                     showDistivityDatePicker(context,onDateSelected: (date){
@@ -639,7 +648,7 @@ showEditTimestampsBottomSheet(BuildContext context, {@required dynamic object,in
                                   },
                                   child: Padding(
                                     padding: const EdgeInsets.all(5.0),
-                                    child: getText(startTime==null?'No date':'${endTime.day}:${endTime.month}:${endTime.year}'),
+                                    child: GText(startTime==null?'No date':'${endTime.day}:${endTime.month}:${endTime.year}'),
                                   ),
                                 ),
                               ],
@@ -653,9 +662,16 @@ showEditTimestampsBottomSheet(BuildContext context, {@required dynamic object,in
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: getText("Duration: ${getTextFromDuration((endTime??getTodayFormated()).difference(startTime??getTodayFormated()))} mins"),
+              padding: const EdgeInsets.all(5.0),
+              child: GText("Duration: ${getTextFromDuration((endTime??getTodayFormated()).difference(startTime??getTodayFormated()))} mins"),
             ),
+            Divider(),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: GText('Remember to not be so strict with this. We all make mistakes and a '
+                  '15-30 minute one will not be reflected in your calendar that much. It doesn\'t matter how'
+                  ' much we fail but when we succeed',textType: TextType.textTypeSubNormal,isCentered: true,),
+            )
           ],
         ),
 
@@ -686,7 +702,7 @@ showSelectParentBottomSheet(BuildContext context,{@required dynamic taskOrActivi
                 itemBuilder: (ctx){
                   return [
                     PopupMenuItem(
-                      child: getButton(cal?"Select from Activities":"Select from Calendars", onPressed: (){
+                      child: GButton(cal?"Select from Activities":"Select from Calendars", onPressed: (){
                         ss((){
                           cal=!cal;
                         });
@@ -695,7 +711,7 @@ showSelectParentBottomSheet(BuildContext context,{@required dynamic taskOrActivi
                     )
                   ];
                 },
-                icon: getIcon(Icons.more_vert),
+                icon: GIcon(Icons.more_vert),
 
               ),
             ),
@@ -714,14 +730,14 @@ showSelectParentBottomSheet(BuildContext context,{@required dynamic taskOrActivi
                     maxRadius: 15,
                     backgroundColor: MyApp.dataModel.eCalendars[i].color,
                   ),
-                  title: getText(MyApp.dataModel.eCalendars[i].name,),
+                  title: GText(MyApp.dataModel.eCalendars[i].name,),
                   onTap: (){
                     onSelected(MyApp.dataModel.eCalendars[i].id,true);
                     Navigator.pop(context);
                   },
                 ),
               ),
-          ):[getEmptyView(context, "No calendars. Try setting an activity as parent")]:
+          ):[GEmptyView( "No calendars. Try setting an activity as parent")]:
           MyApp.dataModel.activities.length!=0?List.generate(
               MyApp.dataModel.activities.length,
               (i) => Card(
@@ -733,14 +749,14 @@ showSelectParentBottomSheet(BuildContext context,{@required dynamic taskOrActivi
                     maxRadius: 15,
                     backgroundColor: MyApp.dataModel.activities[i].color,
                   ),
-                  title: getText(MyApp.dataModel.activities[i].name,),
+                  title: GText(MyApp.dataModel.activities[i].name,),
                   onTap: (){
                     onSelected(MyApp.dataModel.activities[i].id,false);
                     Navigator.pop(context);
                   },
                 ),
               )
-          ):[getEmptyView(context, "No activities. Try setting a calendar as a parent")],
+          ):[GEmptyView( "No activities. Try setting a calendar as a parent")],
         ),
       ],
     );
@@ -762,7 +778,7 @@ showRepeatEditBottomSheet(
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Center(child: getButton('Save', onPressed: (){
+        Center(child: GButton('Save', onPressed: (){
           int valueFromTEC = (int.parse(valueEditingController.text))??0;
           if(repeatRule==RepeatRule.EveryXWeeks){
             String toset = valueFromTEC.toString();
@@ -778,7 +794,7 @@ showRepeatEditBottomSheet(
           padding: const EdgeInsets.all(8.0),
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            child: getTabBar(
+            child: GTabBar(
               onSelected: (i,b){
                 if(b==true){
                   ss((){
@@ -799,13 +815,13 @@ showRepeatEditBottomSheet(
           ),
         ),
         if(repeatRule==RepeatRule.EveryXDays)
-          getTextField(valueEditingController,focus: true,textInputType: TextInputType.number),
+          GTextField(valueEditingController,focus: true,textInputType: TextInputType.number),
         if(repeatRule==RepeatRule.EveryXWeeks||repeatRule==RepeatRule.EveryXMonths)
           Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              getText('Will be supported in the future')
-//              getTextField(valueEditingController, width: 300),
+              GText('Will be supported in the future')
+//              GTextField(valueEditingController, width: 300),
 //              Padding(
 //                padding: const EdgeInsets.all(8.0),
 //                child: SingleChildScrollView(
@@ -817,7 +833,7 @@ showRepeatEditBottomSheet(
 //                        child: CircleAvatar(
 //                          backgroundColor: daysSelected.contains(i)?Colors.white:MyColors.color_black,
 //                          child:GestureDetector(
-//                            child: getText(getDayOfTheWeekStringShort(i)),
+//                            child: GText(getDayOfTheWeekStringShort(i)),
 //                            onTap: (){
 //                              if(daysSelected.contains(i)){
 //                                daysSelected.remove(i);
@@ -856,11 +872,11 @@ showAddEditCalendarBottomSheet(BuildContext context,{ECalendar eCalendar,int ind
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             Flexible(
-              child: getTextField(nameEditingController, hint: 'Name goes here',focus: true,
+              child: GTextField(nameEditingController, hint: 'Name goes here',focus: true,
                   variant: 2,textType: TextType.textTypeSubtitle),
             ),
             IconButton(
-              icon: getIcon(Icons.send,size: TextType.textTypeSubtitle.size*1.5),
+              icon: GIcon(Icons.send,size: TextType.textTypeSubtitle.size*1.5),
               onPressed: ()async{
                 eCalendar.name=nameEditingController.text;
                 eCalendar.description= descriptionEditingController.text;
@@ -875,7 +891,7 @@ showAddEditCalendarBottomSheet(BuildContext context,{ECalendar eCalendar,int ind
             maxRadius: 15,
             backgroundColor: eCalendar.color??Colors.white,
           ),
-          title: getText('Set color'),
+          title: GText('Set color'),
           onTap: (){
             showEditColorBottomSheet(context,eCalendar.color,(col){
               ss((){
@@ -885,8 +901,8 @@ showAddEditCalendarBottomSheet(BuildContext context,{ECalendar eCalendar,int ind
           },
         ),
         ListTile(
-          leading: getIcon(Icons.delete),
-          title: getText('Delete calendar'),
+          leading: GIcon(Icons.delete),
+          title: GText('Delete calendar'),
           onTap: (){
             if(!add){
               MyApp.dataModel.eCalendar(index, eCalendar, context, CUD.Delete);
@@ -894,11 +910,11 @@ showAddEditCalendarBottomSheet(BuildContext context,{ECalendar eCalendar,int ind
             Navigator.pop(context);
           },
         ),
-        getDivider(),
+        Divider(),
         Padding(
           padding: const EdgeInsets.only(bottom: 15,left: 10,right: 10),
           child: Center(
-            child: getTextField(descriptionEditingController, textInputType: TextInputType.multiline,hint: 'Description goes here'),
+            child: GTextField(descriptionEditingController, textInputType: TextInputType.multiline,hint: 'Description goes here'),
           ),
         )
       ],
@@ -912,32 +928,32 @@ showSelectViewBottomSheet(BuildContext context,SelectedView selectedView, Functi
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         ListTile(
-          leading: getIcon(Icons.calendar_view_day),
-          title: getText('Day view'),
+          leading: GIcon(Icons.calendar_view_day),
+          title: GText('Day view'),
           onTap: (){
             onSelectedView(SelectedView.Day);
             Navigator.pop(context);
           },
         ),
         ListTile(
-          leading: getIcon(Icons.calendar_today),
-          title: getText('3 Day view'),
+          leading: GIcon(Icons.calendar_today),
+          title: GText('3 Day view'),
           onTap: (){
             onSelectedView(SelectedView.ThreeDay);
             Navigator.pop(context);
           },
         ),
         ListTile(
-          leading: getIcon(Icons.calendar_today),
-          title: getText('Week view'),
+          leading: GIcon(Icons.calendar_today),
+          title: GText('Week view'),
           onTap: (){
             onSelectedView(SelectedView.Week);
             Navigator.pop(context);
           },
         ),
         ListTile(
-          leading: getIcon(Icons.calendar_today),
-          title: getText('Month view'),
+          leading: GIcon(Icons.calendar_today),
+          title: GText('Month view'),
           onTap: (){
             onSelectedView(SelectedView.Month);
             Navigator.pop(context);
@@ -952,10 +968,10 @@ showAllDriveSavesBottomSheet(BuildContext context)async{
   List<File> files = await MyApp.dataModel.driveHelper.getAllFiles(context);
 
   showDistivityModalBottomSheet(context, (ctx,ss){
-    return files.length==0?getEmptyView(context, "There are no saves on this account. Maybe you logged with the wrong account. If not contact us!"):Column(
+    return files.length==0?GEmptyView("There are no saves on this account. Maybe you logged with the wrong account. If not contact us!"):Column(
       mainAxisSize: MainAxisSize.min,
       children: List.generate(files.length, (i) => ListTile(
-        leading: getIcon(Icons.insert_drive_file),
+        leading: GIcon(Icons.insert_drive_file),
         onTap: (){
           showYesNoDialog(
               context,
@@ -967,9 +983,9 @@ showAllDriveSavesBottomSheet(BuildContext context)async{
                 MyApp.dataModel.driveHelper.downloadAndReplaceFile(context, files[i]);
               });
         },
-        title: getText(files[i].originalFilename+getStringFromDate(files[i].createdDate)),
+        title: GText(files[i].originalFilename+getStringFromDate(files[i].createdDate)),
         trailing: IconButton(
-          icon: getIcon(Icons.delete_forever),
+          icon: GIcon(Icons.delete_forever),
           onPressed: (){
             showYesNoDialog(context, title: "Delete this save?", text: "This action can not be undone", onYesPressed: ()async {
               await MyApp.dataModel.driveHelper.deleteFile(context, files[i]);

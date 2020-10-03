@@ -6,12 +6,13 @@ import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
-import 'package:effectivenezz/utils/basic/widgets_basic.dart';
 import 'package:effectivenezz/utils/complex/overflows_complex.dart';
 import 'package:effectivenezz/utils/date_n_strings.dart';
 import 'package:effectivenezz/utils/distivity_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import 'basics/gwidgets/gtext.dart';
 
 
 class DistivityCalendarWidget extends StatefulWidget {
@@ -53,7 +54,7 @@ class _DistivityCalendarWidgetState extends State<DistivityCalendarWidget> {
                   height: itemSize.height,
                   child: new Container(
                     child: new Center(
-                      child: getText(minuteOfDayToHourMinuteString(minuteOfDay,false)),
+                      child: GText(minuteOfDayToHourMinuteString(minuteOfDay,false)),
                     ),
                   ),
                 );
@@ -124,7 +125,7 @@ class _DistivityCalendarWidgetState extends State<DistivityCalendarWidget> {
                                     borderRadius: BorderRadius.circular(5),
                                   ),
                                   child: Center(
-                                    child: getText(forDayTimestamps[i].name,textType: TextType.textTypeNormal,maxLines: 2,sizeMultiplier: widget.heightPerMinute/5,color: getContrastColor(forDayTimestamps[i].color)),
+                                    child: GText(forDayTimestamps[i].name,textType: TextType.textTypeNormal,maxLines: 2,sizeMultiplier: widget.heightPerMinute/5,color: getContrastColor(forDayTimestamps[i].color)),
                                   ),
                                 ),
                               )
@@ -171,7 +172,7 @@ class _DistivityCalendarWidgetState extends State<DistivityCalendarWidget> {
                                       borderRadius: BorderRadius.circular(5),
                                     ),
                                     child: Center(
-                                      child: getText(forDayTimestamps[i].name,textType: TextType.textTypeNormal,maxLines: 2,sizeMultiplier: widget.heightPerMinute/5,color: getContrastColor(forDayTimestamps[i].color)),
+                                      child: GText(forDayTimestamps[i].name,textType: TextType.textTypeNormal,maxLines: 2,sizeMultiplier: widget.heightPerMinute/5,color: getContrastColor(forDayTimestamps[i].color)),
                                     ),
                                   ),
                                 ),

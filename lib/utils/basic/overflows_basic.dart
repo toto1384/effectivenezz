@@ -1,6 +1,11 @@
 import 'dart:async';
 
+
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gbutton.dart';
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gicon.dart';
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
+import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_duration_picker/flutter_duration_picker.dart';
@@ -20,10 +25,13 @@ showDistivityDialog(BuildContext context,{@required List<Widget> actions ,@requi
           backgroundColor: MyColors.color_black_darker,
           shape: getShape(),
           actions: [
-            getPadding(Row(
-                mainAxisSize: MainAxisSize.min,
-                children: actions
-              ),)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: (Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: actions
+                )),
+            )
           ],
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -45,15 +53,15 @@ showDistivityDialog(BuildContext context,{@required List<Widget> actions ,@requi
 
 showYesNoDialog(BuildContext context,{@required String title,@required String text,String yesString, String noString,@required Function onYesPressed}){
   showDistivityDialog(context, actions: [
-    getButton(yesString??"Yes", onPressed: (){
+    GButton(yesString??"Yes", onPressed: (){
       onYesPressed();
       Navigator.pop(context);
     }),
-    getButton(noString??"No!", onPressed: (){
+    GButton(noString??"No!", onPressed: (){
       Navigator.pop(context);
     },variant: 2)
   ], title: title, stateGetter: (ctx,ss){
-    return getText(text);
+    return GText(text);
   });
 }
 
@@ -89,10 +97,13 @@ showDistivityModalBottomSheet(BuildContext context, StateGetter stateGetter,{boo
                 children: <Widget>[
                   Visibility(
                     visible: !hideHandler,
-                    child: getPadding(IconButton(
-                      onPressed: (){Navigator.pop(context);},
-                      icon: getIcon(Icons.close),
-                    ),vertical: 15,horizontal: 0),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      child: (IconButton(
+                        onPressed: (){Navigator.pop(context);},
+                        icon: GIcon(Icons.close),
+                      )),
+                    ),
                   ),
                   stateGetter(context,(func){
                     setState((){
@@ -134,7 +145,7 @@ showPickDurationBottomSheet(BuildContext context,Function(Duration) onDurationPi
   showDistivityDialog(
       context,
       actions: [
-        getButton('Save', onPressed: (){
+        GButton('Save', onPressed: (){
           onDurationPick(_duration);
           Navigator.pop(context);
         }),

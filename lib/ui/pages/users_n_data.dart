@@ -1,9 +1,15 @@
 
 import 'package:effectivenezz/ui/pages/iap_page.dart';
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gicon.dart';
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext_field.dart';
+import 'package:effectivenezz/ui/widgets/specific/gwidgets/gapp_bar.dart';
+import 'package:effectivenezz/ui/widgets/specific/gwidgets/gdownloads_from_drive_list_tile.dart';
+import 'package:effectivenezz/ui/widgets/specific/gwidgets/gsave_to_drive_list_tile.dart';
+import 'package:effectivenezz/ui/widgets/specific/gwidgets/gsign_in_out_list_tile.dart';
+import 'package:effectivenezz/utils/basic/overflows_basic.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
-import 'package:effectivenezz/utils/basic/widgets_basic.dart';
-import 'package:effectivenezz/utils/complex/buttons_complex.dart';
-import 'package:effectivenezz/utils/complex/widget_complex.dart';
+import 'package:effectivenezz/utils/basic/values_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -18,36 +24,66 @@ class _UsersNDataState extends State<UsersNData> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: getAppBar("Users and Data",backEnabled: true,context: context),
+      appBar: GAppBar("Users and Data",backEnabled: true,),
       body: Column(
         children: <Widget>[
           ListTile(
             leading: CircleAvatar(
               maxRadius: 20,
-              backgroundColor: Colors.blueAccent,
+              backgroundColor: MyColors.color_yellow,
             ),
-            title: getText(MyApp.dataModel.driveHelper.currentUser!=null?MyApp.dataModel.driveHelper.currentUser.displayName:"Logged off"),
+            title: GText(MyApp.dataModel.driveHelper.currentUser!=null?MyApp.dataModel.driveHelper.currentUser.displayName:"Logged off"),
 
           ),
-          getDivider(),
-          getSignInSignOutSettingsButton(context),
-          getSaveToDriveButton(context),
-          getDownloadsFromDrive(context),
+          Divider(),
+          GSignInOutListTile(),
+          GSaveToDriveListTile(),
+          GDownloadsFromDriveListTile(),
           ListTile(
-            title: getText("Delete everything"),
-            leading: getIcon(Icons.delete_forever),
+            title: GText("Delete everything"),
+            leading: GIcon(Icons.delete_forever),
             onTap: (){
               deleteDb(context);
             },
 
           ),
           if(!kIsWeb)ListTile(
-            title: getText("Pricing"),
-            leading: getIcon(Icons.monetization_on),
+            title: GText("Pricing"),
+            leading: GIcon(Icons.monetization_on),
             onTap: (){
               launchPage(context, IAPScreen());
             },
 
+          ),
+          ListTile(
+            title: GText('Enter promo code'),
+            leading: GIcon(Icons.subdirectory_arrow_left),
+            onTap: (){
+              TextEditingController tec = TextEditingController();
+              showDistivityModalBottomSheet(context, (ctx,ss){
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      Container(
+                        child: GTextField(
+                          tec,hint: 'Promo code',
+                        ),width: 300,
+                      ),
+                      IconButton(
+                        icon: GIcon(Icons.send),
+                        onPressed: ()async{
+                          await MyApp.dataModel.prefs.setPromoCode(tec.text);
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              });
+            },
           ),
         ],
       ),

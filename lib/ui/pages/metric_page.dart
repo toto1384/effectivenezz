@@ -1,11 +1,12 @@
-
-import 'package:effectivenezz/ui/widgets/rosse_scaffold.dart';
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
+import 'package:effectivenezz/ui/widgets/basics/rosse_scaffold.dart';
+import 'package:effectivenezz/ui/widgets/specific/gwidgets/gmetric_widget.dart';
+import 'package:effectivenezz/ui/widgets/specific/gwidgets/gselected_days_widget_for_app_bar.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
 import 'package:effectivenezz/utils/basic/widgets_basic.dart';
-import 'package:effectivenezz/utils/complex/widget_complex.dart';
 import 'package:effectivenezz/utils/date_n_strings.dart';
 import 'package:effectivenezz/utils/stats_utils.dart';
 import 'package:flutter/material.dart';
@@ -34,8 +35,8 @@ class _MetricPageState extends State<MetricPage> {
           key: GlobalKey(),
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            getText('${getDatesNameForAppBarSelector(selectedDate,SelectedView.Day)}:'),
-            getMetricWidget(context, widget.metric, StatPeriod.day, selectedDate, Size.Medium),
+            GText('${getDatesNameForAppBarSelector(selectedDate,SelectedView.Day)}:'),
+            GMetricWidget( widget.metric, StatPeriod.day, selectedDate, Size.Medium),
           ],
         ),
         body: SingleChildScrollView(
@@ -44,7 +45,7 @@ class _MetricPageState extends State<MetricPage> {
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 15,horizontal: 20),
-                child: getSelectedDaysWidgetForAppBar(context,
+                child: GSelectedDaysWidgetForAppBar(
                     selectedDate: selectedDate, selectedView: SelectedView.Day, onNewDateSelectedPlusPage: (date,i){
                       setState(() {
                         selectedDate=date;
@@ -52,9 +53,9 @@ class _MetricPageState extends State<MetricPage> {
                     }),
               ),
               getSubtitle("Weekly(${getDatesNameForAppBarSelector(selectedDate,SelectedView.Week)})"),
-              getMetricWidget(context, widget.metric, StatPeriod.week, selectedDate, Size.Large),
+              GMetricWidget( widget.metric, StatPeriod.week, selectedDate, Size.Large),
               getSubtitle("Monthly(${getDatesNameForAppBarSelector(selectedDate,SelectedView.Month)})"),
-              getMetricWidget(context, widget.metric, StatPeriod.month, selectedDate, Size.Large),
+              GMetricWidget( widget.metric, StatPeriod.month, selectedDate, Size.Large),
             ],
           ),
         ),

@@ -1,7 +1,3 @@
-
-
-
-
 import 'package:effectivenezz/ui/pages/popup_page.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:flutter/cupertino.dart';
@@ -47,9 +43,15 @@ class NotificationHelper{
   }
 
   void _configureSelectNotificationSubject() {
-    selectNotificationSubject.stream.listen((String payload){
+    selectNotificationSubject.stream.listen((String payload)async{
       if(payload=='tracked') {
-        launchPage(context,PopupPage());
+        print('launch popup');
+        //if(((await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails()).didNotificationLaunchApp)) {
+        // if(firstTime){
+        //   firstTime=false;
+        // }else
+          launchPage(context, PopupPage());
+        //}
       }
     });
   }
@@ -61,9 +63,8 @@ class NotificationHelper{
 
 
   Future selectNotification(String payload) async {
-//    if(!firstTime||((await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails()).didNotificationLaunchApp)){
-    selectNotificationSubject.add(payload);
-//    }else firstTime=false;
+    if(payload!=null)selectNotificationSubject.add(payload);
+   //}
   }
 
   requestPermisionsWhenIOS()async{
@@ -80,8 +81,8 @@ class NotificationHelper{
   displayNotification({@required int id,@required String title,@required String body,@required String payload,Color color,Importance importance})async{
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
       channelId, channelName, channelDescription,color: color,indeterminate: true,ongoing: true,
-      autoCancel: false,icon: "effectivenezz_logo",playSound: false,
-      importance: importance??Importance.Default, ticker: 'ticker',);
+      autoCancel: false,icon: "effectivenezz_logo",
+      importance: Importance.Min,);
     var iOSPlatformChannelSpecifics = IOSNotificationDetails();
     var platformChannelSpecifics = NotificationDetails(
         androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
@@ -95,11 +96,10 @@ class NotificationHelper{
 
     if(permanent==null)permanent=false;
 
-    var androidPlatformChannelSpecifics =
-    AndroidNotificationDetails(channelId,
-      channelName, channelDescription,color: color,indeterminate: permanent,ongoing: permanent,
-      autoCancel: !permanent,importance: importance??Importance.Default,
-      priority: importance==Importance.Max?Priority.Max:Priority.Default, icon: "effectivenezz_logo",);
+    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+      channelId, channelName, channelDescription,color: color,indeterminate: false,ongoing: false,
+      autoCancel: true,icon: "effectivenezz_logo",playSound: false,
+      importance: importance??Importance.Default, ticker: 'ticker',);
     var iOSPlatformChannelSpecifics =
     IOSNotificationDetails(presentSound: importance==Importance.Max,presentAlert: importance==Importance.Max,);
     NotificationDetails platformChannelSpecifics = NotificationDetails(

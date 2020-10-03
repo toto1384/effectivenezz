@@ -4,10 +4,12 @@ import 'dart:math';
 import 'package:after_layout/after_layout.dart';
 import 'package:effectivenezz/main.dart';
 import 'package:effectivenezz/objects/list_callback.dart';
-import 'package:effectivenezz/ui/pages/welcome_page.dart';
+import 'package:effectivenezz/ui/pages/quick_start_page.dart';
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gbutton.dart';
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gicon.dart';
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
+import 'package:effectivenezz/ui/widgets/specific/gwidgets/gemoji_slider.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
-import 'package:effectivenezz/utils/basic/widgets_basic.dart';
-import 'package:effectivenezz/utils/complex/widget_complex.dart';
 import 'package:effectivenezz/utils/custom_key.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -43,7 +45,7 @@ class DistivityPageState<T extends StatefulWidget> extends State<T> with AfterLa
   init(){
 
     customKey=CustomKey(this);
-    if(!isShowingPage(context, WelcomePage)){
+    if(!isShowingPage(context, QuickStartPage)){
       if(Random().nextInt(17)==1){
         int currentIndex = 2;
         scaffoldKey.currentState.showSnackBar(SnackBar(
@@ -53,7 +55,7 @@ class DistivityPageState<T extends StatefulWidget> extends State<T> with AfterLa
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              getEmojiSlider(
+              GEmojiSlider(
                 currentIndex.toDouble(),
                 (index) {
                   currentIndex=index.toInt();
@@ -69,26 +71,26 @@ class DistivityPageState<T extends StatefulWidget> extends State<T> with AfterLa
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
-                          getText(currentIndex<2?"We are sorry to hear that, please tell us how we can change":kIsWeb?"Amazing, help us make it even better by suggesting something":"Great, rate maybe :)) ?",),
+                          GText(currentIndex<2?"We are sorry to hear that, please tell us how we can change":kIsWeb?"Amazing, help us make it even better by suggesting something":"Great, rate maybe :)) ?",),
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
                               if(!kIsWeb)
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
-                                  child: getButton("Suggest something", onPressed: (){
+                                  child: GButton("Suggest something", onPressed: (){
                                     MyApp.dataModel.launchFeedback(context);
                                   },variant: 2),
                                 ),
                               if(!kIsWeb&&currentIndex>2)
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
-                                  child: getButton("Rate us :))", onPressed: (){
+                                  child: GButton("Rate us :))", onPressed: (){
                                     LaunchReview.launch();
                                   },variant: 2),
                                 ),
                               IconButton(
-                                icon: getIcon(Icons.close),
+                                icon: GIcon(Icons.close),
                                 onPressed: ()=>scaffoldKey.currentState.hideCurrentSnackBar(),
                               )
                             ],
@@ -101,7 +103,7 @@ class DistivityPageState<T extends StatefulWidget> extends State<T> with AfterLa
                   MyApp.dataModel.screenWidth-120
               ),
               IconButton(
-                icon: getIcon(Icons.close),
+                icon: GIcon(Icons.close),
                 onPressed: ()=>scaffoldKey.currentState.hideCurrentSnackBar(),
               )
             ],

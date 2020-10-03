@@ -2,6 +2,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:sweetsheet/sweetsheet.dart';
 
 
 
@@ -16,8 +17,11 @@ class MyColors{
   static const Color color_gray_darker = Color(0xff2d3344);
   static const Color color_gray_lighter = Color(0xff5F6377);
 
+  static const Color color_yellow = Color(0xffF0A500);
+  static const Color color_yellow_darker = Color(0xffCF7500);
+
   static getHelpColor(){
-    return color_gray_darker;
+    return color_yellow;
   }
 
   static getIconTextGray(){
@@ -39,6 +43,12 @@ class MyColors{
   static getIconTextColor(){
     return Colors.white;
   }
+
+  static CustomSheetColor customSheetColor = CustomSheetColor(
+      main: MyColors.color_yellow,
+      accent: MyColors.color_yellow_darker,
+      icon: MyColors.color_black_darker,
+  );
 
 }
 

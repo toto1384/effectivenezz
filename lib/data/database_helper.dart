@@ -1,5 +1,3 @@
-
-
 import 'package:effectivenezz/objects/activity.dart';
 import 'package:effectivenezz/objects/calendar.dart';
 import 'package:effectivenezz/objects/scheduled.dart';

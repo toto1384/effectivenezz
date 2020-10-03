@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
+import 'package:http/http.dart' as http;
 import 'package:effectivenezz/main.dart';
-import 'package:effectivenezz/ui/widgets/distivity_restart_widget.dart';
+import 'package:effectivenezz/ui/widgets/basics/distivity_restart_widget.dart';
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gbutton.dart';
 import 'package:effectivenezz/utils/basic/overflows_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
-import 'package:effectivenezz/utils/basic/widgets_basic.dart';
 import 'package:effectivenezz/utils/distivity_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -106,7 +108,7 @@ deleteDb(BuildContext context)async{
         MyApp.dataModel.databaseHelper.deleteEveryThing().then((value) {
           showDistivityDialog(
               context,
-              actions: [getButton('Restart app', onPressed: (){
+              actions: [GButton('Restart app', onPressed: (){
                 MyApp.dataModel=null;
                 DistivityRestartWidget.restartApp(context);
               })],
@@ -117,31 +119,75 @@ deleteDb(BuildContext context)async{
 
 
 
-Future<HttpClientResponse>performApiRequest(RequestType requestType,String url,Map<String,String> headers)async{
-  HttpClient httpClient = new HttpClient();
-
-  HttpClientRequest request ;
+Future<http.Response> performApiRequest(RequestType requestType,String url,Map<String,String> headers,{Map data})async{
 
   switch(requestType){
-
     case RequestType.Post:
-      request = await httpClient.postUrl(Uri.parse(url));
+      return http.post(Uri.parse(url),headers: headers,body: utf8.encode(json.encode(data)));
       break;
     case RequestType.Update:
-      request = await httpClient.patchUrl(Uri.parse(url));
+      return http.patch(Uri.parse(url),headers: headers,body: utf8.encode(json.encode(data)));
       break;
     case RequestType.Delete:
-      request = await httpClient.deleteUrl(Uri.parse(url));
+      return http.delete(Uri.parse(url),headers: headers,);
       break;
     case RequestType.Query:
-      request = await httpClient.getUrl(Uri.parse(url));
+      return http.get(Uri.parse(url),headers: headers);
       break;
   }
+  return null;
+}
 
-  headers.forEach((k,v){
-    request.headers.set(k, v);
-  });
+RoundedRectangleBorder getShape(
+    {bool bottomSheetShape,bool smallRadius, bool webCardShape,bool subtleBorder,Color subtleBorderColor}){
 
-  return await request.close();
+  if(bottomSheetShape==null){
+    bottomSheetShape=false;
+  }
+  if(smallRadius==null){
+    smallRadius=true;
+  }
+
+  double radius = smallRadius?10:30;
+
+  if(webCardShape==null){
+    webCardShape=false;
+  }
+
+  if(subtleBorder==null){
+    subtleBorder=false;
+  }
+
+  if(bottomSheetShape){
+    return RoundedRectangleBorder(
+        side: subtleBorder?BorderSide(
+          width: 1,
+          color: subtleBorderColor??Colors.white,
+        ):BorderSide(color: Colors.transparent),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(radius),
+          topRight: Radius.circular(radius),
+        )
+    );
+  }else if(webCardShape){
+    return RoundedRectangleBorder(
+      side: subtleBorder?BorderSide(
+        width: 1,
+        color: Colors.white,
+      ):BorderSide(color: Colors.transparent),
+      borderRadius: BorderRadius.only(
+        topRight: Radius.circular(radius),
+        bottomRight: Radius.circular(radius),
+      ),
+    );
+  }else{
+    return RoundedRectangleBorder(
+        side: subtleBorder?BorderSide(
+          width: 1,
+          color: Colors.white,
+        ):BorderSide(color: Colors.transparent),
+        borderRadius: BorderRadius.circular(radius)
+    );
+  }
 }
 
