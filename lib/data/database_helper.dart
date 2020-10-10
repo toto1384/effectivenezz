@@ -14,8 +14,8 @@ abstract class DatabaseHelper{
   Future<List<ECalendar>> queryAllECalendars();
   Future<List<Tag>> queryAllTags();
 
-  Future<int> insertTask(Task task);
-  Future<int> insertActivity(Activity activity);
+  Future<int> insertTask(Task task,{List<Scheduled> scheduleds});
+  Future<int> insertActivity(Activity activity,{List<Scheduled> scheduleds});
   Future<int> insertECalendar(ECalendar eCalendar);
   Future<int> insertScheduled(Scheduled scheduled);
   Future<int> insertTag(Tag tag);

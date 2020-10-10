@@ -19,6 +19,7 @@ class GSignInWithGoogleWelcomeActivityButton extends StatelessWidget {
         if(onSignInCompleted!=null){
           await onSignInCompleted();
         }
+        MyApp.dataModel=null;
         DistivityRestartWidget.restartApp(context);
       });
     });

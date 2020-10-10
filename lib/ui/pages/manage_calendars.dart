@@ -68,8 +68,8 @@ class ManageCalendarsState extends DistivityPageState<ManageCalendars> with Afte
             onPressed: (){
               showAddEditCalendarBottomSheet(context,add: true);
             },
-            child: GIcon(Icons.add),
-            backgroundColor: MyColors.color_black,
+            child: GIcon(Icons.add,color: MyColors.color_black,),
+            backgroundColor: MyColors.color_yellow,
           ),
         ),
     );

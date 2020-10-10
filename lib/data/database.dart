@@ -1,15 +1,11 @@
 import 'dart:io';
 
 import 'package:effectivenezz/data/database_helper.dart';
-import 'package:effectivenezz/main.dart';
 import 'package:effectivenezz/objects/activity.dart';
 import 'package:effectivenezz/objects/calendar.dart';
 import 'package:effectivenezz/objects/scheduled.dart';
 import 'package:effectivenezz/objects/tag.dart';
 import 'package:effectivenezz/objects/task.dart';
-import 'package:effectivenezz/ui/widgets/basics/distivity_restart_widget.dart';
-import 'package:effectivenezz/utils/basic/date_basic.dart';
-import 'package:effectivenezz/utils/basic/overflows_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

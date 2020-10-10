@@ -18,6 +18,7 @@ class TimeStamp{
   Color color;
   bool tracked;
   bool isTask;
+  int parentIndex;
 
   TimeStamp({@required this.duration,
     @required this.isTask,
@@ -25,7 +26,7 @@ class TimeStamp{
     @required this.name,
     @required this.color,
     @required this.tracked,
-    @required this.parentId});
+    @required this.parentId,@required this.parentIndex});
 
   DateTime getEndTime(){
     if(startTime!=null&&duration!=null)return startTime.add(Duration(minutes: duration));
@@ -67,6 +68,7 @@ class TimeStamp{
         startTime: startToreturn,
         duration: endToreturn==null?null:endToreturn.difference(startToreturn).inMinutes,
         color: color,
+        parentIndex: parentIndex
       ));
     }
     return toreturn;

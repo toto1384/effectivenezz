@@ -3,7 +3,6 @@ import 'package:effectivenezz/ui/pages/iap_page.dart';
 import 'package:effectivenezz/ui/pages/manage_calendars.dart';
 import 'package:effectivenezz/ui/pages/metrics_and_stats.dart';
 import 'package:effectivenezz/ui/pages/plan_vs_tracked_page.dart';
-import 'package:effectivenezz/ui/pages/quick_start_page.dart';
 import 'package:effectivenezz/ui/pages/settings_page.dart';
 import 'package:effectivenezz/ui/pages/time_doctor.dart';
 import 'package:effectivenezz/ui/pages/track_page.dart';

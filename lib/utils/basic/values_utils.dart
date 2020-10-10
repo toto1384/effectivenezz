@@ -17,8 +17,8 @@ class MyColors{
   static const Color color_gray_darker = Color(0xff2d3344);
   static const Color color_gray_lighter = Color(0xff5F6377);
 
-  static const Color color_yellow = Color(0xffF0A500);
-  static const Color color_yellow_darker = Color(0xffCF7500);
+  static const Color color_yellow = Color(0xffffc93c);
+  static const Color color_yellow_darker = Color(0xffdb9b0e);
 
   static getHelpColor(){
     return color_yellow;

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:after_layout/after_layout.dart';
 import 'package:effectivenezz/objects/activity.dart';
 import 'package:effectivenezz/objects/task.dart';
+import 'package:effectivenezz/ui/pages/pomodoro_page.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gicon.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
 import 'package:effectivenezz/ui/widgets/specific/task_list_item.dart';
@@ -109,6 +110,9 @@ class _ActivityListItemState extends State<ActivityListItem> with AfterLayoutMix
                     Padding(
                       padding: const EdgeInsets.all(4.0),
                       child: Card(child:InkWell(
+                        onLongPress: (){
+                          launchPage(context, PomodoroPage(object: widget.activity,));
+                        },
                         onTap: (){
                           MyApp.dataModel.setPlaying(context, MyApp.dataModel.isPlaying(widget.activity)?null:widget.activity);
                           ifStartTimer();

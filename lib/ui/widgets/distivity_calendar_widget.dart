@@ -2,6 +2,8 @@
 import 'package:calendar_views/calendar_views.dart';
 import 'package:effectivenezz/main.dart';
 import 'package:effectivenezz/objects/timestamp.dart';
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gicon.dart';
+import 'package:effectivenezz/ui/widgets/specific/gwidgets/dates/gleadingcalendaritem.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
@@ -117,7 +119,16 @@ class _DistivityCalendarWidgetState extends State<DistivityCalendarWidget> {
                               height: itemSize.height-1,
                               child: GestureDetector(
                                 onTap: (){
-                                  showObjectDetailsBottomSheet(context, forDayTimestamps[i].getParent(),day);
+                                  if(forDayTimestamps[i].tracked){
+                                    showEditTimestampsBottomSheet(context,
+                                        object: forDayTimestamps[i].getParent(),
+                                        indexTimestamp: forDayTimestamps[i].parentIndex);
+                                  }else{
+                                    showObjectDetailsBottomSheet(
+                                        context,
+                                        forDayTimestamps[i].getParent(),
+                                        day);
+                                  }
                                 },
                                 child: Container(
                                   decoration: BoxDecoration(
@@ -164,7 +175,16 @@ class _DistivityCalendarWidgetState extends State<DistivityCalendarWidget> {
                                 ),
                                 child: GestureDetector(
                                   onTap: (){
-                                    showObjectDetailsBottomSheet(context, forDayTimestamps[i].getParent(),day);
+                                    if(forDayTimestamps[i].tracked){
+                                      showEditTimestampsBottomSheet(context,
+                                          object: forDayTimestamps[i].getParent(),
+                                          indexTimestamp: forDayTimestamps[i].parentIndex);
+                                    }else{
+                                      showObjectDetailsBottomSheet(
+                                          context,
+                                          forDayTimestamps[i].getParent(),
+                                          day);
+                                    }
                                   },
                                   child: Container(
                                     decoration: BoxDecoration(

@@ -5,7 +5,6 @@ import 'package:effectivenezz/ui/widgets/basics/gwidgets/gicon.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
 import 'package:effectivenezz/ui/widgets/lists/gsort_by_calendar_list_view.dart';
 import 'package:effectivenezz/ui/widgets/lists/gsort_by_money_tasks_and_activities.dart';
-import 'package:effectivenezz/ui/widgets/lists/gupcoming_tasks_and_activities.dart';
 import 'package:effectivenezz/ui/widgets/specific/distivity_secondary_item.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/gapp_bar.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/gtab_bar.dart';

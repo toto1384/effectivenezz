@@ -453,8 +453,7 @@ showObjectDetailsBottomSheet(BuildContext context, dynamic object,DateTime selec
   });
 }
 
-
-showEditTimestampsBottomSheet(BuildContext context, {@required dynamic object,int indexTimestamp}){
+showEditTimestampsBottomSheet(BuildContext context,{@required dynamic object,int indexTimestamp}){
   if(indexTimestamp==null){
     indexTimestamp=object.trackedStart.length-1;
   }

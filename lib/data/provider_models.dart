@@ -145,8 +145,8 @@ class DataModel{
     if(dateTime==null)return;
     notificationHelper.scheduleNotification(id: 100000+scheduled.id, title: "Time for ${scheduled.getParent().name}",
         body: "${scheduled.getParent().name} is between ${scheduled.startTime} and "
-            "${scheduled.startTime.add(Duration(minutes: scheduled.durationInMins))}", payload: "sch",importance: Importance.Max,
-    dateTime: dateTime,permanent: false,color: scheduled.getParent().color);
+            "${scheduled.startTime.add(Duration(minutes: scheduled.durationInMins))}", payload: "sch",
+    dateTime: dateTime,color: scheduled.getParent().color);
   }
 
 
@@ -160,7 +160,7 @@ class DataModel{
         body: "For more info in a popup tap me",
         payload: "tracked",
         color: currentPlaying.color,
-        importance: Importance.Low,
+        importance: Importance.low,
       );
     }
   }

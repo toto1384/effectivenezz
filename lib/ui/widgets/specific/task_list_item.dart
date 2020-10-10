@@ -1,8 +1,11 @@
 import 'dart:async';
 
 import 'package:after_layout/after_layout.dart';
+import 'package:circular_check_box/circular_check_box.dart';
 import 'package:effectivenezz/objects/task.dart';
+import 'package:effectivenezz/ui/pages/pomodoro_page.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gicon.dart';
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gswitchable.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
@@ -54,16 +57,19 @@ class _TaskListItemState extends State<TaskListItem> with AfterLayoutMixin{
             showObjectDetailsBottomSheet(getGlobalContext(context), widget.task,widget.selectedDate);
           }
         },
-        leading: GestureDetector(
-          child: GIcon(widget.task.isCheckedOnDate(widget.selectedDate??getTodayFormated())?Icons.check_circle_outline:Icons.radio_button_unchecked,color: widget.task.color,size: 35),
-          onTap: (){
-            if(widget.task.isCheckedOnDate(widget.selectedDate??getTodayFormated())){
+        leading: CircularCheckBox(
+          inactiveColor: widget.task.color,
+          value: widget.task.isCheckedOnDate(widget.selectedDate??getTodayFormated()),
+          onChanged: (C){
+            if(!C){
               widget.task.unCheckOnDate(widget.selectedDate??getTodayFormated());
             }else{
               widget.task.checks.add(widget.selectedDate??getTodayFormated());
             }
             MyApp.dataModel.task(MyApp.dataModel.findObjectIndexById(widget.task), widget.task, context, CUD.Update);
           },
+          activeColor: widget.task.color,
+
         ),
         subtitle: Row(
           mainAxisSize: MainAxisSize.min,
@@ -92,7 +98,11 @@ class _TaskListItemState extends State<TaskListItem> with AfterLayoutMixin{
           visible: !(widget.minimal??false),
           child: Padding(
             padding: const EdgeInsets.all(4),
-            child: Card(child:GestureDetector(
+            child: Card(
+             child:GestureDetector(
+              onLongPress: (){
+                launchPage(context, PomodoroPage(object: widget.task,));
+              },
               onTap: (){
                 MyApp.dataModel.setPlaying(context, MyApp.dataModel.currentPlaying==(widget.task)?null:widget.task);
                 ifStartTimer();

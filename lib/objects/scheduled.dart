@@ -157,6 +157,7 @@ class Scheduled{
       startTime: startTime,
       name: getParent().name,
       tracked: true,
+      parentIndex: 0
     );
 
     DateTime lastStartTime;
@@ -212,6 +213,7 @@ class Scheduled{
           startTime: startTime,
           name: getParent().name,
           tracked: false,
+          parentIndex: 0
         );
 
         DateTime lastStartTime;
@@ -258,6 +260,7 @@ class Scheduled{
             startTime: startTime,
             name: getParent().name,
             tracked: false,
+            parentIndex: 0
           ).splitTimestampForCalendarSupport();
         }
 
@@ -304,6 +307,7 @@ class Scheduled{
           startTime: startTime,
           name: getParent().name,
           tracked: false,
+          parentIndex: 0
         );
 
         DateTime lastStartTime;
@@ -351,6 +355,7 @@ class Scheduled{
           startTime: startTime,
           name: getParent().name,
           tracked: false,
+          parentIndex: 0
         );
 
         DateTime lastStartTime;

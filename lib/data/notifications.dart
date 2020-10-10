@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:rxdart/subjects.dart';
+import 'package:timezone/timezone.dart';
 
 final BehaviorSubject<String> selectNotificationSubject =
 BehaviorSubject<String>();
@@ -17,6 +18,10 @@ class NotificationHelper{
   String channelId= "0";
   String channelName="What's tracking?";
   String channelDescription="Here you will see... Well.... What's tracking";
+
+  String channelId1="1";
+  String channelName1="Upcoming Events";
+  String channelDescription1="Here you will see... Well.... upcoming events";
 
   bool firstTime= true;
 
@@ -33,8 +38,8 @@ class NotificationHelper{
       requestAlertPermission: false,
       onDidReceiveLocalNotification: notificationHelper.onDidReceiveLocalNotification,
     );
-    var initializationSettings = InitializationSettings(
-        initializationSettingsAndroid, initializationSettingsIOS);
+    var initializationSettings = InitializationSettings(android: initializationSettingsAndroid,
+      iOS: initializationSettingsIOS);
     await notificationHelper.flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onSelectNotification: notificationHelper.selectNotification);
 
@@ -82,34 +87,34 @@ class NotificationHelper{
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
       channelId, channelName, channelDescription,color: color,indeterminate: true,ongoing: true,
       autoCancel: false,icon: "effectivenezz_logo",
-      importance: Importance.Min,);
+      importance: Importance.defaultImportance,priority: Priority.defaultPriority);
     var iOSPlatformChannelSpecifics = IOSNotificationDetails();
     var platformChannelSpecifics = NotificationDetails(
-        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+        android: androidPlatformChannelSpecifics,iOS: iOSPlatformChannelSpecifics);
     await flutterLocalNotificationsPlugin.show(
         id, title, body, platformChannelSpecifics,
         payload: payload);
   }
 
   scheduleNotification({@required int id,@required String title,@required String body,@required String payload,
-    Color color,Importance importance,bool permanent, @required DateTime dateTime})async{
-
-    if(permanent==null)permanent=false;
+    Color color ,@required DateTime dateTime})async{
 
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      channelId, channelName, channelDescription,color: color,indeterminate: false,ongoing: false,
-      autoCancel: true,icon: "effectivenezz_logo",playSound: false,
-      importance: importance??Importance.Default, ticker: 'ticker',);
+      channelId1, channelName1, channelDescription1,color: color,indeterminate: false,ongoing: false,
+      autoCancel: true,icon: "effectivenezz_logo",playSound: true,
+      importance: Importance.max, ticker: 'ticker',priority: Priority.max);
     var iOSPlatformChannelSpecifics =
-    IOSNotificationDetails(presentSound: importance==Importance.Max,presentAlert: importance==Importance.Max,);
+    IOSNotificationDetails(presentSound: true,presentAlert: true,);
     NotificationDetails platformChannelSpecifics = NotificationDetails(
-        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
-    await flutterLocalNotificationsPlugin.schedule(
+        android:androidPlatformChannelSpecifics,iOS: iOSPlatformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.zonedSchedule(
         id,
         title,
         body,
-        dateTime,
-        platformChannelSpecifics);
+        TZDateTime.local(dateTime.year,dateTime.month,dateTime.day,dateTime.hour,dateTime.minute),
+        platformChannelSpecifics,
+        androidAllowWhileIdle: true,
+        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime);
   }
 
   dailyNotification({@required int id,@required String title,@required String body,@required String payload})async{
@@ -120,7 +125,7 @@ class NotificationHelper{
     var iOSPlatformChannelSpecifics =
     IOSNotificationDetails();
     var platformChannelSpecifics = NotificationDetails(
-        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+        android:androidPlatformChannelSpecifics,iOS: iOSPlatformChannelSpecifics);
     await flutterLocalNotificationsPlugin.showDailyAtTime(
         id,
         title,
@@ -137,12 +142,12 @@ class NotificationHelper{
     var iOSPlatformChannelSpecifics =
     IOSNotificationDetails();
     var platformChannelSpecifics = NotificationDetails(
-        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+        android:androidPlatformChannelSpecifics,iOS: iOSPlatformChannelSpecifics);
     await flutterLocalNotificationsPlugin.showWeeklyAtDayAndTime(
         id,
         title,
         body,
-        Day.Monday,
+        Day.monday,
         time,
         platformChannelSpecifics);
   }

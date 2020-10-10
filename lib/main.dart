@@ -1,3 +1,4 @@
+import 'package:effectivenezz/ui/pages/quick_start_page.dart';
 import 'package:effectivenezz/ui/pages/track_page.dart';
 import 'package:effectivenezz/ui/widgets/basics/distivity_restart_widget.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
@@ -92,12 +93,16 @@ class MyAppState extends State<MyApp> {
     }
   }
 
-  Future<DataModel> futureDM ;
-
   @override
   void initState() {
     super.initState();
-    futureDM= DataModel.init(context);
+    if(MyApp.dataModel==null){
+      DataModel.init(context).then((value) {
+        MyApp.dataModel=value;
+        MyApp.dataModel.screenWidth=MediaQuery.of(context).size.width;
+        launchPage(context, value.driveHelper.currentUser==null?QuickStartPage(value.driveHelper):TrackPage());
+      });
+    }
   }
 
   @override
@@ -107,35 +112,23 @@ class MyAppState extends State<MyApp> {
       systemNavigationBarIconBrightness: Brightness.light,
       systemNavigationBarColor: MyColors.color_black_darker
     ));
-    return FutureBuilder(
-        future: futureDM,
-        builder: (ctx,AsyncSnapshot snap){
-          if(snap.hasData){
-            if(MyApp.dataModel==null){
-              MyApp.dataModel=snap.data;
-              MyApp.dataModel.screenWidth=MediaQuery.of(context).size.width;
-            }
-            return TrackPage();
-          }else{
-            return Scaffold(body: Center(child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                      width: 200,
-                      height: 200,
-                      child: Image.asset(AssetsPath.icon)),
-                ),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(15),
-                  child: Container(height:10,width: 100,child: LinearProgressIndicator())
-                ),
-              ],
-            ),));
-          }
-      });
+    return Scaffold(body: Center(child: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+              width: 200,
+              height: 200,
+              child: Image.asset(AssetsPath.icon)),
+        ),
+        ClipRRect(
+            borderRadius: BorderRadius.circular(15),
+            child: Container(height:10,width: 100,child: LinearProgressIndicator())
+        ),
+      ],
+    ),));
   }
 }
 

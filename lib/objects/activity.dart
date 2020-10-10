@@ -285,6 +285,7 @@ class Activity {
           startTime: trackedStart[i],
           name: name,
           tracked: true,
+          parentIndex: i
         ).splitTimestampForCalendarSupport();
 
         //if on date

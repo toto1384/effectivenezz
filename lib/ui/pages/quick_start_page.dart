@@ -4,9 +4,7 @@ import 'package:effectivenezz/objects/activity.dart';
 import 'package:effectivenezz/objects/calendar.dart';
 import 'package:effectivenezz/objects/scheduled.dart';
 import 'package:effectivenezz/objects/task.dart';
-import 'package:effectivenezz/ui/pages/track_page.dart';
 import 'package:effectivenezz/ui/widgets/basics/distivity_radio_group.dart';
-import 'package:effectivenezz/ui/widgets/basics/distivity_restart_widget.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gbutton.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gswitchable.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
@@ -15,7 +13,6 @@ import 'package:effectivenezz/ui/widgets/buttons/gsign_in_with_google_welcome_ac
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/scheduled/gdate_time_edit_widget_for_scheduled.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
-import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
 import 'package:effectivenezz/utils/distivity_page.dart';
 import 'package:flutter/foundation.dart';
@@ -78,9 +75,14 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Padding(
-                    padding: EdgeInsets.only(top: (MediaQuery.of(context).size.height/3),left: 20,right: 20),
+                    padding: EdgeInsets.only(top: (MediaQuery.of(context).size.height/5),left: 10,right: 10),
+                    child: Image.asset(AssetsPath.timeIllustration),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10,left: 20,right: 20),
                     child: GText('Welcome to Effectivenezz, the place to manage your time. Let\'s start your'
-                        'onboarding journey in less than 2 minutes(because we know that time is important)',isCentered: true,),
+                        'onboarding journey in less than 2 minutes(because we know that time is important)',
+                      isCentered: true,),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 50),
@@ -114,40 +116,32 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
               ),
             ],
           ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          ListView(
+            shrinkWrap: true,
             children: [
-              Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: GText("I work on :",textType: TextType.textTypeGigant),
-                    ),
-                    RosseRadioGroup(
-                      isBig: true,
-                      items: {
-                        "9-5 Job":mainOccupationTypes.contains(MainOccupationType.values[0]),
-                        "Freelance":mainOccupationTypes.contains(MainOccupationType.values[1]),
-                        "Side Hustle/Job":mainOccupationTypes.contains(MainOccupationType.values[2]),
-                      },
-                      onSelected: (i,s){
-                        setState(() {
-                          if(mainOccupationTypes.contains(MainOccupationType.values[i])){
-                            //contains
-                            mainOccupationTypes.remove(MainOccupationType.values[i]);
-                          }else{
-                            mainOccupationTypes.add(MainOccupationType.values[i]);
-                          }
-                        });
-                      },
-                    ),
-                    GText("(select 1 or more)")
-                  ],
-                ),
+              Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: GText("I work on :",textType: TextType.textTypeGigant),
               ),
+              RosseRadioGroup(
+                isBig: true,
+                items: {
+                  "9-5 Job":mainOccupationTypes.contains(MainOccupationType.values[0]),
+                  "Freelance":mainOccupationTypes.contains(MainOccupationType.values[1]),
+                  "Side Hustle/Job":mainOccupationTypes.contains(MainOccupationType.values[2]),
+                },
+                onSelected: (i,s){
+                  setState(() {
+                    if(mainOccupationTypes.contains(MainOccupationType.values[i])){
+                      //contains
+                      mainOccupationTypes.remove(MainOccupationType.values[i]);
+                    }else{
+                      mainOccupationTypes.add(MainOccupationType.values[i]);
+                    }
+                  });
+                },
+              ),
+              GText("(select 1 or more)"),
               Center(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 50),
@@ -169,7 +163,7 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
                       GText("I go to sleep at:",textType: TextType.textTypeTitle),
                       GDateTimeEditWidgetForScheduled(onScheduledChange: (sch){
                         setState(() {
-                          sleepScheduled=sch;
+                          sleepScheduled=sch..startTime.subtract(Duration(days: 1));
                         });
                       },isStartTime: true,scheduled: sleepScheduled,text:'',onlyTime: true,),
                       GSwitchable(text: "Schedule daily review(an essential habit for a productive day)",
@@ -281,9 +275,11 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
       ),
     );
   }
+
+
   save()async{
     //cals
-    await MyApp.dataModel.eCalendar(-1, ECalendar(
+    MyApp.dataModel.databaseHelper.insertECalendar(ECalendar(
       name: 'Body',
       color: Colors.brown,
       parentId: -1,
@@ -292,8 +288,8 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
       themesStart: [],
       value: 0,
       id: 1000,
-    ), context, CUD.Create,);//body
-    await MyApp.dataModel.eCalendar(-1, ECalendar(
+    ));
+    await MyApp.dataModel.databaseHelper.insertECalendar(ECalendar(
       name: 'Habits',
       color: Colors.green,
       parentId: -1,
@@ -302,8 +298,8 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
       themesStart: [],
       value: 0,
       id: 1001,
-    ), context, CUD.Create);//habits
-    await MyApp.dataModel.eCalendar(-1, ECalendar(
+    ));//habits
+    await MyApp.dataModel.databaseHelper.insertECalendar(ECalendar(
         name: 'Work',
         value: 10000,
         color: Colors.red,
@@ -312,8 +308,8 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
         themesStart: [],
         parentId: -1,
         id: 1010
-    ), context, CUD.Create);//work
-    await MyApp.dataModel.eCalendar(-1, ECalendar(
+    ));//work
+    await MyApp.dataModel.databaseHelper.insertECalendar(ECalendar(
       name: 'Addictions',
       value: -1000,
       parentId: -1,
@@ -322,11 +318,11 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
       show: true,
       color: Colors.grey,
       id: 1005,
-    ), context, CUD.Create);
+    ));
     //
 
     //addictions
-    await MyApp.dataModel.activity(-1, Activity(
+    await MyApp.dataModel.databaseHelper.insertActivity(Activity(
         value: -1000,
         name: 'Social Media',
         parentCalendarId: 1005,
@@ -336,8 +332,8 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
         color: Colors.grey,
         valueMultiply: false,
         icon: Icons.phone_android
-    ), context, CUD.Create);
-    await MyApp.dataModel.activity(-1, Activity(
+    ));
+    await MyApp.dataModel.databaseHelper.insertActivity(Activity(
         value: -1000,
         name: 'Netflix/TV',
         parentCalendarId: 1005,
@@ -347,8 +343,8 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
         valueMultiply: false,
         color: Colors.grey,
         icon: Icons.tv
-    ), context, CUD.Create);
-    await MyApp.dataModel.activity(-1, Activity(
+    ));
+    await MyApp.dataModel.databaseHelper.insertActivity( Activity(
       value: -100,
       name: 'Gaming',
       parentCalendarId: 1005,
@@ -358,11 +354,11 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
       trackedStart: [],
       valueMultiply: false,
       icon: Icons.gamepad,
-    ), context, CUD.Create);
+    ),);
     //
 
     //sleep
-    await MyApp.dataModel.activity(-1, Activity(
+    await MyApp.dataModel.databaseHelper.insertActivity(Activity(
         name: "Sleep",
         parentCalendarId: 1000,
         value: 10,
@@ -373,11 +369,11 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
         valueMultiply: false,
         icon: Icons.hotel,
         id: 1000
-    ), context, CUD.Create,addWith: sleepScheduled);//sleep
+    ),scheduleds: [sleepScheduled]);
 
     //activity
     if(activityNameTEC.text!=''&&activityDurationMinutesTEC.text!='')
-      await MyApp.dataModel.activity(-1, Activity(
+      await MyApp.dataModel.databaseHelper.insertActivity( Activity(
         trackedEnd: [],
         tags: [],
         trackedStart: [],
@@ -388,15 +384,15 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
         parentCalendarId: 1010,
         id: 11,
         icon: Icons.star_border,
-      ), context, CUD.Create,addWith: Scheduled(
+      ), scheduleds: [Scheduled(
         isParentTask: false,
         durationInMins: int.parse(activityDurationMinutesTEC.text)*60,
         repeatValue: 1,
         repeatRule: RepeatRule.EveryXDays,
         parentId: 11,
         startTime: (sleepScheduled.getEndTime()??getTodayFormated()).add(Duration(hours: 1)),
-      ));//activity
-    if(addReview)await MyApp.dataModel.task(-1, Task(
+      )]);//activity
+    if(addReview)await MyApp.dataModel.databaseHelper.insertTask(Task(
         id: 12,
         parentId: 1001,
         value: 10000,
@@ -423,20 +419,20 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
             "How can I solve the biggest flaw in myself that is holding me from achieving my goals\n"
             "Consider how many people work for years to get a 15% raise when they could quickly switch to"
             " a new job that pays 25% better. - How are you doing something similar in your life? How can you work smarter?\n"
-    ), context,CUD.Create,addWith: Scheduled(
+    ),scheduleds: [Scheduled(
         repeatRule: RepeatRule.EveryXDays,
         repeatValue: 1,
         durationInMins: 20,
         isParentTask: true,
         startTime: sleepScheduled.startTime.subtract(Duration(minutes: 20)),
         parentId: 12
-    ));//review
+    )]);//review
 
     mainOccupationTypes.forEach((element) async {
       switch(element){
 
         case MainOccupationType.NineToFive:
-          await MyApp.dataModel.activity(-1, Activity(
+          await MyApp.dataModel.databaseHelper.insertActivity(Activity(
             trackedEnd: [],
             tags: [],
             trackedStart: [],
@@ -447,17 +443,17 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
             parentCalendarId: 1010,
             id: 102,
             icon: Icons.work,
-          ), context, CUD.Create,addWith: Scheduled(
+          ),scheduleds: [Scheduled(
             isParentTask: false,
             durationInMins: 60*8,
             repeatValue: 1,
             repeatRule: RepeatRule.EveryXDays,
             parentId: 102,
             startTime: DateTime(getTodayFormated().year,getTodayFormated().month,getTodayFormated().day,9),
-          ));
+          )]);
           break;
         case MainOccupationType.Freelance:
-          await MyApp.dataModel.activity(-1, Activity(
+          await MyApp.dataModel.databaseHelper.insertActivity(Activity(
             trackedEnd: [],
             tags: [],
             trackedStart: [],
@@ -468,14 +464,14 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
             parentCalendarId: 1010,
             id: 101,
             icon: Icons.person,
-          ), context, CUD.Create,addWith: Scheduled(
+          ),scheduleds: [Scheduled(
             isParentTask: false,
             durationInMins: 0,
             repeatValue: 1,
             repeatRule: RepeatRule.EveryXDays,
             parentId: 101,
-          ));
-          await MyApp.dataModel.activity(-1, Activity(
+          )]);
+          await MyApp.dataModel.databaseHelper.insertActivity(Activity(
             trackedEnd: [],
             tags: [],
             trackedStart: [],
@@ -486,14 +482,14 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
             parentCalendarId: 1010,
             id: 100,
             icon: Icons.person,
-          ), context, CUD.Create,addWith: Scheduled(
+          ),scheduleds: [Scheduled(
             isParentTask: false,
             durationInMins: 0,
             repeatValue: 1,
             repeatRule: RepeatRule.EveryXDays,
             parentId: 100,
-          ));
-          await MyApp.dataModel.activity(-1, Activity(
+          )]);
+          await MyApp.dataModel.databaseHelper.insertActivity(Activity(
             trackedEnd: [],
             tags: [],
             trackedStart: [],
@@ -504,16 +500,16 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
             parentCalendarId: 1010,
             id: 103,
             icon: Icons.person,
-          ), context, CUD.Create,addWith: Scheduled(
+          ),scheduleds: [Scheduled(
             isParentTask: false,
             durationInMins: 0,
             repeatValue: 1,
             repeatRule: RepeatRule.EveryXDays,
             parentId: 103,
-          ));
+          )]);
           break;
         case MainOccupationType.Business:
-          await MyApp.dataModel.activity(-1, Activity(
+          await MyApp.dataModel.databaseHelper.insertActivity(Activity(
             trackedEnd: [],
             tags: [],
             trackedStart: [],
@@ -524,14 +520,14 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
             parentCalendarId: 1010,
             id: 104,
             icon: Icons.palette,
-          ), context, CUD.Create,addWith: Scheduled(
+          ), scheduleds: [Scheduled(
             isParentTask: false,
             durationInMins: 0,
             repeatValue: 1,
             repeatRule: RepeatRule.EveryXDays,
             parentId: 104,
-          ));
-          await MyApp.dataModel.activity(-1, Activity(
+          )]);
+          await MyApp.dataModel.databaseHelper.insertActivity(Activity(
             trackedEnd: [],
             tags: [],
             trackedStart: [],
@@ -542,14 +538,14 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
             parentCalendarId: 1010,
             id: 105,
             icon: Icons.people_outline,
-          ), context, CUD.Create,addWith: Scheduled(
+          ),scheduleds: [Scheduled(
             isParentTask: false,
             durationInMins: 0,
             repeatValue: 1,
             repeatRule: RepeatRule.EveryXDays,
             parentId: 105,
-          ));
-          await MyApp.dataModel.activity(-1, Activity(
+          )]);
+          await MyApp.dataModel.databaseHelper.insertActivity(Activity(
             trackedEnd: [],
             tags: [],
             trackedStart: [],
@@ -560,14 +556,14 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
             parentCalendarId: 1010,
             id: 106,
             icon: Icons.web,
-          ), context, CUD.Create,addWith: Scheduled(
+          ), scheduleds: [Scheduled(
             isParentTask: false,
             durationInMins: 0,
             repeatValue: 1,
             repeatRule: RepeatRule.EveryXDays,
             parentId: 106,
-          ));
-          await MyApp.dataModel.activity(-1, Activity(
+          )]);
+          await MyApp.dataModel.databaseHelper.insertActivity(Activity(
             trackedEnd: [],
             tags: [],
             trackedStart: [],
@@ -578,18 +574,18 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
             parentCalendarId: 1010,
             id: 107,
             icon: Icons.pie_chart_outlined,
-          ), context, CUD.Create,addWith: Scheduled(
+          ),scheduleds: [Scheduled(
             isParentTask: false,
             durationInMins: 0,
             repeatValue: 1,
             repeatRule: RepeatRule.EveryXDays,
             parentId: 107,
-          ));
+          )]);
           break;
       }
     });
 
-    await MyApp.dataModel.task(-1, Task(
+    await MyApp.dataModel.databaseHelper.insertTask(Task(
         parentId: -1,
         value: 10000,
         name: 'Adjust your schedule to your likings in the \'Calendar\' Page',
@@ -600,13 +596,13 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
         isParentCalendar: true,
         checks: [],
         color: Colors.blue,
-    ), context,CUD.Create,addWith: Scheduled(
+    ),scheduleds: [Scheduled(
         repeatRule: RepeatRule.None,
         repeatValue: 0,
         durationInMins: 10,
         isParentTask: true,
-    ));
-    await MyApp.dataModel.task(-1, Task(
+    )]);
+    await MyApp.dataModel.databaseHelper.insertTask(Task(
       parentId: -1,
       value: 10000,
       name: 'Have a look at the metrics page',
@@ -617,13 +613,13 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
       isParentCalendar: true,
       checks: [],
       color: Colors.blue,
-    ), context,CUD.Create,addWith: Scheduled(
+    ),scheduleds: [Scheduled(
       repeatRule: RepeatRule.None,
       repeatValue: 0,
       durationInMins: 10,
       isParentTask: true,
-    ));
-    await MyApp.dataModel.task(-1, Task(
+    )]);
+    await MyApp.dataModel.databaseHelper.insertTask(Task(
       parentId: -1,
       value: 10000,
       name: 'Add your own activities/tasks',
@@ -634,13 +630,13 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
       isParentCalendar: true,
       checks: [],
       color: Colors.blue,
-    ), context,CUD.Create,addWith: Scheduled(
+    ),scheduleds:[ Scheduled(
       repeatRule: RepeatRule.None,
       repeatValue: 0,
       durationInMins: 10,
       isParentTask: true,
-    ));
-    await MyApp.dataModel.task(-1, Task(
+    )]);
+    await MyApp.dataModel.databaseHelper.insertTask(Task(
       parentId: -1,
       value: 10000,
       name: 'Read our encouragement letter(it\'s short believe me)',
@@ -657,16 +653,12 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
           ' very much. So be patient with this journey, because on the other side there is unlimited potential for'
           ' your productivityWe addressed this problem by letting you edit the timestamp(do it by pressing on the'
           ' seconds passing or clicking the 3 dots button)'
-    ), context,CUD.Create,addWith: Scheduled(
+    ),scheduleds: [Scheduled(
       repeatRule: RepeatRule.None,
       repeatValue: 0,
       durationInMins: 10,
       isParentTask: true,
-    ));
-
-
-
-    launchPage(context, TrackPage());
+    )]);
   }
 
 }

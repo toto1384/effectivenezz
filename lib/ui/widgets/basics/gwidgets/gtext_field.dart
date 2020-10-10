@@ -3,7 +3,6 @@ import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../main.dart';
 
 class GTextField extends StatelessWidget {
 
@@ -24,7 +23,7 @@ class GTextField extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return Container(
-      constraints: BoxConstraints(maxWidth: MyApp.dataModel.screenWidth),
+      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
       decoration: BoxDecoration(
         color: (variant??1)==1?MyColors.color_black:Colors.transparent,
         borderRadius: BorderRadius.circular(100),

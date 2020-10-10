@@ -1,10 +1,8 @@
 import 'package:effectivenezz/data/iap.dart';
-import 'package:effectivenezz/ui/widgets/basics/distivity_drawer.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gicon.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/grich_text.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gswitchable.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
-import 'package:effectivenezz/ui/widgets/basics/rosse_scaffold.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/gapp_bar.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/gtab_bar.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
