@@ -19,7 +19,7 @@ void main() {
           darkTheme: ThemeData(
             fontFamily: 'Montserrat',
             unselectedWidgetColor: Colors.white,
-            canvasColor: MyColors.color_black_darker,
+            canvasColor: MyColors.color_black,
             accentColor: Colors.white,
             cursorColor: Colors.white,
             snackBarTheme: SnackBarThemeData(
@@ -112,7 +112,8 @@ class MyAppState extends State<MyApp> {
       systemNavigationBarIconBrightness: Brightness.light,
       systemNavigationBarColor: MyColors.color_black_darker
     ));
-    return Scaffold(body: Center(child: Column(
+    return Scaffold(
+     body: Center(child: Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[

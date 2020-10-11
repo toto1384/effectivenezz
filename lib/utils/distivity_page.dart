@@ -38,14 +38,13 @@ class DistivityPageState<T extends StatefulWidget> extends State<T> with AfterLa
 
   @override
   void initState() {
+    customKey=CustomKey(this);
     super.initState();
     Future.delayed(Duration.zero, init);
   }
   
   init(){
-
-    customKey=CustomKey(this);
-    if(!isShowingPage(context, QuickStartPage)){
+    if(!isShowingPage(QuickStartPage)){
       if(Random().nextInt(17)==1){
         int currentIndex = 2;
         scaffoldKey.currentState.showSnackBar(SnackBar(

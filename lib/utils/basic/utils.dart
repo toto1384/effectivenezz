@@ -31,7 +31,8 @@ Color getContrastColor(Color color){
   return (color??Colors.white).computeLuminance() > 0.5 ? Colors.black : Colors.white;
 }
 
-bool isShowingPage(BuildContext context,Type type){
+bool isShowingPage(Type type){
+  print("IS SHOWING PAGE ${type.toString()} ${DistivityPageState.customKey.pageName}");
   if(DistivityPageState.customKey.pageName==type.toString())return true;
 
   return false;

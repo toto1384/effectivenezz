@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gbutton.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gicon.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
+import 'package:effectivenezz/ui/widgets/specific/gwidgets/ui/gmax_web_width.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:flutter/cupertino.dart';
@@ -73,6 +74,7 @@ showDistivityModalBottomSheet(BuildContext context, StateGetter stateGetter,{boo
 
   showSlidingBottomSheet(context, builder: (ctx){
     return SlidingSheetDialog(
+      maxWidth: MediaQuery.of(context).size.height,
       duration: Duration(milliseconds: 100),
       elevation: 0,
       cornerRadius: 16,

@@ -11,6 +11,7 @@ import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext_field.dart';
 import 'package:effectivenezz/ui/widgets/buttons/gsign_in_with_google_welcome_activity_button.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/scheduled/gdate_time_edit_widget_for_scheduled.dart';
+import 'package:effectivenezz/ui/widgets/specific/gwidgets/ui/gmax_web_width.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
@@ -64,214 +65,219 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
         });
       },backgroundColor: MyColors.color_black, label: GText(pageIndex==3?"Finish":"Next($pageIndex/3)")),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-      body: PageView(
-        controller: pageController,
-        physics: NeverScrollableScrollPhysics(),
-        children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Center(child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(top: (MediaQuery.of(context).size.height/5),left: 10,right: 10),
-                    child: Image.asset(AssetsPath.timeIllustration),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10,left: 20,right: 20),
-                    child: GText('Welcome to Effectivenezz, the place to manage your time. Let\'s start your'
-                        'onboarding journey in less than 2 minutes(because we know that time is important)',
-                      isCentered: true,),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 50),
-                    child: GButton('Start',onPressed: (){
-                      setState(() {
-                        pageIndex++;
-                      });
-                      pageController.animateToPage
-                        (pageIndex, duration: Duration(milliseconds: 200), curve: Curves.easeInOut);
-                    },),
-                  ),
-                ],
-              )),
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      GText("Already an user?"),
-                      GButton("Log in", onPressed: (){
-                        widget.driveHelper.handleSignIn(context).then((v)async{
-                          await MyApp.dataModel.driveHelper.downloadAndReplaceFile(context,
-                              (await MyApp.dataModel.driveHelper.getAllFiles(context))[0]);
-                        });
-                      },variant: 2),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          ListView(
-            shrinkWrap: true,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(15.0),
-                child: GText("I work on :",textType: TextType.textTypeGigant),
-              ),
-              RosseRadioGroup(
-                isBig: true,
-                items: {
-                  "9-5 Job":mainOccupationTypes.contains(MainOccupationType.values[0]),
-                  "Freelance":mainOccupationTypes.contains(MainOccupationType.values[1]),
-                  "Side Hustle/Job":mainOccupationTypes.contains(MainOccupationType.values[2]),
-                },
-                onSelected: (i,s){
-                  setState(() {
-                    if(mainOccupationTypes.contains(MainOccupationType.values[i])){
-                      //contains
-                      mainOccupationTypes.remove(MainOccupationType.values[i]);
-                    }else{
-                      mainOccupationTypes.add(MainOccupationType.values[i]);
-                    }
-                  });
-                },
-              ),
-              GText("(select 1 or more)"),
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 50),
-                  child: GText('We ask this to determine the basic activities you do at work so you can track them and get insights'),
-                ),
-              ),
-            ],
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                padding: EdgeInsets.only(top: MediaQuery.of(context).size.height/3),
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      GText("I go to sleep at:",textType: TextType.textTypeTitle),
-                      GDateTimeEditWidgetForScheduled(onScheduledChange: (sch){
-                        setState(() {
-                          sleepScheduled=sch..startTime.subtract(Duration(days: 1));
-                        });
-                      },isStartTime: true,scheduled: sleepScheduled,text:'',onlyTime: true,),
-                      GSwitchable(text: "Schedule daily review(an essential habit for a productive day)",
-                          checked: addReview, onCheckedChanged: (b){
-                            setState(() {
-                              addReview=b;
-                            });
-                          }, isCheckboxOrSwitch: true
+      body: GMaxWebWidth(
+        child: PageView(
+          controller: pageController,
+          physics: NeverScrollableScrollPhysics(),
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Center(child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(top: (MediaQuery.of(context).size.height/5),left: 10,right: 10),
+                      child: Container(
+                          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height/2.5),
+                          child: Image.asset(AssetsPath.timeIllustration)
                       ),
-                    ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10,left: 20,right: 20),
+                      child: GText('Welcome to Effectivenezz, the place to manage your time. Let\'s start your'
+                          'onboarding journey in less than 2 minutes(because we know that time is important)',
+                        isCentered: true,),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 50),
+                      child: GButton('Start',onPressed: (){
+                        setState(() {
+                          pageIndex++;
+                        });
+                        pageController.animateToPage
+                          (pageIndex, duration: Duration(milliseconds: 200), curve: Curves.easeInOut);
+                      },),
+                    ),
+                  ],
+                )),
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        GText("Already an user?"),
+                        GButton("Log in", onPressed: (){
+                          widget.driveHelper.handleSignIn(context).then((v)async{
+                            await MyApp.dataModel.driveHelper.downloadAndReplaceFile(context,
+                                (await MyApp.dataModel.driveHelper.getAllFiles(context))[0]);
+                          });
+                        },variant: 2),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 50),
-                  child: GText('Everything centers around your sleep, so we use it to build your schedule. And no Johnny, we don\'t save your data'),
+              ],
+            ),
+            ListView(
+              shrinkWrap: true,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: GText("I work on :",textType: TextType.textTypeGigant),
                 ),
-              )
-            ],
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                padding: EdgeInsets.only(top: MediaQuery.of(context).size.height/3),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(15),
-                        child: kIsWeb?Wrap(
-                          direction: Axis.horizontal,
-                          children: [
-                            GText('What\'s that one activity that if I do everyday for',),
-                            Container(
-                              width: 100,
-                              child: Padding(
-                                padding: const EdgeInsets.all(2),
-                                child: GTextField(
-                                    activityDurationMinutesTEC, hint: 'hours',small: true),
-                              ),
-                            ),
-                            GText(' hours will change my life in 6 months'),
-                          ],
-                        ):Text.rich(
-                          TextSpan(children: <InlineSpan>[
-                            TextSpan(text: 'What\'s that one activity that if I do everyday for',style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: TextType.textTypeNormal.fontWeight,
-                              fontSize: TextType.textTypeNormal.size,
-                            ),),
-                            WidgetSpan(
-                              alignment: PlaceholderAlignment.middle,
-                              child: Container(
+                RosseRadioGroup(
+                  isBig: true,
+                  items: {
+                    "9-5 Job":mainOccupationTypes.contains(MainOccupationType.values[0]),
+                    "Freelance":mainOccupationTypes.contains(MainOccupationType.values[1]),
+                    "Side Hustle/Job":mainOccupationTypes.contains(MainOccupationType.values[2]),
+                  },
+                  onSelected: (i,s){
+                    setState(() {
+                      if(mainOccupationTypes.contains(MainOccupationType.values[i])){
+                        //contains
+                        mainOccupationTypes.remove(MainOccupationType.values[i]);
+                      }else{
+                        mainOccupationTypes.add(MainOccupationType.values[i]);
+                      }
+                    });
+                  },
+                ),
+                GText("(select 1 or more)"),
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 50),
+                    child: GText('We ask this to determine the basic activities you do at work so you can track them and get insights'),
+                  ),
+                ),
+              ],
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(top: MediaQuery.of(context).size.height/3),
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        GText("I go to sleep at:",textType: TextType.textTypeTitle),
+                        GDateTimeEditWidgetForScheduled(onScheduledChange: (sch){
+                          setState(() {
+                            sleepScheduled=sch..startTime.subtract(Duration(days: 1));
+                          });
+                        },isStartTime: true,scheduled: sleepScheduled,text:'',onlyTime: true,),
+                        GSwitchable(text: "Schedule daily review(an essential habit for a productive day)",
+                            checked: addReview, onCheckedChanged: (b){
+                              setState(() {
+                                addReview=b;
+                              });
+                            }, isCheckboxOrSwitch: true
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 50),
+                    child: GText('Everything centers around your sleep, so we use it to build your schedule. And no Johnny, we don\'t save your data'),
+                  ),
+                )
+              ],
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(top: MediaQuery.of(context).size.height/3),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(15),
+                          child: kIsWeb?Wrap(
+                            direction: Axis.horizontal,
+                            children: [
+                              GText('What\'s that one activity that if I do everyday for',),
+                              Container(
                                 width: 100,
                                 child: Padding(
                                   padding: const EdgeInsets.all(2),
                                   child: GTextField(
                                       activityDurationMinutesTEC, hint: 'hours',small: true),
                                 ),
+                              ),
+                              GText(' hours will change my life in 6 months'),
+                            ],
+                          ):Text.rich(
+                            TextSpan(children: <InlineSpan>[
+                              TextSpan(text: 'What\'s that one activity that if I do everyday for',style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: TextType.textTypeNormal.fontWeight,
+                                fontSize: TextType.textTypeNormal.size,
                               ),),
-                            TextSpan(text: ' hours will change my life in 6 months',style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: TextType.textTypeNormal.fontWeight,
-                              fontSize: TextType.textTypeNormal.size,
-                            )),
-                          ],),textAlign: TextAlign.center,
+                              WidgetSpan(
+                                alignment: PlaceholderAlignment.middle,
+                                child: Container(
+                                  width: 100,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(2),
+                                    child: GTextField(
+                                        activityDurationMinutesTEC, hint: 'hours',small: true),
+                                  ),
+                                ),),
+                              TextSpan(text: ' hours will change my life in 6 months',style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: TextType.textTypeNormal.fontWeight,
+                                fontSize: TextType.textTypeNormal.size,
+                              )),
+                            ],),textAlign: TextAlign.center,
+                          ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(15.0),
-                        child: GTextField(activityNameTEC,hint: 'Activity name',),
-                      ),
-                    ],
+                        Padding(
+                          padding: const EdgeInsets.all(15.0),
+                          child: GTextField(activityNameTEC,hint: 'Activity name',),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 50),
-                  child: GText('It\'s not hard to push the needle forward. Consistent medium-sized action every day will get'
-                      ' you very further in life. You can start your business with 4 hours a day, you can build an '
-                      'amazing body with 30 minutes a day.'),
-                ),
-              )
-            ],
-          ),
-          Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                GText("Time management shouldn\'t be that hard and STRICT. So we\'ve created a simple routine "
-                    "for you and you will be notified before each activity.",textType: TextType.textTypeSubtitle,isCentered: true,),
-                Padding(
-                  padding: const EdgeInsets.only(top: 30),
-                  child: GSignInWithGoogleWelcomeActivityButton( widget.driveHelper,onSignInCompleted: ()async{
-                    await save();
-                  },),
-                ),
-                GText("(and continue)",)
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 50),
+                    child: GText('It\'s not hard to push the needle forward. Consistent medium-sized action every day will get'
+                        ' you very further in life. You can start your business with 4 hours a day, you can build an '
+                        'amazing body with 30 minutes a day.'),
+                  ),
+                )
               ],
             ),
-          ),
-        ],
+            Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  GText("Time management shouldn\'t be that hard and STRICT. So we\'ve created a simple routine "
+                      "for you and you will be notified before each activity.",textType: TextType.textTypeSubtitle,isCentered: true,),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 30),
+                    child: GSignInWithGoogleWelcomeActivityButton( widget.driveHelper,onSignInCompleted: ()async{
+                      await save();
+                    },),
+                  ),
+                  GText("(and continue)",)
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

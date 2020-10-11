@@ -28,15 +28,14 @@ class _DistivityDrawerState extends State<DistivityDrawer> {
   Widget build(BuildContext context) {
 
     return Drawer(
-        elevation: 10,
-        child: Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment:MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Container(
-                height: MediaQuery.of(context).size.height-100,
-                child: ListView(
-                    children: <Widget>[
+        elevation: 0,
+        child: SingleChildScrollView(
+          child: Column(
+              mainAxisAlignment:MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
                       getDrawerHeader(),
                       getPageItem(name: "Track", page: TrackPage(), icon: Icons.timer),
                       getCalendarWidget(locked: false),
@@ -45,9 +44,9 @@ class _DistivityDrawerState extends State<DistivityDrawer> {
                       getPageItem(name: "Time Doctor", page: TimeDoctorPage(), icon: Icons.av_timer,locked: false),
                     ]
                 ),
-              ),
-              getPageItem(name: "Settings", page: SettingsPage(),icon: Icons.settings),
-            ]
+                getPageItem(name: "Settings", page: SettingsPage(),icon: Icons.settings),
+              ]
+          ),
         ),
     );
   }
@@ -66,7 +65,7 @@ class _DistivityDrawerState extends State<DistivityDrawer> {
           padding: const EdgeInsets.only(right: 5),
           child: Card(
             shape: getShape(smallRadius: false),
-            color: isShowingPage(context, PlanVsTrackedPage)?MyColors.color_black:Colors.transparent,
+            color: isShowingPage(PlanVsTrackedPage)?MyColors.color_black_darker:Colors.transparent,
             elevation: 0,
             child: ListTile(
               leading: Stack(
@@ -114,13 +113,13 @@ class _DistivityDrawerState extends State<DistivityDrawer> {
             ),
           ),
         ),
-      ]+(showCals?GCalendarListForDrawer():[])+[
-        (MyApp.dataModel.eCalendars.length==0&&showCals)?Padding(
+        if(showCals)GCalendarListForDrawer(),
+        if(MyApp.dataModel.eCalendars.length==0&&showCals)Padding(
           padding: const EdgeInsets.all(8.0),
           child: Center(child: GText("No calendars"),),
-        ):Container(),
-        showCals?Divider():Container()
-      ],
+        ),
+        if(showCals)Divider()
+      ]
     );
   }
   getDrawerHeader(){
@@ -146,37 +145,35 @@ class _DistivityDrawerState extends State<DistivityDrawer> {
     return Padding(
       padding: const EdgeInsets.only(right: 5),
       child: Card(
-        color: isShowingPage(context, page.runtimeType)?MyColors.color_black:Colors.transparent,
+        color: isShowingPage(page.runtimeType)?MyColors.color_black_darker:Colors.transparent,
         elevation: 0,
         shape: getShape(smallRadius: false,),
-        child: GestureDetector(
+        child: ListTile(
+          leading: Stack(
+            children: [
+              Padding(
+                padding: EdgeInsets.only(left: 5,top: 5),
+                child: icon!=null?GIcon(icon,color: locked?Colors.blueGrey:Colors.white):null,
+              ),
+              if(locked)Container(
+                width: 20,
+                height: 20,
+                child: Card(
+                  shape: getShape(),
+                  color: Colors.red,
+                  child: GIcon(Icons.lock_outline,size: 10),
+                ),
+              )
+            ],
+          ),
           onTap: (){
-            if(isShowingPage(context, page.runtimeType)){
+            if(isShowingPage(page.runtimeType)){
               return;
             }
             if(!(page is Container))if(!locked)launchPage(context, page);
             if(locked)launchPage(context,IAPScreen());
           },
-          child: ListTile(
-            leading: Stack(
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(left: 5,top: 5),
-                  child: icon!=null?GIcon(icon,color: locked?Colors.blueGrey:Colors.white):null,
-                ),
-                if(locked)Container(
-                  width: 20,
-                  height: 20,
-                  child: Card(
-                    shape: getShape(),
-                    color: Colors.red,
-                    child: GIcon(Icons.lock_outline,size: 10),
-                  ),
-                )
-              ],
-            ),
-            title: GText(name,color: locked?Colors.blueGrey:Colors.white),
-          ),
+          title: GText(name,color: locked?Colors.blueGrey:Colors.white),
         ),
       ),
     );

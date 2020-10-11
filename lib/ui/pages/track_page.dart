@@ -8,6 +8,7 @@ import 'package:effectivenezz/ui/widgets/lists/gsort_by_money_tasks_and_activiti
 import 'package:effectivenezz/ui/widgets/specific/distivity_secondary_item.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/gapp_bar.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/gtab_bar.dart';
+import 'package:effectivenezz/ui/widgets/specific/gwidgets/ui/gscaffold.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
@@ -90,7 +91,7 @@ class _TrackPageState extends DistivityPageState<TrackPage> with AfterLayoutMixi
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: ()=>customOnBackPressed(context),
-      child: Scaffold(
+      child: GScaffold(
         key: scaffoldKey,
         drawer: DistivityDrawer(),
         appBar: GAppBar('Track',smallSubtitle: false,drawerEnabled: true,trailing: Visibility(

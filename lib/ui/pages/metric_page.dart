@@ -2,6 +2,8 @@ import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
 import 'package:effectivenezz/ui/widgets/basics/rosse_scaffold.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/gmetric_widget.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/gselected_days_widget_for_app_bar.dart';
+import 'package:effectivenezz/ui/widgets/specific/gwidgets/ui/gmax_web_width.dart';
+import 'package:effectivenezz/ui/widgets/specific/gwidgets/ui/gscaffold.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
@@ -29,39 +31,41 @@ class _MetricPageState extends State<MetricPage> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: ()=>customOnBackPressed(context),
-      child: RosseScaffold(
-        getMetricName(widget.metric),
-        appBarWidget: Column(
-          key: GlobalKey(),
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            GText('${getDatesNameForAppBarSelector(selectedDate,SelectedView.Day)}:'),
-            GMetricWidget( widget.metric, StatPeriod.day, selectedDate, Size.Medium),
-          ],
-        ),
-        body: SingleChildScrollView(
-          child: Column(
+      child: GScaffold(
+        body: RosseSilver(
+          getMetricName(widget.metric),
+          appBarWidget: Column(
+            key: GlobalKey(),
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 15,horizontal: 20),
-                child: GSelectedDaysWidgetForAppBar(
-                    selectedDate: selectedDate, selectedView: SelectedView.Day, onNewDateSelectedPlusPage: (date,i){
-                      setState(() {
-                        selectedDate=date;
-                      });
-                    }),
-              ),
-              getSubtitle("Weekly(${getDatesNameForAppBarSelector(selectedDate,SelectedView.Week)})"),
-              GMetricWidget( widget.metric, StatPeriod.week, selectedDate, Size.Large),
-              getSubtitle("Monthly(${getDatesNameForAppBarSelector(selectedDate,SelectedView.Month)})"),
-              GMetricWidget( widget.metric, StatPeriod.month, selectedDate, Size.Large),
+              GText('${getDatesNameForAppBarSelector(selectedDate,SelectedView.Day)}:'),
+              GMetricWidget( widget.metric, StatPeriod.day, selectedDate, Size.Medium),
             ],
           ),
-        ),
+          body: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 15,horizontal: 20),
+                  child: GSelectedDaysWidgetForAppBar(
+                      selectedDate: selectedDate, selectedView: SelectedView.Day, onNewDateSelectedPlusPage: (date,i){
+                        setState(() {
+                          selectedDate=date;
+                        });
+                      }),
+                ),
+                getSubtitle("Weekly(${getDatesNameForAppBarSelector(selectedDate,SelectedView.Week)})"),
+                GMetricWidget( widget.metric, StatPeriod.week, selectedDate, Size.Large),
+                getSubtitle("Monthly(${getDatesNameForAppBarSelector(selectedDate,SelectedView.Month)})"),
+                GMetricWidget( widget.metric, StatPeriod.month, selectedDate, Size.Large),
+              ],
+            ),
+          ),
 //        expandedHeight: widget.metric==Metric.tracked_today?400:200,
-        color: MyColors.color_black,
-        backEnabled: true,
+          color: MyColors.color_black,
+          backEnabled: true,
+        ),
       ),
     );
   }

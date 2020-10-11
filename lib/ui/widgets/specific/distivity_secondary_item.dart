@@ -4,6 +4,7 @@ import 'package:after_layout/after_layout.dart';
 import 'package:effectivenezz/objects/task.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gicon.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
+import 'package:effectivenezz/ui/widgets/specific/gwidgets/ui/gmax_web_width.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
@@ -34,6 +35,8 @@ class _DistivitySecondaryItemState extends State<DistivitySecondaryItem> with Af
     super.initState();
   }
 
+  Color contrastColor = getContrastColor(MyApp.dataModel.currentPlaying.color);
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -42,7 +45,7 @@ class _DistivitySecondaryItemState extends State<DistivitySecondaryItem> with Af
           topLeft: Radius.circular(7),
           topRight: Radius.circular(7)
         ),
-        color: MyColors.color_black_darker,
+        color: MyApp.dataModel.currentPlaying.color,
       ),
       width: (MyApp.dataModel.screenWidth??400)-100,
       child: Padding(
@@ -51,7 +54,7 @@ class _DistivitySecondaryItemState extends State<DistivitySecondaryItem> with Af
           children: <Widget>[
             if(MyApp.dataModel.currentPlaying is Task)
               IconButton(
-                icon: GIcon(MyApp.dataModel.currentPlaying.isCheckedOnDate(getTodayFormated())?Icons.check_circle_outline:Icons.radio_button_unchecked,color: MyApp.dataModel.currentPlaying.color),
+                icon: GIcon(MyApp.dataModel.currentPlaying.isCheckedOnDate(getTodayFormated())?Icons.check_circle_outline:Icons.radio_button_unchecked,color:contrastColor),
                 onPressed: (){
                   if(MyApp.dataModel.currentPlaying.isCheckedOnDate(getTodayFormated())){
                     MyApp.dataModel.currentPlaying.unCheckOnDate(getTodayFormated());
@@ -70,7 +73,7 @@ class _DistivitySecondaryItemState extends State<DistivitySecondaryItem> with Af
                     },
                     child: Padding(
                       padding: EdgeInsets.only(left: ((MyApp.dataModel.currentPlaying is Task)?0:20),top: 10,bottom: 10),
-                      child: GText(MyApp.dataModel.currentPlaying.name,color: MyApp.dataModel.currentPlaying.color,maxLines: 2),
+                      child: GText(MyApp.dataModel.currentPlaying.name,color: contrastColor,maxLines: 2),
                     )
                 ),
               ),
@@ -82,7 +85,7 @@ class _DistivitySecondaryItemState extends State<DistivitySecondaryItem> with Af
               },
               child: Padding(
                 padding: const EdgeInsets.only(left: 10),
-                child:GText("• "+tracked)
+                child:GText("• "+tracked,color: contrastColor,)
                    // + "\n(left: ${getTextFromDuration(currentPlaying.getTimeLeft(context))})"),
 
               ),
@@ -90,11 +93,11 @@ class _DistivitySecondaryItemState extends State<DistivitySecondaryItem> with Af
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                IconButton(icon: GIcon(Icons.stop,), onPressed: (){
+                IconButton(icon: GIcon(Icons.stop,color: contrastColor,), onPressed: (){
                   MyApp.dataModel.setPlaying(context, null,);
                 }),
                 PopupMenuButton(
-                  child: GIcon(Icons.more_horiz),
+                  child: GIcon(Icons.more_horiz,color: contrastColor,),
                   shape: getShape(),
                   color: MyColors.getOverFlowColor(),
                   itemBuilder: (ctx){
