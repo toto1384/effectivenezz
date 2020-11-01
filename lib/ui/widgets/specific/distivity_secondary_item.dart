@@ -4,7 +4,6 @@ import 'package:after_layout/after_layout.dart';
 import 'package:effectivenezz/objects/task.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gicon.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
-import 'package:effectivenezz/ui/widgets/specific/gwidgets/ui/gmax_web_width.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
@@ -35,11 +34,10 @@ class _DistivitySecondaryItemState extends State<DistivitySecondaryItem> with Af
     super.initState();
   }
 
-  Color contrastColor = getContrastColor(MyApp.dataModel.currentPlaying.color);
-
   @override
   Widget build(BuildContext context) {
-    return Container(
+    Color contrastColor = getContrastColor(MyApp.dataModel.currentPlaying!=null?MyApp.dataModel.currentPlaying.color:Colors.black);
+    return MyApp.dataModel.currentPlaying!=null?Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(7),
@@ -59,7 +57,7 @@ class _DistivitySecondaryItemState extends State<DistivitySecondaryItem> with Af
                   if(MyApp.dataModel.currentPlaying.isCheckedOnDate(getTodayFormated())){
                     MyApp.dataModel.currentPlaying.unCheckOnDate(getTodayFormated());
                   }else{
-                    MyApp.dataModel.currentPlaying.checks.add(getTodayFormated());
+                    MyApp.dataModel.currentPlaying.addCheck(getTodayFormated());
                   }
                   MyApp.dataModel.task(MyApp.dataModel.findObjectIndexById(MyApp.dataModel.currentPlaying), MyApp.dataModel.currentPlaying, context, CUD.Update);
                 },
@@ -153,7 +151,7 @@ class _DistivitySecondaryItemState extends State<DistivitySecondaryItem> with Af
           ],
         ),
       ),
-    );
+    ):Container();
   }
 
   Timer _everySecond;

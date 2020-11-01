@@ -65,9 +65,9 @@ class GDateTimeEditWidgetForScheduled extends StatelessWidget {
                                   scheduled.startTime.year,
                                   scheduled.startTime.month,
                                   scheduled.startTime.day, time.hour,
-                                  time.minute);
+                                  time.minute,0);
                             }else{
-                              scheduled.durationInMins = DateTime(
+                              scheduled.durationInMinutes = DateTime(
                                   scheduled.getEndTime().year,
                                   scheduled.getEndTime().month,
                                   scheduled.getEndTime().day,
@@ -102,9 +102,9 @@ class GDateTimeEditWidgetForScheduled extends StatelessWidget {
                           scheduled.startTime = DateTime(
                               date.year, date.month, date.day,
                               scheduled.startTime.hour,
-                              scheduled.startTime.minute);
+                              scheduled.startTime.minute,0);
                         }else{
-                          scheduled.durationInMins = DateTime(
+                          scheduled.durationInMinutes = DateTime(
                               date.year, date.month, date.day,
                               scheduled.getEndTime().hour, scheduled.getEndTime().minute
                           ).difference(scheduled.startTime).inMinutes;

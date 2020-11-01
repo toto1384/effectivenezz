@@ -2,6 +2,8 @@ import 'package:effectivenezz/ui/widgets/basics/gwidgets/gicon.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
 import 'package:effectivenezz/utils/basic/overflows_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
+import 'package:effectivenezz/utils/basic/widgets_basic.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../main.dart';
@@ -9,37 +11,46 @@ import '../../../../main.dart';
 class GSelectedViewIconButton extends StatelessWidget {
 
   final SelectedView selectedView;
+  final double zoom;
   final Function(SelectedView) onSelectedView;
+  final Function(double) onZoomUpdate;
 
 
-  GSelectedViewIconButton(this. selectedView,
-      this. onSelectedView);
+  GSelectedViewIconButton(this. selectedView,this.zoom,
+  {@required this. onSelectedView,@required this.onZoomUpdate});
 
   @override
   Widget build(BuildContext context) {
-    IconData iconData;
-    switch (selectedView) {
-      case SelectedView.Day:
-        iconData = Icons.calendar_view_day;
-        break;
-      case SelectedView.ThreeDay:
-        iconData = Icons.today;
-        break;
-      case SelectedView.Week:
-        iconData = Icons.calendar_today;
-        break;
-      case SelectedView.Month:
-        iconData = Icons.grid_on;
-        break;
-    }
+    double actualZoom = zoom;
 
     return IconButton(
-      icon: GIcon(iconData),
+      icon: GIcon(Icons.preview_rounded),
       onPressed: () {
         showDistivityModalBottomSheet(context, (ctx, ss) {
           return Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
+
+              if(kIsWeb)
+                getSubtitle('Zoom'),
+              if(kIsWeb)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Slider(
+
+                    onChanged: (v){
+                      ss((){
+                        actualZoom=v;
+                        onZoomUpdate(v);
+                      });
+                    },
+                    value: actualZoom,
+                    min: 1.0/3.0,
+                    max: 5,
+                  ),
+                ),
+              getSubtitle('Views'),
               ListTile(
                 leading: GIcon(Icons.calendar_view_day),
                 title: GText('Day view'),

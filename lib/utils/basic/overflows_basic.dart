@@ -4,7 +4,6 @@ import 'dart:async';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gbutton.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gicon.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
-import 'package:effectivenezz/ui/widgets/specific/gwidgets/ui/gmax_web_width.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:flutter/cupertino.dart';

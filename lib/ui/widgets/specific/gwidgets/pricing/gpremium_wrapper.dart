@@ -24,7 +24,7 @@ class _GPremiumWrapperState extends State<GPremiumWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return MyApp.dataModel.driveHelper.isPremium?widget.child:Container(
       height: widget.height,
       width: widget.width,
       child: Stack(
@@ -32,24 +32,23 @@ class _GPremiumWrapperState extends State<GPremiumWrapper> {
         children: [
           Center(child: widget.child),
           ClipRect(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(
-                sigmaX: MyApp.dataModel.driveHelper.isPremium?0:5,
-                sigmaY: MyApp.dataModel.driveHelper.isPremium?0:5,
+              child: BackdropFilter(
+                filter: ImageFilter.blur(
+                  sigmaX: 5,
+                  sigmaY: 5,
+                ),
+                child:  widget.height==null?Opacity(
+                  opacity: 0.01,
+                  child: widget.child,
+                ):Container(
+                  color: Colors.transparent,
+                  height: widget.height,
+                  width: widget.width,
+                )
               ),
-              child:  widget.height==null?Opacity(
-                opacity: 0.01,
-                child: widget.child,
-              ):Container(
-                color: Colors.transparent,
-                height: widget.height,
-                width: widget.width,
-              )
             ),
-          ),
-          Visibility(
-            visible: widget.upgradeButton&&(!MyApp.dataModel.driveHelper.isPremium),
-            child: Positioned.fill(child: Padding(
+          if(widget.upgradeButton)
+            Positioned.fill(child: Padding(
               padding: const EdgeInsets.only(top: 50),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -61,7 +60,6 @@ class _GPremiumWrapperState extends State<GPremiumWrapper> {
                 ],
               ),
             )),
-          )
         ],
       ),
     );

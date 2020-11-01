@@ -31,7 +31,7 @@ class GMetricWidget extends StatelessWidget {
             MyApp.dataModel.getTimeStamps(context, dateTimes: calculateSelectedDates(statPeriod, dateTime),tracked: true);
 
             double averageFocusMinutes = 0;
-            tracked.forEach((element) {averageFocusMinutes=averageFocusMinutes+element.duration;});
+            tracked.forEach((element) {averageFocusMinutes=averageFocusMinutes+element.durationInMinutes;});
             if(averageFocusMinutes!=0)averageFocusMinutes=averageFocusMinutes/tracked.length;
 
             return GText("${minuteOfDayToHourMinuteString(averageFocusMinutes.toInt(),true)}",textType: getTextTypeFromSize(big));
@@ -44,7 +44,7 @@ class GMetricWidget extends StatelessWidget {
               MyApp.dataModel.getTimeStamps(context, dateTimes: [element],tracked: true);
 
               double averageFocusMinutes = 0;
-              tracked.forEach((element) {averageFocusMinutes+=element.duration;});
+              tracked.forEach((element) {averageFocusMinutes+=element.durationInMinutes;});
               if(averageFocusMinutes!=0)averageFocusMinutes=averageFocusMinutes/tracked.length;
 
               data.add(DateValueObject(element,averageFocusMinutes.toInt()));
@@ -69,7 +69,7 @@ class GMetricWidget extends StatelessWidget {
 
             tracked.forEach((element) {
               averageHourValue+=element.getParent().value;
-              minutesTracked+=element.duration;
+              minutesTracked+=element.durationInMinutes;
             });
             if(averageHourValue!=0)averageHourValue=averageHourValue/minutesTracked;
 
@@ -87,7 +87,7 @@ class GMetricWidget extends StatelessWidget {
 
               tracked.forEach((element) {
                 averageHourValue+=element.getParent().value;
-                minutesTracked+=element.duration;
+                minutesTracked+=element.durationInMinutes;
               });
               if(averageHourValue!=0)averageHourValue=averageHourValue/minutesTracked;
 

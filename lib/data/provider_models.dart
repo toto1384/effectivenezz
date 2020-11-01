@@ -60,6 +60,15 @@ class DataModel{
     dataModel.scheduleds= await dataModel.databaseHelper.queryAllScheduled();
     dataModel.tasks=await dataModel.databaseHelper.queryAllTasks();
     dataModel.activities = await dataModel.databaseHelper.queryAllActivities();
+    dataModel.tasks.forEach((element) {
+      if(!element.isParentCalendar){
+        dataModel.activities.forEach((act) {
+          if(act.id==element.parentId){
+            act.childs.add(element);
+          }
+        });
+      }
+    });
     dataModel.eCalendars = await dataModel.databaseHelper.queryAllECalendars();
     dataModel.tags=await dataModel.databaseHelper.queryAllTags();
     print(6);
@@ -145,7 +154,7 @@ class DataModel{
     if(dateTime==null)return;
     notificationHelper.scheduleNotification(id: 100000+scheduled.id, title: "Time for ${scheduled.getParent().name}",
         body: "${scheduled.getParent().name} is between ${scheduled.startTime} and "
-            "${scheduled.startTime.add(Duration(minutes: scheduled.durationInMins))}", payload: "sch",
+            "${scheduled.startTime.add(Duration(minutes: scheduled.durationInMinutes))}", payload: "sch",
     dateTime: dateTime,color: scheduled.getParent().color);
   }
 
@@ -288,6 +297,13 @@ class DataModel{
         DistivityPageState.listCallback.notifyUpdated(event);
         break;
       case CUD.Delete:
+        if(!event.isParentCalendar){
+          for(int i = 0 ; i<activities.length;i++){
+            if(activities[i].id==event.parentId){
+              activities[i].childs.remove(event);
+            }
+          }
+        }
         tasks.remove(event);
         if(currentPlaying!=null){
           if(event.id==currentPlaying.id){
@@ -389,13 +405,15 @@ class DataModel{
       case CUD.Create:
         scheduleds.add(event);
         scheduleds[scheduleds.length-1].id=await databaseHelper.insertScheduled(event);
-        if(!kIsWeb)scheduleNotificationForScheduled(notificationHelper,event.getNextStartTime(), event);
+        if(!kIsWeb)scheduleNotificationForScheduled(notificationHelper,
+            event.getNextStartTime(), event);
         break;
       case CUD.Update:
         scheduleds[index]=event;
         await databaseHelper.updateScheduled(event);
         if(!kIsWeb)notificationHelper.cancelNotification(100000+event.id);
-        if(!kIsWeb)scheduleNotificationForScheduled(notificationHelper,event.getNextStartTime(), event);
+        if(!kIsWeb)scheduleNotificationForScheduled(notificationHelper,
+            event.getNextStartTime(), event);
         break;
       case CUD.Delete:
         scheduleds.remove(event);

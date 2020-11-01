@@ -31,13 +31,13 @@ class _GDurationWidgetForScheduledState extends State<GDurationWidgetForSchedule
           child: GText('Duration'),
         ),
         GButton(
-          widget.scheduled.durationInMins == null
+          widget.scheduled.durationInMinutes == null
               ? "Set duration"
-              : "${minuteOfDayToHourMinuteString(widget.scheduled.durationInMins,true)}",
+              : "${minuteOfDayToHourMinuteString(widget.scheduled.durationInMinutes,true)}",
           onPressed: () {
             showPickDurationBottomSheet(context, (d) {
               setState(() {
-                widget.scheduled.durationInMins = (d??Duration.zero).inMinutes;
+                widget.scheduled.durationInMinutes = (d??Duration.zero).inMinutes;
                 widget.onScheduledChange(widget.scheduled);
               });
             });

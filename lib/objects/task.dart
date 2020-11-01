@@ -4,7 +4,6 @@ import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:effectivenezz/utils/date_n_strings.dart';
 import 'package:flutter/material.dart';
-
 import '../main.dart';
 
 
@@ -63,7 +62,11 @@ class Task{
     return toreturn;
   }
 
-  stringFromTags(){
+  addCheck(DateTime dateTime){
+    checks.add(dateTime);
+  }
+
+  String stringFromTags(){
     String toreturn = '';
     tags.forEach((element) {
       toreturn= toreturn+ element.toString()+",";
@@ -71,8 +74,19 @@ class Task{
     return toreturn;
   }
 
+  int getStreakNumberForEveryday(){
+    int streak = 0;
+    while(isCheckedOnDate(getTodayFormated().subtract(Duration(days: streak+1)))){
+      streak++;
+    }
+    if(isCheckedOnDate(getTodayFormated())){
+      streak++;
+    }
+    return streak;
+  }
 
-  isCheckedOnDate(DateTime dateTime){
+
+  bool isCheckedOnDate(DateTime dateTime){
     if(checks.length==0){
       return false;
     }else{
@@ -144,7 +158,6 @@ class Task{
       });
       if(toreturn.length==0){
         Scheduled scheduled = Scheduled(
-          durationInMins: 0,
           repeatValue: 0,
           repeatRule: RepeatRule.None,
           isParentTask: true,
@@ -159,7 +172,7 @@ class Task{
   }
 
   Duration getTimeLeft(BuildContext context){
-    if(getScheduled(context)[0].durationInMins==0){
+    if(getScheduled(context)[0].durationInMinutes==0){
       return Duration.zero;
     }
 
@@ -187,8 +200,8 @@ class Task{
           taken = addDurations(taken, endTime.difference(startTime));
 
         }
-
-        return subtractDurations(Duration(minutes: getScheduled(context)[0].durationInMins), taken);
+        return Duration(minutes: subtractDurations(Duration(minutes:
+          getScheduled(context)[0].durationInMinutes), taken).inMinutes);
         break;
       case RepeatRule.EveryXDays:
 
@@ -223,7 +236,8 @@ class Task{
             }
             //now calculate which ts and te match between the dates
             for(int i = 0 ; i < tsl.length ; i++){
-              if(!(tsl[i].isBefore(currentStartTime)&&tel[i].isBefore(currentStartTime))){
+              if(!(tsl[i].isBefore(currentStartTime)&&
+                  tel[i].isBefore(currentStartTime))){
                 //is in between
                 if(tsl[i].isBefore(currentStartTime)){
                   tsl[i]=currentStartTime;
@@ -249,7 +263,8 @@ class Task{
           }
         }
 
-        return subtractDurations(Duration(minutes: getScheduled(context)[0].durationInMins), tracked);
+        return Duration(minutes: subtractDurations(Duration(minutes:
+          getScheduled(context)[0].durationInMinutes), tracked).inMinutes);
       case RepeatRule.EveryXWeeks:
       // TODO: Handle this case.
         break;
@@ -296,12 +311,14 @@ class Task{
 
     for(int i = 0; i<trackedStart.length;i++){
       List<TimeStamp> splittedPlanedTimestamp = TimeStamp(
+        id: id,
         parentId: id,
         isTask: true,
         color: color,
-        duration: (((trackedStart.length!=trackedEnd.length)&&(i==(trackedStart.length-1)))?getTodayFormated():trackedEnd[i]).difference(trackedStart[i]).inMinutes,
-        startTime: trackedStart[i],
-        name: name,
+        durationInMinutes: (((trackedStart.length!=trackedEnd.length)&&
+            (i==(trackedStart.length-1)))?getTodayFormated():trackedEnd[i]).difference(trackedStart[i]).inMinutes,
+        start: trackedStart[i],
+        title: name,
         tracked: true,
         parentIndex: i
       ).splitTimestampForCalendarSupport();
@@ -309,7 +326,7 @@ class Task{
       //if on date
       splittedPlanedTimestamp.forEach((splittedTimestamp){
         forDates.forEach((forDay){
-          if(areDatesOnTheSameDay(splittedTimestamp.startTime, forDay)){
+          if(areDatesOnTheSameDay(splittedTimestamp.start, forDay)){
             toreturn.add(splittedTimestamp);
           }
         });

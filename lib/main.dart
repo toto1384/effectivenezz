@@ -9,8 +9,7 @@ import 'package:flutter/services.dart';
 
 import 'data/provider_models.dart';
 
-
-void main() {
+void main(){
   runApp(
     DistivityRestartWidget(
       child: MaterialApp(

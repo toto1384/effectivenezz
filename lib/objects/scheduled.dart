@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 
-
 final String scheduledId= "sid";
 final String scheduledParentId= "spid";
 final String scheduledIsParentTask= "sispat";
@@ -18,8 +17,6 @@ final String scheduledRepeatRule= "srr";
 final String scheduledRepeatValue= "srv";
 final String scheduledRepeatUntil= "sru";
 
-
-
 class Scheduled{
 
 
@@ -27,19 +24,19 @@ class Scheduled{
   int parentId;
   bool isParentTask;
   DateTime startTime;
-  int durationInMins;
+  int durationInMinutes;
   RepeatRule repeatRule;
   int repeatValue;
   DateTime repeatUntil;
 
 
   Scheduled({this.parentId,@required this.isParentTask,
-    this.startTime,@required this.durationInMins,@required this.repeatRule,@required this.repeatValue,this.repeatUntil,this.id});
+    this.startTime,this.durationInMinutes,@required this.repeatRule,@required this.repeatValue,this.repeatUntil,this.id});
 
 
   DateTime getEndTime(){
     if(startTime==null)return null;
-    return startTime.add(Duration(minutes: durationInMins));
+    return (startTime.add(Duration(minutes: durationInMinutes??0)));
   }
 
   static Scheduled fromMap(Map map){
@@ -47,7 +44,7 @@ class Scheduled{
       startTime: getDateFromString(map[scheduledStartTime]),
       repeatValue: map[scheduledRepeatValue],
       repeatRule: getRepeatRuleInt(map[scheduledRepeatRule]??0),
-      durationInMins: map[scheduledDuration],
+      durationInMinutes: map[scheduledDuration],
       parentId: map[scheduledParentId],
       isParentTask: map[scheduledIsParentTask]==1,
       repeatUntil: getDateFromString(map[scheduledRepeatUntil]),
@@ -66,7 +63,7 @@ class Scheduled{
       scheduledParentId: parentId,
       scheduledIsParentTask:isParentTask?1:0,
       scheduledStartTime:getStringFromDate(startTime),
-      scheduledDuration:durationInMins,
+      scheduledDuration:durationInMinutes,
       scheduledRepeatValue: repeatValue,
       scheduledRepeatUntil: getStringFromDate(repeatUntil),
       scheduledRepeatRule: getIntRepeatRule(),
@@ -74,7 +71,7 @@ class Scheduled{
   }
 
 
-  getRepeatText(){
+  String getRepeatText(){
     switch(repeatRule){
 
       case RepeatRule.EveryXDays:
@@ -90,9 +87,10 @@ class Scheduled{
         return 'Does not repeat';
         break;
     }
+    return '';
   }
 
-  getIntRepeatRule(){
+  int getIntRepeatRule(){
     switch(repeatRule){
 
       case RepeatRule.EveryXDays:
@@ -112,7 +110,7 @@ class Scheduled{
     return 0;
   }
 
-  static getRepeatRuleInt(int repeatRule){
+  static RepeatRule getRepeatRuleInt(int repeatRule){
     switch(repeatRule){
       case 0 : return RepeatRule.None;
       case 1 : return RepeatRule.EveryXDays;
@@ -123,7 +121,7 @@ class Scheduled{
   }
 
 
-  isOnDates(BuildContext context,List<DateTime> forDays){
+  bool isOnDates(BuildContext context,List<DateTime> forDays){
     print("isondates m");
 
     bool isOnDates = false;
@@ -150,12 +148,13 @@ class Scheduled{
     }
 
     TimeStamp wholeTimeStamp=TimeStamp(
+      id: id,
       parentId: parentId,
       color: getParent().color,
       isTask: isParentTask,
-      duration: durationInMins,
-      startTime: startTime,
-      name: getParent().name,
+      durationInMinutes: durationInMinutes,
+      start: startTime,
+      title: getParent().name,
       tracked: true,
       parentIndex: 0
     );
@@ -168,7 +167,8 @@ class Scheduled{
       //if it is not first time then add to the start time the repeat value and the endtime-starttime difference for the purpose
       //of incrementing the date according to the repeat rule
       if(lastStartTime!=null){
-        wholeTimeStamp.startTime=wholeTimeStamp.startTime.add(Duration(days: repeatValue+Duration(minutes: durationInMins).inDays));
+        wholeTimeStamp.start=wholeTimeStamp.start.add
+          (Duration(days: repeatValue+Duration(minutes: durationInMinutes).inDays));
       }
 
       //form timestamp then split it
@@ -177,13 +177,13 @@ class Scheduled{
       //if on date
       splittedPlanedTimestamp.forEach((splittedTimestamp){
         forDays.forEach((forDay){
-          if(areDatesOnTheSameDay(splittedTimestamp.startTime, forDay)){
+          if(areDatesOnTheSameDay(splittedTimestamp.start, forDay)){
             isOnDates=true;
           }
         });
       });
 
-      lastStartTime=splittedPlanedTimestamp.last.startTime;
+      lastStartTime=splittedPlanedTimestamp.last.start;
 
     }
     return isOnDates;
@@ -198,7 +198,7 @@ class Scheduled{
 //      var bdate = b['expiry'] //before -> var bdate = b.expiry;
 //      return b.compareTo(a); //to get the order other way just switch `adate & bdate`
 //    });
-    if(durationInMins==null||startTime==null)return [];
+    if(durationInMinutes==null||startTime==null)return [];
 
     List<TimeStamp> toreturn = [];
 
@@ -206,12 +206,13 @@ class Scheduled{
       case RepeatRule.EveryXDays:
 
         TimeStamp wholeTimeStamp=TimeStamp(
+          id: id,
           parentId: parentId,
           isTask: isParentTask,
           color: semiOpacity?getParent().color.withOpacity(.3):getParent().color,
-          duration: durationInMins,
-          startTime: startTime,
-          name: getParent().name,
+          durationInMinutes: durationInMinutes,
+          start: startTime,
+          title: getParent().name,
           tracked: false,
           parentIndex: 0
         );
@@ -223,7 +224,8 @@ class Scheduled{
           //if it is not first time then add to the start time the repeat value and the endtime-starttime difference for the purpose
           //of incrementing the date according to the repeat rule
           if(lastStartTime!=null){
-            wholeTimeStamp.startTime=wholeTimeStamp.startTime.add(Duration(days: repeatValue+Duration(minutes: durationInMins).inDays));
+            wholeTimeStamp.start=wholeTimeStamp.start.add
+              (Duration(days: repeatValue+Duration(minutes: durationInMinutes).inDays));
           }
 
           //form timestamp then split it
@@ -232,13 +234,13 @@ class Scheduled{
           //if on date
           splittedPlanedTimestamp.forEach((splittedTimestamp){
             forDays.forEach((forDay){
-              if(areDatesOnTheSameDay(splittedTimestamp.startTime, forDay)){
+              if(areDatesOnTheSameDay(splittedTimestamp.start, forDay)){
                 toreturn.add(splittedTimestamp);
               }
             });
           });
 
-          lastStartTime=splittedPlanedTimestamp.last.startTime;
+          lastStartTime=splittedPlanedTimestamp.last.start;
 
         }
         break;
@@ -253,12 +255,13 @@ class Scheduled{
         List<TimeStamp> splittedPlanedTimestamp =[];
         if(startTime!=null){
           splittedPlanedTimestamp= TimeStamp(
+            id: id,
             parentId: parentId,
             isTask: isParentTask,
             color: semiOpacity?getParent().color.withOpacity(.4):getParent().color,
-            duration: durationInMins,
-            startTime: startTime,
-            name: getParent().name,
+            durationInMinutes: durationInMinutes,
+            start: startTime,
+            title: getParent().name,
             tracked: false,
             parentIndex: 0
           ).splitTimestampForCalendarSupport();
@@ -267,7 +270,7 @@ class Scheduled{
         //if on date
         splittedPlanedTimestamp.forEach((splittedTimestamp){
           forDays.forEach((forDay){
-            if(areDatesOnTheSameDay(splittedTimestamp.startTime, forDay)){
+            if(areDatesOnTheSameDay(splittedTimestamp.start, forDay)){
               toreturn.add(splittedTimestamp);
             }
           });
@@ -296,16 +299,17 @@ class Scheduled{
     switch(repeatRule){
 
       case RepeatRule.None:
-        return startTime.isAfter(getTodayFormated())?startTime:null;
+        return startTime.difference(getTodayFormated()).inDays>=0?startTime:null;
         break;
       case RepeatRule.EveryXDays:
         TimeStamp wholeTimeStamp=TimeStamp(
+          id: id,
           parentId: parentId,
           isTask: isParentTask,
           color: Colors.white,
-          duration: durationInMins,
-          startTime: startTime,
-          name: getParent().name,
+          durationInMinutes: durationInMinutes,
+          start: startTime,
+          title: getParent().name,
           tracked: false,
           parentIndex: 0
         );
@@ -317,16 +321,17 @@ class Scheduled{
           //if it is not first time then add to the start time the repeat value and the endtime-starttime difference for the purpose
           //of incrementing the date according to the repeat rule
           if(lastStartTime!=null){
-            wholeTimeStamp.startTime=wholeTimeStamp.startTime.add(Duration(days: repeatValue+Duration(minutes: durationInMins).inDays));
+            wholeTimeStamp.start=wholeTimeStamp.start.
+              add(Duration(days: repeatValue+Duration(minutes: durationInMinutes).inDays));
           }
 
           //form timestamp then split it
           List<TimeStamp> splittedPlanedTimestamp = wholeTimeStamp.splitTimestampForCalendarSupport();
 
-          lastStartTime=splittedPlanedTimestamp.last.startTime;
+          lastStartTime=splittedPlanedTimestamp.last.start;
 
         }
-        return wholeTimeStamp.startTime;
+        return wholeTimeStamp.start;
         break;
       case RepeatRule.EveryXWeeks:
         // TODO: Handle this case.
@@ -344,16 +349,17 @@ class Scheduled{
     switch(repeatRule){
 
       case RepeatRule.None:
-        return startTime.isAfter(getTodayFormated())?startTime:null;
+        startTime.difference(getTodayFormated()).inDays>=0?startTime:null;
         break;
       case RepeatRule.EveryXDays:
         TimeStamp wholeTimeStamp=TimeStamp(
+          id: id,
           parentId: parentId,
           isTask: isParentTask,
           color: Colors.white,
-          duration: durationInMins,
-          startTime: startTime,
-          name: getParent().name,
+          durationInMinutes: durationInMinutes,
+          start: startTime,
+          title: getParent().name,
           tracked: false,
           parentIndex: 0
         );
@@ -365,16 +371,19 @@ class Scheduled{
           //if it is not first time then add to the start time the repeat value and the endtime-starttime difference for the purpose
           //of incrementing the date according to the repeat rule
           if(lastStartTime!=null){
-            wholeTimeStamp.startTime=wholeTimeStamp.startTime.add(Duration(days: repeatValue+Duration(minutes: durationInMins).inDays));
+            wholeTimeStamp.start=
+                wholeTimeStamp.start.
+                add(Duration(days: repeatValue+Duration(minutes: durationInMinutes).inDays));
           }
 
           //form timestamp then split it
           List<TimeStamp> splittedPlanedTimestamp = wholeTimeStamp.splitTimestampForCalendarSupport();
 
-          lastStartTime=splittedPlanedTimestamp.last.startTime;
+          lastStartTime=splittedPlanedTimestamp.last.start;
 
         }
-        return wholeTimeStamp.startTime.subtract(Duration(days: repeatValue+Duration(minutes: durationInMins).inDays));
+        return wholeTimeStamp.start.subtract(Duration(days: repeatValue+
+            Duration(minutes: durationInMinutes).inDays));
         break;
       case RepeatRule.EveryXWeeks:
       // TODO: Handle this case.
@@ -389,7 +398,7 @@ class Scheduled{
 
 
 
-  getStartMinuteOfTheDay(DateTime forThisDate){
+  int getStartMinuteOfTheDay(DateTime forThisDate){
     return (startTime.hour * 60) + startTime.minute;
   }
 

@@ -1,6 +1,5 @@
 import 'package:after_layout/after_layout.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/ginfo_icon.dart';
-import 'package:effectivenezz/ui/widgets/specific/gwidgets/ui/gmax_web_width.dart';
 import 'package:effectivenezz/utils/basic/widgets_basic.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
 import 'package:effectivenezz/utils/distivity_page.dart';
@@ -9,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-import 'distivity_drawer.dart';
 import 'gwidgets/gicon.dart';
 
 class RosseSilver extends StatefulWidget {

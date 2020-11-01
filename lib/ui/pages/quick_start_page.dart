@@ -35,7 +35,7 @@ class QuickStartPage extends StatefulWidget {
 class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
 
   Scheduled sleepScheduled = Scheduled(
-    durationInMins: 8*60,
+    durationInMinutes: 8*60,
     isParentTask: false,
     repeatRule: RepeatRule.EveryXDays,
     repeatValue: 1,
@@ -85,7 +85,7 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
                     ),
                     Padding(
                       padding: const EdgeInsets.only(top: 10,left: 20,right: 20),
-                      child: GText('Welcome to Effectivenezz, the place to manage your time. Let\'s start your'
+                      child: GText('Welcome to Effectivenezz, the place to manage your time. Let\'s start your '
                           'onboarding journey in less than 2 minutes(because we know that time is important)',
                         isCentered: true,),
                     ),
@@ -392,11 +392,11 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
         icon: Icons.star_border,
       ), scheduleds: [Scheduled(
         isParentTask: false,
-        durationInMins: int.parse(activityDurationMinutesTEC.text)*60,
+        durationInMinutes: int.parse(activityDurationMinutesTEC.text)*60,
         repeatValue: 1,
         repeatRule: RepeatRule.EveryXDays,
         parentId: 11,
-        startTime: (sleepScheduled.getEndTime()??getTodayFormated()).add(Duration(hours: 1)),
+        startTime: sleepScheduled.getEndTime()??getTodayFormated().add(Duration(hours: 1)),
       )]);//activity
     if(addReview)await MyApp.dataModel.databaseHelper.insertTask(Task(
         id: 12,
@@ -428,7 +428,7 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
     ),scheduleds: [Scheduled(
         repeatRule: RepeatRule.EveryXDays,
         repeatValue: 1,
-        durationInMins: 20,
+        durationInMinutes: 20,
         isParentTask: true,
         startTime: sleepScheduled.startTime.subtract(Duration(minutes: 20)),
         parentId: 12
@@ -451,11 +451,11 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
             icon: Icons.work,
           ),scheduleds: [Scheduled(
             isParentTask: false,
-            durationInMins: 60*8,
+            durationInMinutes: 60*8,
             repeatValue: 1,
             repeatRule: RepeatRule.EveryXDays,
             parentId: 102,
-            startTime: DateTime(getTodayFormated().year,getTodayFormated().month,getTodayFormated().day,9),
+            startTime: DateTime(getTodayFormated().year,getTodayFormated().month,getTodayFormated().day,9,0,0),
           )]);
           break;
         case MainOccupationType.Freelance:
@@ -472,7 +472,7 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
             icon: Icons.person,
           ),scheduleds: [Scheduled(
             isParentTask: false,
-            durationInMins: 0,
+            durationInMinutes: 0,
             repeatValue: 1,
             repeatRule: RepeatRule.EveryXDays,
             parentId: 101,
@@ -490,7 +490,7 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
             icon: Icons.person,
           ),scheduleds: [Scheduled(
             isParentTask: false,
-            durationInMins: 0,
+            durationInMinutes: 0,
             repeatValue: 1,
             repeatRule: RepeatRule.EveryXDays,
             parentId: 100,
@@ -508,7 +508,7 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
             icon: Icons.person,
           ),scheduleds: [Scheduled(
             isParentTask: false,
-            durationInMins: 0,
+            durationInMinutes: 0,
             repeatValue: 1,
             repeatRule: RepeatRule.EveryXDays,
             parentId: 103,
@@ -528,7 +528,7 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
             icon: Icons.palette,
           ), scheduleds: [Scheduled(
             isParentTask: false,
-            durationInMins: 0,
+            durationInMinutes: 0,
             repeatValue: 1,
             repeatRule: RepeatRule.EveryXDays,
             parentId: 104,
@@ -546,7 +546,7 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
             icon: Icons.people_outline,
           ),scheduleds: [Scheduled(
             isParentTask: false,
-            durationInMins: 0,
+            durationInMinutes: 0,
             repeatValue: 1,
             repeatRule: RepeatRule.EveryXDays,
             parentId: 105,
@@ -564,7 +564,7 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
             icon: Icons.web,
           ), scheduleds: [Scheduled(
             isParentTask: false,
-            durationInMins: 0,
+            durationInMinutes: 0,
             repeatValue: 1,
             repeatRule: RepeatRule.EveryXDays,
             parentId: 106,
@@ -582,7 +582,7 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
             icon: Icons.pie_chart_outlined,
           ),scheduleds: [Scheduled(
             isParentTask: false,
-            durationInMins: 0,
+            durationInMinutes: 0,
             repeatValue: 1,
             repeatRule: RepeatRule.EveryXDays,
             parentId: 107,
@@ -605,7 +605,7 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
     ),scheduleds: [Scheduled(
         repeatRule: RepeatRule.None,
         repeatValue: 0,
-        durationInMins: 10,
+        durationInMinutes: 10,
         isParentTask: true,
     )]);
     await MyApp.dataModel.databaseHelper.insertTask(Task(
@@ -622,7 +622,7 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
     ),scheduleds: [Scheduled(
       repeatRule: RepeatRule.None,
       repeatValue: 0,
-      durationInMins: 10,
+      durationInMinutes: 10,
       isParentTask: true,
     )]);
     await MyApp.dataModel.databaseHelper.insertTask(Task(
@@ -639,7 +639,7 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
     ),scheduleds:[ Scheduled(
       repeatRule: RepeatRule.None,
       repeatValue: 0,
-      durationInMins: 10,
+      durationInMinutes: 10,
       isParentTask: true,
     )]);
     await MyApp.dataModel.databaseHelper.insertTask(Task(
@@ -662,7 +662,7 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
     ),scheduleds: [Scheduled(
       repeatRule: RepeatRule.None,
       repeatValue: 0,
-      durationInMins: 10,
+      durationInMinutes: 10,
       isParentTask: true,
     )]);
   }

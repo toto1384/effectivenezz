@@ -1,5 +1,4 @@
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/ui/gmax_web_width.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
@@ -28,10 +27,13 @@ class GScaffoldState extends ScaffoldState {
 
   static bool show = true;
 
+  DeviceScreenType deviceScreenType = DeviceScreenType.mobile;
+
   @override
   Widget build(BuildContext context) {
     return ResponsiveBuilder(
       builder: (ctx,b){
+        deviceScreenType=b.deviceScreenType;
         switch(b.deviceScreenType){
           case DeviceScreenType.mobile:
             return Scaffold(
@@ -100,12 +102,12 @@ class GScaffoldState extends ScaffoldState {
 
   @override
   void openDrawer() {
-    if(kIsWeb){
+    if(deviceScreenType==DeviceScreenType.mobile){
+      localKey.currentState.openDrawer();
+    }else{
       setState(() {
         show=!show;
       });
-    }else{
-      localKey.currentState.openDrawer();
     }
   }
 }

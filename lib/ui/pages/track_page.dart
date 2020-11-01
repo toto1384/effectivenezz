@@ -43,7 +43,7 @@ class _TrackPageState extends DistivityPageState<TrackPage> with AfterLayoutMixi
           title: GText('Here you can track your activities.',textType: TextType.textTypeTitle,
             color: MyColors.color_black_darker,),
           description: GText('Sorted by value and calendars. Press play to track them and see how much time'
-              ' you have remaining of that activity"',color: MyColors.color_black_darker,),
+              ' you have remaining of that activity(or long press to start a pomodoro timer)"',color: MyColors.color_black_darker,),
           color: MyColors.customSheetColor,
           icon: Icons.play_arrow,
           positive: SweetSheetAction(

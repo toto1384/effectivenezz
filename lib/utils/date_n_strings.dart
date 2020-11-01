@@ -51,15 +51,15 @@ getTimeName(DateTime dateTime){
   return "${dateTime.hour}:${dateTime.minute}";
 }
 
-getDayOfTheWeekStringShort(int dayOfTheWeek){
-  switch(dayOfTheWeek){
-    case 0 : return 'Mon';
-    case 1 : return 'Tue';
-    case 2 : return 'Wed';
-    case 3 : return 'Thu';
-    case 4 : return 'Fri';
-    case 5 : return 'Sat';
-    case 6 : return 'Sun';
+getDayOfTheWeekStringShort(int dayOfTheWeek,bool big){
+  switch(dayOfTheWeek-1){
+    case 0 : return big?'Mon':"M";
+    case 1 : return big?'Tue':"T";
+    case 2 : return big?'Wed':"W";
+    case 3 : return big?'Thu':"T";
+    case 4 : return big?'Fri':"F";
+    case 5 : return big?'Sat':"S";
+    case 6 : return big?'Sun':"S";
   }
 }
 

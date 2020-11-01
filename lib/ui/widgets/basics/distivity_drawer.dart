@@ -4,10 +4,12 @@ import 'package:effectivenezz/ui/pages/manage_calendars.dart';
 import 'package:effectivenezz/ui/pages/metrics_and_stats.dart';
 import 'package:effectivenezz/ui/pages/plan_vs_tracked_page.dart';
 import 'package:effectivenezz/ui/pages/settings_page.dart';
+import 'package:effectivenezz/ui/pages/tasks_page.dart';
 import 'package:effectivenezz/ui/pages/time_doctor.dart';
 import 'package:effectivenezz/ui/pages/track_page.dart';
 import 'package:effectivenezz/ui/pages/users_n_data.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/drawer/gcalendar_list_for_drawer.dart';
+import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
 import 'package:flutter/material.dart';
@@ -24,8 +26,16 @@ class _DistivityDrawerState extends State<DistivityDrawer> {
 
   bool showCals = false;
 
+  int tasksToDo=0;
+
   @override
   Widget build(BuildContext context) {
+    tasksToDo=0;
+    MyApp.dataModel.tasks.forEach((element) {
+      if(!element.isCheckedOnDate(getTodayFormated())){
+        tasksToDo++;
+      }
+    });
 
     return Drawer(
         elevation: 0,
@@ -37,6 +47,19 @@ class _DistivityDrawerState extends State<DistivityDrawer> {
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                       getDrawerHeader(),
+                      Visibility(
+                        visible: tasksToDo!=0,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: GestureDetector(
+                            onTap: ()=>launchPage(context, TasksPage()),
+                            child: Padding(
+                              padding: const EdgeInsets.all(5),
+                              child: GText("$tasksToDo tasks to do"),
+                            ),
+                          ),
+                        ),
+                      ),
                       getPageItem(name: "Track", page: TrackPage(), icon: Icons.timer),
                       getCalendarWidget(locked: false),
                       getPageItem(name: "Metrics&Stats", page: MetricsAndStatsPage(), icon: Icons.insert_chart,locked:false),

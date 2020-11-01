@@ -94,6 +94,19 @@ class _ActivityListItemState extends State<ActivityListItem> with AfterLayoutMix
                       child: GIcon(Icons.receipt,size: 10),
                     ),color: MyColors.color_black_darker),
                   ),
+                  Visibility(
+                    visible: widget.activity.childs.length!=0,
+                    child: Card(child:Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4,vertical: 2),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          GIcon(Icons.check_circle,size: 10),
+                          GText(" ${widget.activity.childs.length}",textType: TextType.textTypeSubNormal,)
+                        ],
+                      ),
+                    ),color: MyColors.color_black_darker),
+                  ),
                 ],
               ),
               title: GText(widget.activity.name),
@@ -123,7 +136,7 @@ class _ActivityListItemState extends State<ActivityListItem> with AfterLayoutMix
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
                               GIcon(MyApp.dataModel.isPlaying(widget.activity)?Icons.stop:Icons.play_arrow),
-                              GText(getTextFromDuration(widget.activity.getTimeLeft(context))),
+                              // GText(getTextFromDuration(widget.activity.getTimeLeft(context))),
                             ],
                           ),
                         ),
@@ -169,10 +182,11 @@ class _ActivityListItemState extends State<ActivityListItem> with AfterLayoutMix
         return "Not scheduled";
       }
 
-      if(!areDatesOnTheSameDay(widget.activity.getScheduled(context)[0].startTime, getTodayFormated())){
-        schedule = schedule+ getDateName(widget.activity.getScheduled(context)[0].startTime) + " , ";
+      if(!areDatesOnTheSameDay((widget.activity.getScheduled(context)[0].
+        startTime), getTodayFormated())){
+        schedule = schedule+ getDateName((widget.activity.getScheduled(context)[0].startTime)) + " , ";
       }
-      schedule = schedule+ getTimeName(widget.activity.getScheduled(context)[0].startTime)+" -- ";
+      schedule = schedule+ getTimeName((widget.activity.getScheduled(context)[0].startTime))+" -- ";
 
       if(!areDatesOnTheSameDay(widget.activity.getScheduled(context)[0].getEndTime(), getTodayFormated())){
         schedule = schedule+ getDateName(widget.activity.getScheduled(context)[0].getEndTime())+ " , ";

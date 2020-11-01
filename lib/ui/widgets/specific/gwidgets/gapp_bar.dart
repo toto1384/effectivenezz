@@ -17,61 +17,53 @@ class GAppBar extends PreferredSize implements PreferredSizeWidget {
   final Widget trailing;
   final Widget subtitle;
   final bool smallSubtitle;
-  final String tooltip;
+  final bool disablePadding;
+  final double size;
 
-  GAppBar(this. title, {this. backEnabled, this. centered, this. drawerEnabled, this. trailing,
-    this. subtitle, this. smallSubtitle, this. tooltip,
+  GAppBar(this. title, {this.size, this. backEnabled, this. centered, this. drawerEnabled, this. trailing,
+    this. subtitle, this. smallSubtitle, this. disablePadding,
   });
 
   @override
   Widget build(BuildContext context) {
+
     return GMaxWebWidth(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: (Align(
-          alignment: (centered??false) ? Alignment.bottomCenter : Alignment.bottomLeft,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              AppBar(
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                brightness: Brightness.dark,
-                leading: (drawerEnabled??false)?IconButton(
-                  icon: GIcon(Icons.menu,),
-                  onPressed: () {
-                    DistivityPageState.customKey.openDrawer();
-                  },
-                ):(backEnabled??false)?IconButton(
-                  icon: GIcon(Icons.chevron_left), onPressed: () {
-                  Navigator.pop(context);
-                },):Container(),
-                title: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Flexible(child: GText(title, textType: TextType.textTypeTitle,)),
-                        Visibility(child: GInfoIcon( tooltip),
-                          visible: tooltip != null,),
-                      ],
-                    ),
-                    if(subtitle != null && (smallSubtitle??true))
-                      subtitle
-                  ],
-                ),
+        padding: EdgeInsets.only(top: (disablePadding??false)?10:30,left: 10,right: 10),
+        child: (Column(
+          crossAxisAlignment: (centered??false) ?CrossAxisAlignment.center : CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            AppBar(
+              automaticallyImplyLeading: false,
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              brightness: Brightness.dark,
+              actions: [if(trailing!=null)trailing],
+              leading: (drawerEnabled??false)?IconButton(
+                icon: GIcon(Icons.menu,),
+                onPressed: () {
+                  DistivityPageState.customKey.openDrawer();
+                },
+              ):(backEnabled??false)?IconButton(
+                icon: GIcon(Icons.chevron_left), onPressed: () {
+                Navigator.pop(context);
+              },):Container(),
+              title: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  GText(title, textType: TextType.textTypeTitle,),
+                  if(subtitle != null && (smallSubtitle??true))subtitle
+                ],
               ),
-              if(!(smallSubtitle??true) && subtitle != null)
-                subtitle
-            ],
-          ),
+            ),
+            if((!(smallSubtitle??true)) && subtitle != null)subtitle
+          ],
         )),
       ),
     );
   }
 
   @override
-  Size get preferredSize => Size(MyApp.dataModel.screenWidth, (smallSubtitle??true) ? 100 : 150);
+  Size get preferredSize => Size(MyApp.dataModel.screenWidth, (size??((smallSubtitle??true)?100:150)));
 }

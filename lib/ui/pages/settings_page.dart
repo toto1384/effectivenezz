@@ -10,6 +10,8 @@ import 'package:effectivenezz/utils/distivity_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:launch_review/launch_review.dart';
+import 'package:package_info/package_info.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../main.dart';
 
 
@@ -60,15 +62,23 @@ class _SettingsPageState extends DistivityPageState<SettingsPage>{
                     LaunchReview.launch();
                   },
                 ),
+              if(kIsWeb)ListTile(
+                leading: GIcon(Icons.android),
+                title: GText('Get android app'),
+                onTap: ()=>launch("https://play.google.com/store/apps/details?id=com.effectivenezz.effectivenezz&hl=en"),
+              ),
               ListTile(
                 leading: GIcon(Icons.info_outline),
                 title: GText("About this app"),
-                onTap: (){
+                onTap: ()async{
+                  PackageInfo packageInfo = await PackageInfo.fromPlatform();
+
+                  String version = packageInfo.version;
                   showAboutDialog(
                     context: context,
                     applicationIcon: Image.asset(AssetsPath.icon,width: 50,height: 50,),
                     applicationName: "Effectivenezz",
-                    applicationVersion: "0.5",
+                    applicationVersion: version,
                   );
                 },
 

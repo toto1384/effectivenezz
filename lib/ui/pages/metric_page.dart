@@ -2,7 +2,6 @@ import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
 import 'package:effectivenezz/ui/widgets/basics/rosse_scaffold.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/gmetric_widget.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/gselected_days_widget_for_app_bar.dart';
-import 'package:effectivenezz/ui/widgets/specific/gwidgets/ui/gmax_web_width.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/ui/gscaffold.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';

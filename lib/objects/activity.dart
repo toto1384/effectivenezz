@@ -1,6 +1,7 @@
 
 import 'package:effectivenezz/main.dart';
 import 'package:effectivenezz/objects/scheduled.dart';
+import 'package:effectivenezz/objects/task.dart';
 import 'package:effectivenezz/objects/timestamp.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
@@ -41,6 +42,7 @@ class Activity {
   bool valueMultiply;
 
   List<DateTime> blacklistedDates;
+  List<Task> childs = [];
 
 
   Activity({ this.id, @required this.name,@required this.trackedStart,@required this.trackedEnd,
@@ -59,7 +61,6 @@ class Activity {
       });
       if(toreturn.length==0){
         Scheduled scheduled = Scheduled(
-          durationInMins: 30,
           repeatValue: 0,
           repeatRule: RepeatRule.None,
           isParentTask: false,
@@ -74,12 +75,12 @@ class Activity {
   }
 
   insertSchedule({@required DateTime startTime,@required DateTime repeatUntil,@required RepeatRule repeatRule,
-    @required int repeatValue,@required int durationInMins}){
+    @required int repeatValue,@required int durationInMinutes}){
 
     MyApp.dataModel.databaseHelper.insertScheduled(Scheduled(
       isParentTask: false,
       parentId: id,
-      durationInMins: durationInMins,
+      durationInMinutes: durationInMinutes,
       repeatRule: repeatRule,
       repeatValue: repeatValue,
       startTime: startTime,
@@ -143,7 +144,7 @@ class Activity {
 
 
   Duration getTimeLeft(BuildContext context){
-    if(getScheduled(context)[0].durationInMins==0){
+    if(getScheduled(context)[0].durationInMinutes==0){
       return Duration.zero;
     }
 
@@ -160,7 +161,7 @@ class Activity {
             //last
             if(trackedStart.length!=trackedEnd.length){
               //isn't finished
-              endTime= getDateFromString(getStringFromDate(DateTime.now()));
+              endTime= getTodayFormated();
             }else{
               endTime = trackedEnd[i];
             }
@@ -172,7 +173,7 @@ class Activity {
 
         }
 
-        return subtractDurations(Duration(minutes: getScheduled(context)[0].durationInMins), taken);
+        return subtractDurations(Duration(minutes: getScheduled(context)[0].durationInMinutes), taken);
         break;
       case RepeatRule.EveryXDays:
 
@@ -207,7 +208,8 @@ class Activity {
             }
             //now calculate which ts and te match between the dates
             for(int i = 0 ; i < tsl.length ; i++){
-              if(!(tsl[i].isBefore(currentStartTime)&&tel[i].isBefore(currentStartTime))){
+              if(!(tsl[i].isBefore(currentStartTime)&&
+                  tel[i].isBefore(currentStartTime))){
                 //is in between
                 if(tsl[i].isBefore(currentStartTime)){
                   tsl[i]=currentStartTime;
@@ -220,7 +222,8 @@ class Activity {
             }
           }else{
 
-            if(!(ts.isBefore(currentStartTime)&&te.isBefore(currentStartTime))){
+            if(!(ts.isBefore(currentStartTime)&&
+                te.isBefore(currentStartTime))){
               //is in between
               if(ts.isBefore(currentStartTime)){
                 ts=currentStartTime;
@@ -233,7 +236,7 @@ class Activity {
           }
         }
 
-        return subtractDurations(Duration(minutes: getScheduled(context)[0].durationInMins), tracked);
+        return subtractDurations(Duration(minutes: getScheduled(context)[0].durationInMinutes), tracked);
       case RepeatRule.EveryXWeeks:
       // TODO: Handle this case.
         break;
@@ -278,12 +281,14 @@ class Activity {
 
     for(int i = 0; i<trackedStart.length;i++){
         List<TimeStamp> splittedPlanedTimestamp = TimeStamp(
+          id: int.parse("${id}000$i"),
           parentId: id,
           isTask: false,
           color: color,
-          duration: (((trackedStart.length!=trackedEnd.length)&&(i==(trackedStart.length-1)))?getTodayFormated():trackedEnd[i]).difference(trackedStart[i]).inMinutes,
-          startTime: trackedStart[i],
-          name: name,
+          durationInMinutes: (((trackedStart.length!=trackedEnd.length)&&
+              (i==(trackedStart.length-1)))?getTodayFormated():trackedEnd[i]).difference(trackedStart[i]).inMinutes,
+          start: trackedStart[i],
+          title: name,
           tracked: true,
           parentIndex: i
         ).splitTimestampForCalendarSupport();
@@ -294,7 +299,7 @@ class Activity {
             toreturn.add(splittedTimestamp);
           }else{
             forDates.forEach((forDay){
-              if(areDatesOnTheSameDay(splittedTimestamp.startTime, forDay)){
+              if(areDatesOnTheSameDay(splittedTimestamp.start, forDay)){
                 toreturn.add(splittedTimestamp);
               }
             });

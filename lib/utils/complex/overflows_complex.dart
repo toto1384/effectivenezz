@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:circular_check_box/circular_check_box.dart';
 import 'package:effectivenezz/objects/activity.dart';
 import 'package:effectivenezz/objects/calendar.dart';
 import 'package:effectivenezz/objects/scheduled.dart';
@@ -15,6 +16,7 @@ import 'package:effectivenezz/ui/widgets/specific/gwidgets/gempty_view.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/ginfo_icon.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/gtab_bar.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/scheduled/gschedule_editor.dart';
+import 'package:effectivenezz/ui/widgets/specific/task_list_item.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/overflows_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
@@ -72,7 +74,6 @@ showAddEditObjectBottomSheet(
       repeatValue: 0,
       repeatRule: RepeatRule.None,
       isParentTask: true,
-      durationInMins: 30
     );
   }
 
@@ -103,7 +104,7 @@ showAddEditObjectBottomSheet(
                 child: IconButton(
                   icon: GIcon(Icons.send,size: TextType.textTypeSubtitle.size*1.5),
                   onPressed: (){
-                    if(scheduled.durationInMins<0){
+                    if(scheduled.durationInMinutes<0){
                       Fluttertoast.showToast(
                           msg: "End time can not be sooner than start time",
                           toastLength: Toast.LENGTH_LONG,
@@ -117,6 +118,11 @@ showAddEditObjectBottomSheet(
                       object.name = nameEditingController.text;
                       object.description = descriptionEditingController.text;
                       if(object is Task){
+                        if(!object.isParentCalendar){
+                          Activity newAct =
+                            MyApp.dataModel.findActivityById(object.parentId)..childs.add(object);
+                          MyApp.dataModel.activities[MyApp.dataModel.findObjectIndexById(newAct)]=newAct;
+                        }
                         MyApp.dataModel.task(index, object, context, add?CUD.Create:CUD.Update,addWith: scheduled);
                       }else{
                         MyApp.dataModel.activity(index, object, context, add?CUD.Create:CUD.Update,addWith: scheduled);
@@ -374,7 +380,7 @@ showObjectDetailsBottomSheet(BuildContext context, dynamic object,DateTime selec
   showDistivityModalBottomSheet(context, (ctx,ss){
     return Column(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.center,
+      // crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Padding(
           padding: const EdgeInsets.all(15.0),
@@ -382,16 +388,21 @@ showObjectDetailsBottomSheet(BuildContext context, dynamic object,DateTime selec
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               if(!isActivity)
-                IconButton(
-                  icon: GIcon(object.isCheckedOnDate(selectedDate)?Icons.check_circle_outline:Icons.radio_button_unchecked),
-                  onPressed: (){
-                    if(object.isCheckedOnDate(selectedDate)){
-                      object.unCheckOnDate(selectedDate);
-                    }else{
-                      object.checks.add(selectedDate);
-                    }
-                    MyApp.dataModel.task(MyApp.dataModel.tasks.indexOf(object), object, context, CUD.Update);
+                CircularCheckBox(
+                  inactiveColor: object.color,
+                  value: object.isCheckedOnDate(selectedDate??getTodayFormated()),
+                  onChanged: (C){
+                    ss(() {
+                      if(!C){
+                        object.unCheckOnDate(selectedDate??getTodayFormated());
+                      }else{
+                        object.addCheck(selectedDate??getTodayFormated());
+                      }
+                    });
+                    MyApp.dataModel.task(MyApp.dataModel.findObjectIndexById(object), object, context, CUD.Update);
                   },
+                  activeColor: object.color,
+
                 ),
               Flexible(
                 child: getSubtitle(object.name,isCentered: false),
@@ -406,14 +417,26 @@ showObjectDetailsBottomSheet(BuildContext context, dynamic object,DateTime selec
             ],
           ),
         ),
-        Divider(),
-        getSubtitle('Description'),
-        Padding(
+        if(object.description!="")Divider(),
+        if(object.description!="")getSubtitle('Description'),
+        if(object.description!="")Padding(
           padding: const EdgeInsets.all(15),
           child: GText(object.description),
         ),
         Divider(),
-        getSubtitle("${(object is Task)?"Task":"Activity"} value: ${formatDouble(object.value.toDouble())} \$/hour"),
+        ListTile(
+          leading: GIcon(Icons.attach_money),
+          title: GText("${formatDouble(object.value.toDouble())} \$/hour"),
+        ),
+        if(object is Task)
+          Visibility(
+            visible: object.getScheduled(context)[0].repeatValue==1&&object.getScheduled(context)[0].repeatRule==RepeatRule.EveryXDays,
+            child: ListTile(
+              leading: GIcon(Icons.local_fire_department_rounded),
+              title: GText("${object.getStreakNumberForEveryday()} day(s) streak"),
+            )
+          ),
+        Divider(),
         ListTile(
           leading: GIcon(Icons.delete_outline),
           title: GText('Delete task'),
@@ -445,6 +468,34 @@ showObjectDetailsBottomSheet(BuildContext context, dynamic object,DateTime selec
             });
           },
         ),
+        if(object is Activity)Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            getSubtitle('Sub-tasks'),
+          ]+List.generate(object.childs.length, (i){
+            return TaskListItem(task: MyApp.dataModel.tasks[MyApp.dataModel.tasks.indexOf(object.childs[i])],
+              selectedDate: getTodayFormated(),minimal: true,);
+          },)+[ GButton('Add task', onPressed: (){
+            showAddEditObjectBottomSheet(
+              context,
+              selectedDate: getTodayFormated(),
+              isTask: true,
+              add: true,
+              object: Task(
+                  name: '',
+                  trackedEnd: [],
+                  trackedStart: [],
+                  parentId: object.id,
+                  isParentCalendar: false,
+                  value: object.value,
+                  checks: [],
+                  valueMultiply: false,
+                  tags: [],
+                  color: object.color
+              ),
+            );
+          })],
+        )
 //        getSubtitle("Tracked"),
 //        if(object.trackedStart.length==0)
 //          getEmptyView(context, "No timestamps")
@@ -732,6 +783,15 @@ showSelectParentBottomSheet(BuildContext context,{@required dynamic taskOrActivi
                   title: GText(MyApp.dataModel.eCalendars[i].name,),
                   onTap: (){
                     onSelected(MyApp.dataModel.eCalendars[i].id,true);
+                    if(taskOrActivity is Task){
+                      if(!taskOrActivity.isParentCalendar){
+                        for(int j = 0;j<MyApp.dataModel.activities.length;j++){
+                          if(MyApp.dataModel.activities[j].id==taskOrActivity.parentId){
+                            MyApp.dataModel.activities[j].childs.remove(taskOrActivity);
+                          }
+                        }
+                      }
+                    }
                     Navigator.pop(context);
                   },
                 ),
@@ -751,6 +811,7 @@ showSelectParentBottomSheet(BuildContext context,{@required dynamic taskOrActivi
                   title: GText(MyApp.dataModel.activities[i].name,),
                   onTap: (){
                     onSelected(MyApp.dataModel.activities[i].id,false);
+                    MyApp.dataModel.activities[i].childs.add(taskOrActivity);
                     Navigator.pop(context);
                   },
                 ),

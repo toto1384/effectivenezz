@@ -5,7 +5,6 @@ import 'package:circular_check_box/circular_check_box.dart';
 import 'package:effectivenezz/objects/task.dart';
 import 'package:effectivenezz/ui/pages/pomodoro_page.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gicon.dart';
-import 'package:effectivenezz/ui/widgets/basics/gwidgets/gswitchable.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
@@ -52,7 +51,9 @@ class _TaskListItemState extends State<TaskListItem> with AfterLayoutMixin{
       child: ListTile(
         onTap: (){
           if(widget.minimal??false){
-            widget.onTap();
+            if(widget.onTap!=null){
+              widget.onTap();
+            }else showObjectDetailsBottomSheet(getGlobalContext(context), widget.task,widget.selectedDate);
           }else{
             showObjectDetailsBottomSheet(getGlobalContext(context), widget.task,widget.selectedDate);
           }
@@ -61,18 +62,21 @@ class _TaskListItemState extends State<TaskListItem> with AfterLayoutMixin{
           inactiveColor: widget.task.color,
           value: widget.task.isCheckedOnDate(widget.selectedDate??getTodayFormated()),
           onChanged: (C){
-            if(!C){
-              widget.task.unCheckOnDate(widget.selectedDate??getTodayFormated());
-            }else{
-              widget.task.checks.add(widget.selectedDate??getTodayFormated());
-            }
+            setState(() {
+              if(!C){
+                widget.task.unCheckOnDate(widget.selectedDate??getTodayFormated());
+              }else{
+                widget.task.addCheck(widget.selectedDate??getTodayFormated());
+              }
+            });
             MyApp.dataModel.task(MyApp.dataModel.findObjectIndexById(widget.task), widget.task, context, CUD.Update);
           },
           activeColor: widget.task.color,
 
         ),
-        subtitle: Row(
-          mainAxisSize: MainAxisSize.min,
+        subtitle: Wrap(
+          direction: Axis.horizontal,
+
           children: <Widget>[
             Card(child:Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4,vertical: 2),
@@ -84,6 +88,19 @@ class _TaskListItemState extends State<TaskListItem> with AfterLayoutMixin{
               child: Card(child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4,vertical: 2),
                 child: GIcon(Icons.receipt,size: 10),
+              ),color: MyColors.color_black_darker),
+            ),
+            Visibility(
+              visible: widget.task.getScheduled(context)[0].repeatValue==1&&widget.task.getScheduled(context)[0].repeatRule==RepeatRule.EveryXDays,
+              child: Card(child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4,vertical: 2),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    GIcon(Icons.local_fire_department_rounded,size: 10),
+                    GText(' ${widget.task.getStreakNumberForEveryday()} day(s) streak',textType: TextType.textTypeSubNormal,)
+                  ],
+                ),
               ),color: MyColors.color_black_darker),
             ),
           ],
@@ -113,7 +130,6 @@ class _TaskListItemState extends State<TaskListItem> with AfterLayoutMixin{
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     GIcon(MyApp.dataModel.currentPlaying==(widget.task)?Icons.stop:Icons.play_arrow),
-                    GText(getTextFromDuration(widget.task.getTimeLeft(context))),
                   ],
                 ),
               ),

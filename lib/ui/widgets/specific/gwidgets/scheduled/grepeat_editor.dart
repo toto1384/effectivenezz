@@ -34,7 +34,8 @@ class _GRepeatEditorState extends State<GRepeatEditor> {
               setState((){
                 widget.scheduled.repeatRule=rr;
                 widget.scheduled.repeatValue=rv;
-                if(widget.scheduled.startTime==null)widget.scheduled.startTime=getTodayFormated();
+                if(widget.scheduled.startTime==null)widget.scheduled.startTime=
+                    getTodayFormated();
                 widget.onScheduledChange(widget.scheduled);
               });
             }, repeatRule: widget.scheduled.repeatRule, repeatValue: widget.scheduled.repeatValue);
