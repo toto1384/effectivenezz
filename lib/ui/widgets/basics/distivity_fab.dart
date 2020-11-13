@@ -9,8 +9,9 @@ import 'gwidgets/gicon.dart';
 
 class DistivityFAB extends StatefulWidget {
   final Function(Function,Function) controllerLogic;
+  final bool isInCalendar;
 
-  const DistivityFAB({Key key,@required this.controllerLogic}) : super(key: key);
+  const DistivityFAB({Key key,@required this.controllerLogic,@required this.isInCalendar}) : super(key: key);
 
   @override
   _DistivityFABState createState() => _DistivityFABState();
@@ -52,13 +53,15 @@ class _DistivityFABState extends State<DistivityFAB> with TickerProviderStateMix
             backgroundColor: MyColors.color_yellow,
             label: 'Add Event',
             child: GIcon(Icons.event,color: MyColors.color_black_darker,),
-            onPressed: ()=>showAddEditObjectBottomSheet(context, selectedDate: getTodayFormated(), add: true,isTask: false),
+            onPressed: ()=>showAddEditObjectBottomSheet(context, isInCalendar: widget.isInCalendar,
+                selectedDate: getTodayFormated(), add: true,isTask: false),
           ),
           SpeedDialChild(
             backgroundColor: MyColors.color_yellow,
             label: 'Add Task',
             child: GIcon(Icons.event_available,color: MyColors.color_black_darker,),
-            onPressed: ()=>showAddEditObjectBottomSheet(context, selectedDate: getTodayFormated(), add: true,isTask: true),
+            onPressed: ()=>showAddEditObjectBottomSheet(context,isInCalendar: widget.isInCalendar,
+                selectedDate: getTodayFormated(), add: true,isTask: true),
           ),
         ],
       ),

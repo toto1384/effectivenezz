@@ -5,6 +5,7 @@ import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/overflows_basic.dart';
 import 'package:effectivenezz/utils/date_n_strings.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class GDateTimeEditWidgetForScheduled extends StatelessWidget {
 
@@ -48,6 +49,7 @@ class GDateTimeEditWidgetForScheduled extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: GButton(
                   getTimeName(isStartTime?scheduled.startTime:scheduled.getEndTime()),
+                  variant: 3,
                   onPressed: () {
                     showDistivityTimePicker(context,
                         TimeOfDay.fromDateTime(
@@ -66,17 +68,21 @@ class GDateTimeEditWidgetForScheduled extends StatelessWidget {
                                   scheduled.startTime.month,
                                   scheduled.startTime.day, time.hour,
                                   time.minute,0);
+                              onScheduledChange(scheduled);
                             }else{
-                              scheduled.durationInMinutes = DateTime(
+                              int newDurationInMinutes = DateTime(
                                   scheduled.getEndTime().year,
                                   scheduled.getEndTime().month,
                                   scheduled.getEndTime().day,
                                   time.hour,
                                   time.minute
                               ).difference(scheduled.startTime).inMinutes;
+                              if(newDurationInMinutes>0){
+                                scheduled.durationInMinutes = newDurationInMinutes;
+                                onScheduledChange(scheduled);
+                              }else Fluttertoast.showToast(msg: 'End time needs to be after Start time');
                             }
                           }
-                          onScheduledChange(scheduled);
                         });
                   },
                 ),
@@ -89,6 +95,7 @@ class GDateTimeEditWidgetForScheduled extends StatelessWidget {
               if(!(onlyTime??false))
                 GButton(
                   getDateName(isStartTime?scheduled.startTime:scheduled.getEndTime()),
+                  variant: 3,
                   onPressed: () {
                     showDistivityDatePicker(
                         context, onDateSelected: (date) {
@@ -99,18 +106,23 @@ class GDateTimeEditWidgetForScheduled extends StatelessWidget {
                         scheduled.startTime=null;
                       }else{
                         if(isStartTime){
-                          scheduled.startTime = DateTime(
+                          DateTime newStart = DateTime(
                               date.year, date.month, date.day,
                               scheduled.startTime.hour,
                               scheduled.startTime.minute,0);
+                          scheduled.startTime = newStart;
+                          onScheduledChange(scheduled);
                         }else{
-                          scheduled.durationInMinutes = DateTime(
+                          int newDurationInMinutes = DateTime(
                               date.year, date.month, date.day,
                               scheduled.getEndTime().hour, scheduled.getEndTime().minute
                           ).difference(scheduled.startTime).inMinutes;
+                          if(newDurationInMinutes>0){
+                            scheduled.durationInMinutes = newDurationInMinutes;
+                            onScheduledChange(scheduled);
+                          }else Fluttertoast.showToast(msg: 'End time needs to be after Start time');
                         }
                       }
-                      onScheduledChange(scheduled);
                     });
                   },
                 ),

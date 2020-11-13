@@ -34,6 +34,7 @@ class _GDurationWidgetForScheduledState extends State<GDurationWidgetForSchedule
           widget.scheduled.durationInMinutes == null
               ? "Set duration"
               : "${minuteOfDayToHourMinuteString(widget.scheduled.durationInMinutes,true)}",
+          variant: 3,
           onPressed: () {
             showPickDurationBottomSheet(context, (d) {
               setState(() {

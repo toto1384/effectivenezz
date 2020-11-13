@@ -22,7 +22,7 @@ class GButton extends StatelessWidget {
       onPressed: onPressed,
       shape: getShape(smallRadius: false),
 
-      color: (variant??1)==1?MyColors.color_yellow:MyColors.color_black_darker,
+      color: (variant??1)==1?MyColors.color_yellow:(variant==2)?MyColors.color_black_darker:MyColors.color_black,
     );
   }
 

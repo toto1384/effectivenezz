@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:after_layout/after_layout.dart';
 import 'package:circular_check_box/circular_check_box.dart';
+import 'package:effectivenezz/objects/scheduled.dart';
 import 'package:effectivenezz/objects/task.dart';
 import 'package:effectivenezz/ui/pages/pomodoro_page.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gicon.dart';
@@ -21,8 +22,10 @@ class TaskListItem extends StatefulWidget {
   final DateTime selectedDate;
   final Function onTap;
   final bool minimal;
+  final Scheduled context;
 
-  const TaskListItem({Key key,@required this.task,@required this.selectedDate,this.onTap,this.minimal}) : super(key: key);
+  const TaskListItem({Key key,@required this.task,
+    @required this.selectedDate,this.onTap,this.minimal,this.context}) : super(key: key);
 
   @override
   _TaskListItemState createState() => _TaskListItemState();
@@ -53,9 +56,13 @@ class _TaskListItemState extends State<TaskListItem> with AfterLayoutMixin{
           if(widget.minimal??false){
             if(widget.onTap!=null){
               widget.onTap();
-            }else showObjectDetailsBottomSheet(getGlobalContext(context), widget.task,widget.selectedDate);
+            }else showObjectDetailsBottomSheet(
+                getGlobalContext(context), widget.task,widget.selectedDate,
+                isInCalendar: false,sContext: widget.context);
           }else{
-            showObjectDetailsBottomSheet(getGlobalContext(context), widget.task,widget.selectedDate);
+            showObjectDetailsBottomSheet(
+                getGlobalContext(context), widget.task,widget.selectedDate,
+                isInCalendar: false,sContext: widget.context);
           }
         },
         leading: CircularCheckBox(
@@ -69,7 +76,7 @@ class _TaskListItemState extends State<TaskListItem> with AfterLayoutMixin{
                 widget.task.addCheck(widget.selectedDate??getTodayFormated());
               }
             });
-            MyApp.dataModel.task(MyApp.dataModel.findObjectIndexById(widget.task), widget.task, context, CUD.Update);
+            MyApp.dataModel.task(widget.task, context, CUD.Update);
           },
           activeColor: widget.task.color,
 
@@ -91,7 +98,7 @@ class _TaskListItemState extends State<TaskListItem> with AfterLayoutMixin{
               ),color: MyColors.color_black_darker),
             ),
             Visibility(
-              visible: widget.task.getScheduled(context)[0].repeatValue==1&&widget.task.getScheduled(context)[0].repeatRule==RepeatRule.EveryXDays,
+              visible: widget.task.getScheduled()[0].repeatValue==1&&widget.task.getScheduled()[0].repeatRule==RepeatRule.EveryXDays,
               child: Card(child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4,vertical: 2),
                 child: Row(
@@ -107,9 +114,8 @@ class _TaskListItemState extends State<TaskListItem> with AfterLayoutMixin{
         ),
         title: GText(widget.task.name),
         onLongPress: ()=>showAddEditObjectBottomSheet(
-            context, selectedDate: widget.selectedDate,
-            add: false,index: MyApp.dataModel.findObjectIndexById(widget.task),
-            object: widget.task,scheduled: widget.task.getScheduled(context)[0],isTask: true
+            context, selectedDate: widget.selectedDate,isInCalendar: false,
+            add: false, object: widget.task,isTask: true
         ),
         trailing: Visibility(
           visible: !(widget.minimal??false),
@@ -138,26 +144,6 @@ class _TaskListItemState extends State<TaskListItem> with AfterLayoutMixin{
         )
       ),
     );
-  }
-
-  getStringSchedule(){
-    String schedule = "";
-
-    if(widget.task.getScheduled(context)[0].startTime==null){
-      return "Not scheduled";
-    }
-
-    if(!areDatesOnTheSameDay(widget.task.getScheduled(context)[0].startTime, getTodayFormated())){
-      schedule = schedule+ getDateName(widget.task.getScheduled(context)[0].startTime) + " , ";
-    }
-    schedule = schedule+ getTimeName(widget.task.getScheduled(context)[0].startTime)+" -- ";
-
-    if(!areDatesOnTheSameDay(widget.task.getScheduled(context)[0].getEndTime(), getTodayFormated())){
-      schedule = schedule+ getDateName(widget.task.getScheduled(context)[0].getEndTime())+ " , ";
-    }
-    schedule = schedule+ getTimeName(widget.task.getScheduled(context)[0].getEndTime());
-
-    return schedule;
   }
 
   @override

@@ -60,7 +60,7 @@ class _DistivityAnimatedListObjState extends State<DistivityAnimatedListObj> {
     ListView.builder(itemCount: widget.headerItemCount+(widget.additionalButton!=null?1:0), itemBuilder:(ctx, ind)=>logik(ind),controller: widget.scrollController,)
         :Column(children: List.generate(widget.headerItemCount+(widget.additionalButton!=null?1:0), logik),);
   }
-
+  //THIS GENERATES EACH HEADING
   Widget logik(ind){
     List<Task> tasks = [];
     List<Activity> activities = [];

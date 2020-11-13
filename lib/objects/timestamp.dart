@@ -2,6 +2,7 @@
 import 'dart:ui';
 
 import 'package:effectivenezz/main.dart';
+import 'package:effectivenezz/objects/scheduled.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/date_n_strings.dart';
 import 'package:flutter/cupertino.dart';
@@ -36,6 +37,16 @@ class TimeStamp {
   getParent(){
     print('timestamp get parent');
     return isTask?MyApp.dataModel.findTaskById(parentId):MyApp.dataModel.findActivityById(parentId);
+  }
+
+  getScheduled(){
+    Scheduled scheduled;
+    MyApp.dataModel.scheduleds.forEach((element) {
+      if(element.id==id){
+        scheduled=element;
+      }
+    });
+    return scheduled;
   }
 
   List<TimeStamp> splitTimestampForCalendarSupport(){
@@ -78,11 +89,6 @@ class TimeStamp {
     }
     return toreturn;
   }
-
-
-
-
-
 
 
   static List<NameValueObject> totalMinutesPerTrackable(List<TimeStamp> timestamps){

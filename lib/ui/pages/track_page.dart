@@ -103,14 +103,12 @@ class _TrackPageState extends DistivityPageState<TrackPage> with AfterLayoutMixi
             },
           ),
         ),subtitle: GTabBar(
-            items: ["Sort by value",'Sort by calendars'],
+            items: ["Activities by value",'Tasks by value'],
             selected: [pageIndex],
             onSelected:(i,b){
               setState(() {
                 if(b){
-                  setState(() {
                     pageIndex=i;
-                  });
                 }
               });
               pageController.animateToPage(i, duration: Duration(milliseconds: 200), curve: Curves.easeInOut);
@@ -127,7 +125,7 @@ class _TrackPageState extends DistivityPageState<TrackPage> with AfterLayoutMixi
               }
             }
           });
-        }),
+        },isInCalendar: false,),
         bottomNavigationBar: MyApp.dataModel!=null?(MyApp.dataModel.currentPlaying!=null)?DistivitySecondaryItem():null:null,
         body: PageView(
           onPageChanged: (i){
@@ -137,8 +135,8 @@ class _TrackPageState extends DistivityPageState<TrackPage> with AfterLayoutMixi
           },
           controller: pageController,
           children: <Widget>[
-            GSortByMoneyTasksAndActivities(scrollController,selectedDate,),
-            GSortByCalendarListView(getTodayFormated()),
+            GSortByMoneyTasksAndActivities(scrollController,selectedDate,whatToShow: WhatToShow.Activities,),
+            GSortByMoneyTasksAndActivities(scrollController,selectedDate,whatToShow: WhatToShow.Tasks,),
           ],
         ),
       ),

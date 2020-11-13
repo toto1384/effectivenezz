@@ -27,7 +27,7 @@ class ManageCalendarsState extends DistivityPageState<ManageCalendars> with Afte
   void afterFirstLayout(BuildContext context) {
     super.afterFirstLayout(context);
     DistivityPageState.listCallback.listen((object, d) {
-      setState(() {
+      if(mounted)setState(() {
 
       });
     });

@@ -6,7 +6,6 @@ import 'package:effectivenezz/utils/distivity_page.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../main.dart';
-import 'ginfo_icon.dart';
 
 class GAppBar extends PreferredSize implements PreferredSizeWidget {
 

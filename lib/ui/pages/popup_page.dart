@@ -10,6 +10,7 @@ import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
 import 'package:effectivenezz/utils/basic/widgets_basic.dart';
 import 'package:effectivenezz/utils/distivity_page.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:minimize_app/minimize_app.dart';
 
@@ -21,6 +22,7 @@ class PopupPage extends StatefulWidget {
 class _PopupPageState extends DistivityPageState<PopupPage> {
   @override
   Widget build(BuildContext context) {
+    if(kIsWeb)return Scaffold();
     return WillPopScope(
       onWillPop: (){
         MinimizeApp.minimizeApp();

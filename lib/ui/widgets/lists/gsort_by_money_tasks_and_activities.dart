@@ -1,3 +1,5 @@
+import 'package:effectivenezz/objects/activity.dart';
+import 'package:effectivenezz/objects/task.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gbutton.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
 import 'package:effectivenezz/ui/widgets/specific/distivity_animated_list_obj.dart';
@@ -17,9 +19,10 @@ class GSortByMoneyTasksAndActivities extends StatefulWidget {
   final bool areMinimal;
   final Function(dynamic) onSelected;
   final bool scrollable;
+  final WhatToShow whatToShow;
 
   GSortByMoneyTasksAndActivities(this. controller,
-      this. selectedDate,{this. areMinimal,this. onSelected, this. scrollable});
+      this. selectedDate,{this. areMinimal,this. onSelected, this. scrollable, this.whatToShow});
 
   @override
   _GSortByMoneyTasksAndActivitiesState createState() => _GSortByMoneyTasksAndActivitiesState();
@@ -98,11 +101,13 @@ class _GSortByMoneyTasksAndActivitiesState extends State<GSortByMoneyTasksAndAct
       },
       headerItemCount: showing?15:9,
       isObjectSuitableForHeader: (item, ind){
+        if(item is Task && (widget.whatToShow??WhatToShow.All)==WhatToShow.Activities)return false;
+        if(item is Activity && (widget.whatToShow??WhatToShow.All)==WhatToShow.Tasks)return false;
         if(item.value == figures(15.0-ind.toDouble()).toInt()){
           return true;
         }return false;
       },
-      whatToShow: WhatToShow.All,
+      whatToShow: widget.whatToShow??WhatToShow.All,
       areMinimal: widget.areMinimal,
       scrollController: widget.controller,
     );

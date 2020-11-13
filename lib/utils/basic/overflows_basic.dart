@@ -65,7 +65,8 @@ showYesNoDialog(BuildContext context,{@required String title,@required String te
   });
 }
 
-showDistivityModalBottomSheet(BuildContext context, StateGetter stateGetter,{bool hideHandler,bool dismissible,double initialSnapping}){
+showDistivityModalBottomSheet(BuildContext context, StateGetter stateGetter,
+    {bool hideHandler,bool dismissible,double initialSnapping,Function onCollapsed}){
 
   if(hideHandler==null){
     hideHandler=false;
@@ -74,6 +75,11 @@ showDistivityModalBottomSheet(BuildContext context, StateGetter stateGetter,{boo
   showSlidingBottomSheet(context, builder: (ctx){
     return SlidingSheetDialog(
       maxWidth: MediaQuery.of(context).size.height,
+      listener: (state){
+        if(state.isHidden){
+          if(onCollapsed!=null)onCollapsed();
+        }
+      },
       duration: Duration(milliseconds: 100),
       elevation: 0,
       cornerRadius: 16,

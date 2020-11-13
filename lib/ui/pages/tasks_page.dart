@@ -47,7 +47,7 @@ class _TasksPageState extends DistivityPageState<TasksPage> {
       },itemCount: undoneTasks.length,),
       floatingActionButton: FloatingActionButton(
         onPressed: ()=>showAddEditObjectBottomSheet(
-          context,
+          context,isInCalendar: false,
           selectedDate: getTodayFormated(),
           isTask: true,
         ),

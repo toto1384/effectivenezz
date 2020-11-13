@@ -30,7 +30,7 @@ class Scheduled{
   DateTime repeatUntil;
 
 
-  Scheduled({this.parentId,@required this.isParentTask,
+  Scheduled({@required this.parentId,@required this.isParentTask,
     this.startTime,this.durationInMinutes,@required this.repeatRule,@required this.repeatValue,this.repeatUntil,this.id});
 
 
@@ -279,17 +279,10 @@ class Scheduled{
     }
     return toreturn;
   }
-  dynamic parent;
   getParent(){
-    print('get parent');
-    if(parent==null){
-      if(isParentTask){
-        parent= MyApp.dataModel.findTaskById(parentId);
-      }else{
-        parent= MyApp.dataModel.findActivityById(parentId);
-      }
-    }
-    return parent;
+    if(isParentTask==null||parentId==null)return null;
+    return isParentTask?MyApp.dataModel.findTaskById(parentId):MyApp.dataModel.findActivityById(parentId);
+
   }
 
 
@@ -400,6 +393,18 @@ class Scheduled{
 
   int getStartMinuteOfTheDay(DateTime forThisDate){
     return (startTime.hour * 60) + startTime.minute;
+  }
+
+  isOverdue() {
+    if(startTime==null)return false;
+    return getEndTime().isBefore(getTodayFormated());
+  }
+
+  getColor() {
+    final parent = getParent();
+    if(parent==null){
+      return Colors.red;
+    }else return parent.color;
   }
 
 }

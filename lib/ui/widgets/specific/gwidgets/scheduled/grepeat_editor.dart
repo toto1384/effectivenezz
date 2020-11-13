@@ -29,6 +29,7 @@ class _GRepeatEditorState extends State<GRepeatEditor> {
         ),
         GButton(
           getRepeatText(widget.scheduled.repeatRule, widget.scheduled.repeatValue),
+          variant: 3,
           onPressed: (){
             showRepeatEditBottomSheet(context, onUpdate: (rr,rv){
               setState((){

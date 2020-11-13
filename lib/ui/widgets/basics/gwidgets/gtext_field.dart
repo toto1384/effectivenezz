@@ -31,7 +31,7 @@ class GTextField extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 10,vertical: 2),
         child: AutoSizeTextField(
-          onChanged: (str){onChanged(str);},
+          onChanged: (str){if(onChanged!=null)onChanged(str);},
           autofocus: focus??false,
           keyboardType: textInputType??TextInputType.text,
           controller: textEditingController,

@@ -1,16 +1,18 @@
 
 import 'package:after_layout/after_layout.dart';
-import 'package:calendar_views/calendar_views.dart';
+import 'package:effectivenezz/objects/activity.dart';
+import 'package:effectivenezz/objects/scheduled.dart';
+import 'package:effectivenezz/objects/task.dart';
 import 'package:effectivenezz/objects/timestamp.dart';
 import 'package:effectivenezz/ui/widgets/basics/distivity_drawer.dart';
 import 'package:effectivenezz/ui/widgets/basics/distivity_fab.dart';
 import 'package:effectivenezz/ui/widgets/basics/distivity_zoom_widget.dart';
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gicon.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
-import 'package:effectivenezz/ui/widgets/basics/rosse_scaffold.dart';
 import 'package:effectivenezz/ui/widgets/distivity_calendar_widget.dart';
+import 'package:effectivenezz/ui/widgets/lists/gsort_by_money_tasks_and_activities.dart';
+import 'package:effectivenezz/ui/widgets/specific/distivity_secondary_item.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/gapp_bar.dart';
-import 'package:effectivenezz/ui/widgets/specific/gwidgets/ginfo_icon.dart';
-import 'package:effectivenezz/ui/widgets/specific/gwidgets/gselected_days_widget_for_app_bar.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/gselected_view_icon_button.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/gtab_bar.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/pricing/gpremium_wrapper.dart';
@@ -19,9 +21,12 @@ import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
+import 'package:effectivenezz/utils/complex/overflows_complex.dart';
 import 'package:effectivenezz/utils/distivity_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:sliding_sheet/sliding_sheet.dart';
 import 'package:sweetsheet/sweetsheet.dart';
 
 import '../../main.dart';
@@ -63,8 +68,8 @@ class _PlanVsTrackedPageState extends DistivityPageState<PlanVsTrackedPage> with
           context: context,
           title: GText('Plan',textType: TextType.textTypeTitle,
             color: MyColors.color_black_darker,),
-          description: GText('This acts as your calendar. The tasks/activities that you\'ve planned in the Track Page'
-              ' will appear here',color: MyColors.color_black_darker,),
+          description: GText('This acts as your calendar. The tasks/activities that you\'ve planned in'
+              ' the Track Page will appear here',color: MyColors.color_black_darker,),
           color: MyColors.customSheetColor,
           icon: Icons.calendar_today,
           positive: SweetSheetAction(
@@ -72,14 +77,64 @@ class _PlanVsTrackedPageState extends DistivityPageState<PlanVsTrackedPage> with
             title: 'GOT IT',
             onPressed: (){
               Navigator.pop(context);
+              sweetSheet.show(
+                  context: context,
+                  title: GText('Schedule',textType: TextType.textTypeTitle,
+                    color: MyColors.color_black_darker,),
+                  description: GText('Just tap on the calendar to schedule your day. You can either schedule'
+                      ' a new task/activity(just as any other calendar) or schedule a existing task/activity('
+                      'for example you can schedule multiple work or nap blocks in your day)',
+                    color: MyColors.color_black_darker,),
+                  color: MyColors.customSheetColor,
+                  icon: Icons.calendar_today,
+                  positive: SweetSheetAction(
+                    color: Colors.white,
+                    title: 'GOT IT',
+                    onPressed: (){
+                      Navigator.pop(context);
+                      sweetSheet.show(
+                          context: context,
+                          title: GText('Double tap to track',textType: TextType.textTypeTitle,
+                            color: MyColors.color_black_darker,),
+                          description: GText('Oh and if you are lazy to go to the Track Page just double tap'
+                              ' on any activity/task to track them',color: MyColors.color_black_darker,),
+                          color: MyColors.customSheetColor,
+                          icon: Icons.calendar_today,
+                          positive: SweetSheetAction(
+                            color: Colors.white,
+                            title: 'GOT IT',
+                            onPressed: (){
+                              Navigator.pop(context);
+                            },
+                          )
+                      );
+                    },
+                  )
+              );
             },
           )
       );
     }
+    DistivityCalendarWidget.scheduledCallback.listen((s){
+      if(mounted){
+        setState(() {
+          if(s!=null){
+            if(sheetController.state.isHidden){
+              sheetController.show();
+            }
+          }
+        });
+      }
+    });
   }
+
+  SheetController sheetController = SheetController();
+
+  bool isTasks=false;
 
   @override
   Widget build(BuildContext context) {
+
     List<DateTime> selectedDateTimes =
     (selectedView==SelectedView.Day)?[selectedDate]:
     (selectedView==SelectedView.ThreeDay)?[selectedDate,selectedDate.add(Duration(days: 1)),selectedDate.add(Duration(days: 2))]:
@@ -89,6 +144,7 @@ class _PlanVsTrackedPageState extends DistivityPageState<PlanVsTrackedPage> with
       onWillPop: ()=>customOnBackPressed(context),
       child: GScaffold(
         key: scaffoldKey,
+        bottomNavigationBar: DistivitySecondaryItem(),
         drawer: DistivityDrawer(),
         floatingActionButton: GPremiumWrapper(
           upgradeButton: false,
@@ -104,7 +160,7 @@ class _PlanVsTrackedPageState extends DistivityPageState<PlanVsTrackedPage> with
                 }
               }
             });
-          }),
+          },isInCalendar: true,),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         appBar: GAppBar(
@@ -167,48 +223,135 @@ class _PlanVsTrackedPageState extends DistivityPageState<PlanVsTrackedPage> with
             });
           },),
         ),
-        body: selectedView==SelectedView.Month?Center(child: GText('Will be implemented in a future release'),):
-        PageView.builder(itemBuilder: (ctx,ind){
-          return VerticalZoom(
-            onScaleChange: (d){
-              setState(() {
-                heightPerMinute=d/(24*60);
-              });
-            },
-            contentHeight: heightPerMinute*24*60,
-            child: GPremiumWrapper(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 20),
-                child: DistivityCalendarWidget(
-                  heightPerMinute: heightPerMinute,
-                  days: selectedDateTimes,
-                  forPlanVsTracked: true,
-                  selectedView: selectedView,
-                  plannedTimestamps:getTimeStamps(selectedDateTimes,false),
-                  trackedTimestamps: getTimeStamps(selectedDateTimes,true),
+        body: SlidingSheet(
+          maxWidth: MediaQuery.of(context).size.height,
+          duration: Duration(milliseconds: 100),
+          elevation: 0,
+          cornerRadius: 16,
+          color: MyColors.color_black_darker,
+          cornerRadiusOnFullscreen: 0,
+          builder: (ctx,state){
+            return StatefulBuilder(
+              builder: (context, ss) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      child: (IconButton(
+                        onPressed: (){
+                          sheetController.hide();DistivityCalendarWidget.scheduledCallback.notifyUpdated(null);
+                        },
+                        icon: GIcon(Icons.close),
+                      )),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          GText('Schedule Activity/Task',textType: TextType.textTypeSubtitle,),
+                          IconButton(icon: GIcon(Icons.search), onPressed: (){
+                            Fluttertoast.showToast(msg: 'Will be implemented in a future release');
+                          }),
+                        ],
+                      ),
+                    ),
+                    ListTile(
+                      leading: GIcon(Icons.add),
+                      onTap: (){
+                        sheetController.hide();
+                        showAddEditObjectBottomSheet(context, selectedDate: selectedDate,
+                            isTask: false, isInCalendar: true,add: true,withNewScheduled: true);
+                      },
+                      title: GText('Schedule new Activity'),
+                    ),
+                    ListTile(
+                      leading: GIcon(Icons.add),
+                      title: GText('Schedule new Task'),
+                      onTap: (){
+                        sheetController.hide();
+                        showAddEditObjectBottomSheet(context, selectedDate: selectedDate,
+                            isTask: true, isInCalendar: true,add: true,withNewScheduled: true);
+                      },
+                    ),
+                    Divider(),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: GTabBar(items: ['Activities' , 'Tasks'], selected: [isTasks?1:0],onSelected: (i,b){
+                        if(b){
+                          ss((){
+                            isTasks=(i==1);
+                          });
+                        }
+                      },),
+                    ),
+                    GSortByMoneyTasksAndActivities(
+                      ScrollController(),selectedDate,
+                      scrollable: false,whatToShow: isTasks?WhatToShow.Tasks:WhatToShow.Activities,
+                      areMinimal: true,onSelected: (item)async{
+                        DistivityCalendarWidget.scheduledCallback.newScheduled.isParentTask=item is Task;
+                        DistivityCalendarWidget.scheduledCallback.newScheduled.parentId=item.id;
+                        await MyApp.dataModel.scheduled(DistivityCalendarWidget.
+                          scheduledCallback.newScheduled, context, CUD.Create);
+                        DistivityCalendarWidget.scheduledCallback.notifyUpdated(null);
+                        sheetController.hide();
+                      },
+                    ),
+                  ]
+                );
+              }
+            );
+          },
+          snapSpec: SnapSpec(
+            snappings: [0.3, 1.0],initialSnap: 0,
+            positioning: SnapPositioning.relativeToAvailableSpace,
+          ),
+          controller: sheetController,
+          body: selectedView==SelectedView.Month?Center(child: GText('Will be implemented in a future release'),):
+          PageView.builder(itemBuilder: (ctx,ind){
+            return VerticalZoom(
+              onScaleChange: (d){
+                setState(() {
+                  heightPerMinute=d/(24*60);
+                });
+              },
+              contentHeight: heightPerMinute*24*60,
+              child: GPremiumWrapper(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: DistivityCalendarWidget(
+                    heightPerMinute: heightPerMinute,
+                    days: selectedDateTimes,
+                    forPlanVsTracked: planTracked,
+                    selectedView: selectedView,
+                    plannedTimestamps:getTimeStamps(selectedDateTimes,false),
+                    trackedTimestamps: getTimeStamps(selectedDateTimes,true),
+                  ),
                 ),
               ),
-            ),
-          );
+            );
 
-        },controller: pageController,onPageChanged: (page){
-          setState(() {
-            switch(selectedView){
-              case SelectedView.Day:
-                selectedDate=getTodayFormated().add(Duration(days: page-50));
-                break;
-              case SelectedView.ThreeDay:
-                selectedDate=getTodayFormated().add(Duration(days: (page-50)*3));
-                break;
-              case SelectedView.Week:
-                selectedDate=getTodayFormated().add(Duration(days: (page-50)*7));
-                break;
-              case SelectedView.Month:
-              // TODO: Handle this case.
-                break;
-            }
-          });
-        },)
+          },controller: pageController,onPageChanged: (page){
+            setState(() {
+              switch(selectedView){
+                case SelectedView.Day:
+                  selectedDate=getTodayFormated().add(Duration(days: page-50));
+                  break;
+                case SelectedView.ThreeDay:
+                  selectedDate=getTodayFormated().add(Duration(days: (page-50)*3));
+                  break;
+                case SelectedView.Week:
+                  selectedDate=getTodayFormated().add(Duration(days: (page-50)*7));
+                  break;
+                case SelectedView.Month:
+                // TODO: Handle this case.
+                  break;
+              }
+            });
+          },),
+        )
       ),
     );
   }

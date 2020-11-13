@@ -34,9 +34,13 @@ class GUpcomingTasksAndActivities extends StatelessWidget {
       headerItemCount: 8,
       isObjectSuitableForHeader: (item, ind){
         DateTime listDate = ind==7?null:getTodayFormated().add(Duration(days: ind));
-        if (item.getScheduled(context)[0].isOnDates(context, [listDate])) {
-          return true;
-        }return false;
+        bool b = false;
+        item.getScheduled().forEach((element){
+          if (element.isOnDates(context, [listDate])) {
+            b=true;
+          }
+        });
+        return b;
       },
       whatToShow: WhatToShow.All,
       areMinimal: false,

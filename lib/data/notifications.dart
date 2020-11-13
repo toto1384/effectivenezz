@@ -1,6 +1,9 @@
+
 import 'package:effectivenezz/ui/pages/popup_page.dart';
+import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:rxdart/subjects.dart';
@@ -55,7 +58,7 @@ class NotificationHelper{
         // if(firstTime){
         //   firstTime=false;
         // }else
-          launchPage(context, PopupPage());
+          if(!kIsWeb)launchPage(context, PopupPage());
         //}
       }
     });
@@ -99,22 +102,24 @@ class NotificationHelper{
   scheduleNotification({@required int id,@required String title,@required String body,@required String payload,
     Color color ,@required DateTime dateTime})async{
 
-    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      channelId1, channelName1, channelDescription1,color: color,indeterminate: false,ongoing: false,
-      autoCancel: true,icon: "effectivenezz_logo",playSound: true,
-      importance: Importance.max, ticker: 'ticker',priority: Priority.max);
-    var iOSPlatformChannelSpecifics =
-    IOSNotificationDetails(presentSound: true,presentAlert: true,);
-    NotificationDetails platformChannelSpecifics = NotificationDetails(
-        android:androidPlatformChannelSpecifics,iOS: iOSPlatformChannelSpecifics);
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-        id,
-        title,
-        body,
-        TZDateTime.local(dateTime.year,dateTime.month,dateTime.day,dateTime.hour,dateTime.minute),
-        platformChannelSpecifics,
-        androidAllowWhileIdle: true,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime);
+    if(!dateTime.isBefore(getTodayFormated())){
+      var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+          channelId1, channelName1, channelDescription1,color: color,indeterminate: false,ongoing: false,
+          autoCancel: true,icon: "effectivenezz_logo",playSound: true,
+          importance: Importance.max, ticker: 'ticker',priority: Priority.max);
+      var iOSPlatformChannelSpecifics =
+      IOSNotificationDetails(presentSound: true,presentAlert: true,);
+      NotificationDetails platformChannelSpecifics = NotificationDetails(
+          android:androidPlatformChannelSpecifics,iOS: iOSPlatformChannelSpecifics);
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+          id,
+          title,
+          body,
+          TZDateTime.local(dateTime.year,dateTime.month,dateTime.day,dateTime.hour,dateTime.minute),
+          platformChannelSpecifics,
+          androidAllowWhileIdle: true,
+          uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime);
+    }
   }
 
   dailyNotification({@required int id,@required String title,@required String body,@required String payload})async{

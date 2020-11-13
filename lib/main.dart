@@ -1,3 +1,4 @@
+import 'package:effectivenezz/ui/pages/plan_vs_tracked_page.dart';
 import 'package:effectivenezz/ui/pages/quick_start_page.dart';
 import 'package:effectivenezz/ui/pages/track_page.dart';
 import 'package:effectivenezz/ui/widgets/basics/distivity_restart_widget.dart';
@@ -6,10 +7,12 @@ import 'package:effectivenezz/utils/basic/values_utils.dart';
 import 'package:effectivenezz/utils/distivity_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:timezone/data/latest.dart';
 
 import 'data/provider_models.dart';
 
 void main(){
+  initializeTimeZones();
   runApp(
     DistivityRestartWidget(
       child: MaterialApp(
@@ -20,7 +23,6 @@ void main(){
             unselectedWidgetColor: Colors.white,
             canvasColor: MyColors.color_black,
             accentColor: Colors.white,
-            cursorColor: Colors.white,
             snackBarTheme: SnackBarThemeData(
               shape: getShape(subtleBorder: true),
               backgroundColor: MyColors.color_black,
@@ -29,6 +31,7 @@ void main(){
                 endIndent: 20,indent: 20,color: Colors.white,space: 20,thickness: 1.5
             ),
             cardTheme: CardTheme(
+
               shape: getShape(smallRadius: false),
               elevation: 0,
               color: MyColors.color_black,
@@ -99,7 +102,7 @@ class MyAppState extends State<MyApp> {
       DataModel.init(context).then((value) {
         MyApp.dataModel=value;
         MyApp.dataModel.screenWidth=MediaQuery.of(context).size.width;
-        launchPage(context, value.driveHelper.currentUser==null?QuickStartPage(value.driveHelper):TrackPage());
+        launchPage(context, value.driveHelper.currentUser==null?QuickStartPage(value.driveHelper):PlanVsTrackedPage());
       });
     }
   }

@@ -39,7 +39,7 @@ class TextType{
   static const TextType textTypeSubtitle =TextType(20,FontWeight.w700);
   static const TextType textTypeNormal =TextType(15,FontWeight.w600);
   static const TextType textTypeSubNormal =TextType(12,FontWeight.w400);
-  static const TextType textTypeSubMiniscule =TextType(9,FontWeight.w300);
+  static const TextType textTypeSubMiniscule =TextType(11,FontWeight.w300);
   static const TextType textTypeGigant =TextType(50,FontWeight.w900);
 
 }
@@ -78,7 +78,7 @@ enum RequestType{
   Query,
 }
 enum CUD{
-  Create,Update,Delete,
+  Create,Update,Delete,AddUpdate
 }
 
 

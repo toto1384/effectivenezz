@@ -10,11 +10,13 @@ import 'package:effectivenezz/ui/widgets/basics/gwidgets/gicon.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gswitchable.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext_field.dart';
+import 'package:effectivenezz/ui/widgets/distivity_calendar_widget.dart';
 import 'package:effectivenezz/ui/widgets/lists/gsort_by_calendar_list_view.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/dates/gtracked_intervals_widget.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/gempty_view.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/ginfo_icon.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/gtab_bar.dart';
+import 'package:effectivenezz/ui/widgets/specific/gwidgets/scheduled/gdate_time_edit_widget_for_scheduled.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/scheduled/gschedule_editor.dart';
 import 'package:effectivenezz/ui/widgets/specific/task_list_item.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
@@ -36,9 +38,11 @@ import '../../main.dart';
 
 
 showAddEditObjectBottomSheet(
-    BuildContext context,{dynamic object,int index,bool add,
-      @required DateTime selectedDate,Scheduled scheduled,@required bool isTask}){
+    BuildContext context,{dynamic object,bool add,
+      @required DateTime selectedDate,
+      @required bool isTask,@required bool isInCalendar,bool withNewScheduled})async{
 
+  if(isInCalendar==null)isInCalendar=false;
 
   if(!isTask){
     if(object==null){
@@ -50,8 +54,10 @@ showAddEditObjectBottomSheet(
         trackedEnd: [],
         trackedStart: [],
         value: 0,
+        color: Colors.red,
         icon: Icons.mail,
       );
+      if(add)object.id=await MyApp.dataModel.databaseHelper.insertActivity(object);
     }
   }else{
     if(object==null){
@@ -66,21 +72,39 @@ showAddEditObjectBottomSheet(
         trackedStart: [],
         value: 0,
       );
+      if(add)object.id=await MyApp.dataModel.databaseHelper.insertTask(object);
     }
   }
+  List<Scheduled> scheduleds = [];
 
-  if(scheduled==null){
-    scheduled= Scheduled(
-      repeatValue: 0,
-      repeatRule: RepeatRule.None,
-      isParentTask: true,
+  if(!add)scheduleds.addAll(object.getScheduled());
+
+  if(withNewScheduled??false){
+    DistivityCalendarWidget.scheduledCallback.newScheduled.isParentTask=isTask;
+    DistivityCalendarWidget.scheduledCallback.newScheduled.parentId=object.id;
+    await MyApp.dataModel.scheduled(DistivityCalendarWidget.scheduledCallback.newScheduled, context, CUD.Create);
+    scheduleds.add(DistivityCalendarWidget.scheduledCallback.newScheduled);
+  }
+  if(scheduleds.length==0){
+    print('scheduleds is 0');
+    DistivityCalendarWidget.scheduledCallback.newScheduled = Scheduled(
+        repeatValue: 0,
+        repeatRule: RepeatRule.None,
+        isParentTask: isTask,
+        durationInMinutes: isInCalendar?30:null,
+        startTime: isInCalendar?getTodayFormated():null,
+        parentId: object.id
     );
+    scheduleds.add(DistivityCalendarWidget.scheduledCallback.newScheduled);
+    await MyApp.dataModel.scheduled(DistivityCalendarWidget.scheduledCallback.newScheduled,
+        context, CUD.Create);
   }
 
   if(add==null)add=false;
   TextEditingController nameEditingController = TextEditingController(text: object.name??'');
   TextEditingController descriptionEditingController = TextEditingController(text: object.description??'');
 
+  bool delete = true;
 
   showDistivityModalBottomSheet(context, (ctx,ss){
       return Column(
@@ -103,8 +127,14 @@ showAddEditObjectBottomSheet(
                 padding: const EdgeInsets.all(7),
                 child: IconButton(
                   icon: GIcon(Icons.send,size: TextType.textTypeSubtitle.size*1.5),
-                  onPressed: (){
-                    if(scheduled.durationInMinutes<0){
+                  onPressed: ()async{
+                    bool valid = true;
+                    scheduleds.forEach((element) {
+                      if((element.durationInMinutes??0)<0){
+                        valid=false;
+                      }
+                    });
+                    if(!valid){
                       Fluttertoast.showToast(
                           msg: "End time can not be sooner than start time",
                           toastLength: Toast.LENGTH_LONG,
@@ -115,6 +145,7 @@ showAddEditObjectBottomSheet(
                           fontSize: 16.0
                       );
                     }else{
+                      delete=false;
                       object.name = nameEditingController.text;
                       object.description = descriptionEditingController.text;
                       if(object is Task){
@@ -123,10 +154,13 @@ showAddEditObjectBottomSheet(
                             MyApp.dataModel.findActivityById(object.parentId)..childs.add(object);
                           MyApp.dataModel.activities[MyApp.dataModel.findObjectIndexById(newAct)]=newAct;
                         }
-                        MyApp.dataModel.task(index, object, context, add?CUD.Create:CUD.Update,addWith: scheduled);
+                        await MyApp.dataModel.task(object, context,
+                            add?CUD.AddUpdate:CUD.Update);
                       }else{
-                        MyApp.dataModel.activity(index, object, context, add?CUD.Create:CUD.Update,addWith: scheduled);
+                        await MyApp.dataModel.activity(object, context,
+                            add?CUD.AddUpdate:CUD.Update);
                       }
+                      DistivityCalendarWidget.scheduledCallback.notifyUpdated(null);
                       Navigator.pop(context);
                     }
                   },
@@ -134,6 +168,7 @@ showAddEditObjectBottomSheet(
               ),
             ],
           ),
+
           //set parent
           Padding(
             padding: const EdgeInsets.only(top: 10),
@@ -201,12 +236,38 @@ showAddEditObjectBottomSheet(
             ),
 
           Divider(),
-          getSubtitle('Schedule'+(object is Task?' task':' activity')),
-          GScheduleEditor(scheduled, (sc){
-            ss((){
-              scheduled=sc;
-            });
-          }),
+          GScheduleEditor(
+            scheduleds, (sc){
+              ss((){
+                for(int i = 0 ; i< scheduleds.length;i++){
+                  if(scheduleds[i].id==sc.id){
+                    scheduleds[i]=sc;
+                    MyApp.dataModel.scheduled(sc, context, CUD.Update);
+                  }
+                }
+              });
+            },isInCalendar: isInCalendar,
+            onScheduledDeleted: (sc){
+              ss((){
+                scheduleds.remove(sc);
+              });
+              MyApp.dataModel.scheduled(sc, context, CUD.Delete);
+            },
+            onScheduledAdded: (){
+              ss((){
+                Scheduled sc = Scheduled(
+                  isParentTask: isTask,
+                  parentId: object.id,
+                  repeatRule: RepeatRule.None,
+                  repeatValue: 0,
+                  durationInMinutes: isInCalendar?30:0,
+                  startTime: isInCalendar?getTodayFormated():null
+                );
+                scheduleds.add(sc);
+                MyApp.dataModel.scheduled(sc, context, CUD.Create);
+              });
+            },
+          ),
           Divider(),
           ExpansionTile(
             title: Padding(
@@ -258,7 +319,13 @@ showAddEditObjectBottomSheet(
           ),
         ],
       );
-  },initialSnapping: .3);
+  },initialSnapping: .3,onCollapsed: (){
+    if(add==true&&delete==true){
+      print('delete $delete');
+      isTask?MyApp.dataModel.databaseHelper.deleteTask(object.id):
+        MyApp.dataModel.databaseHelper.deleteActivity(object.id);
+    }
+  });
 }
 
 showHourValuePopup(BuildContext context,{@required double value,@required bool isMultiply,@required Function(int,bool) onSelectedValueAndBool}){
@@ -318,17 +385,17 @@ showReplacePlayableBottomSheet(BuildContext context,dynamic currentPlaying){
 
     MyApp.dataModel.currentPlaying=obj;
     if(obj is Task){
-      MyApp.dataModel.task(MyApp.dataModel.findObjectIndexById(obj), obj, context, CUD.Update);
+      MyApp.dataModel.task( obj, context, CUD.Update);
     }else if(obj is Activity){
-      MyApp.dataModel.activity(MyApp.dataModel.findObjectIndexById(obj), obj, context, CUD.Update);
+      MyApp.dataModel.activity(obj, context, CUD.Update);
     }
 
     (currentPlaying.trackedStart as List<DateTime>).removeLast();
 
     if(currentPlaying is Task){
-      MyApp.dataModel.task(MyApp.dataModel.findObjectIndexById(currentPlaying), currentPlaying, context, CUD.Update);
+      MyApp.dataModel.task(currentPlaying, context, CUD.Update);
     }else if(currentPlaying is Activity){
-      MyApp.dataModel.activity(MyApp.dataModel.findObjectIndexById(currentPlaying), currentPlaying, context, CUD.Update);
+      MyApp.dataModel.activity(currentPlaying, context, CUD.Update);
     }
 
     if(!kIsWeb){
@@ -374,13 +441,14 @@ showReplacePlayableBottomSheet(BuildContext context,dynamic currentPlaying){
   });
 }
 
-showObjectDetailsBottomSheet(BuildContext context, dynamic object,DateTime selectedDate){
+showObjectDetailsBottomSheet(BuildContext context, dynamic object,DateTime selectedDate,
+    {@required bool isInCalendar,Scheduled sContext}){
   bool isActivity = object is Activity;
 
   showDistivityModalBottomSheet(context, (ctx,ss){
     return Column(
       mainAxisSize: MainAxisSize.min,
-      // crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Padding(
           padding: const EdgeInsets.all(15.0),
@@ -399,7 +467,7 @@ showObjectDetailsBottomSheet(BuildContext context, dynamic object,DateTime selec
                         object.addCheck(selectedDate??getTodayFormated());
                       }
                     });
-                    MyApp.dataModel.task(MyApp.dataModel.findObjectIndexById(object), object, context, CUD.Update);
+                    MyApp.dataModel.task(object, context, CUD.Update);
                   },
                   activeColor: object.color,
 
@@ -407,30 +475,48 @@ showObjectDetailsBottomSheet(BuildContext context, dynamic object,DateTime selec
               Flexible(
                 child: getSubtitle(object.name,isCentered: false),
               ),
-              GButton("Edit", onPressed: (){
+              GButton("Edit",variant: 3, onPressed: (){
                 Navigator.pop(context);
                 showAddEditObjectBottomSheet(
-                    context, selectedDate: selectedDate,
-                    object: object,add: false,index: MyApp.dataModel.findObjectIndexById(object),
-                    scheduled: object.getScheduled(context)[0],isTask: true);
+                    context, selectedDate: selectedDate,isInCalendar: isInCalendar,
+                    object: object,add: false, isTask: true);
               })
             ],
           ),
         ),
-        if(object.description!="")Divider(),
-        if(object.description!="")getSubtitle('Description'),
-        if(object.description!="")Padding(
-          padding: const EdgeInsets.all(15),
-          child: GText(object.description),
-        ),
         Divider(),
+        if(sContext!=null)
+          GDateTimeEditWidgetForScheduled(onScheduledChange: (s){
+            ss((){
+              sContext=s;
+              MyApp.dataModel.scheduled(sContext, context, CUD.Update);
+            });
+          }, scheduled: sContext, isStartTime: true),
+        if(sContext!=null)
+          GDateTimeEditWidgetForScheduled(onScheduledChange: (s){
+            ss((){
+              sContext=s;
+              MyApp.dataModel.scheduled(sContext, context, CUD.Update);
+            });
+          }, scheduled: sContext, isStartTime: false),
+        Divider(),
+        if(object.description!="")ExpansionTile(
+          title: GText('Description'),
+          leading: GIcon(Icons.note),
+          children: [
+            if(object.description!="")Padding(
+              padding: const EdgeInsets.all(15),
+              child: GText(object.description),
+            )
+          ],
+        ),
         ListTile(
           leading: GIcon(Icons.attach_money),
           title: GText("${formatDouble(object.value.toDouble())} \$/hour"),
         ),
         if(object is Task)
           Visibility(
-            visible: object.getScheduled(context)[0].repeatValue==1&&object.getScheduled(context)[0].repeatRule==RepeatRule.EveryXDays,
+            visible: object.getScheduled()[0].repeatValue==1&&object.getScheduled()[0].repeatRule==RepeatRule.EveryXDays,
             child: ListTile(
               leading: GIcon(Icons.local_fire_department_rounded),
               title: GText("${object.getStreakNumberForEveryday()} day(s) streak"),
@@ -442,11 +528,9 @@ showObjectDetailsBottomSheet(BuildContext context, dynamic object,DateTime selec
           title: GText('Delete task'),
           onTap: (){
             if(isActivity){
-              MyApp.dataModel.activity(
-                  MyApp.dataModel.findObjectIndexById(object), object, context, CUD.Delete,withScheduleds: true);
+              MyApp.dataModel.activity(object, context, CUD.Delete,withScheduleds: true);
             }else{
-              MyApp.dataModel.task(
-                  MyApp.dataModel.findObjectIndexById(object), object, context, CUD.Delete,withScheduleds: true);
+              MyApp.dataModel.task(object, context, CUD.Delete,withScheduleds: true);
             }
             Navigator.pop(context);
           },
@@ -468,38 +552,37 @@ showObjectDetailsBottomSheet(BuildContext context, dynamic object,DateTime selec
             });
           },
         ),
-        if(object is Activity)Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            getSubtitle('Sub-tasks'),
-          ]+List.generate(object.childs.length, (i){
-            return TaskListItem(task: MyApp.dataModel.tasks[MyApp.dataModel.tasks.indexOf(object.childs[i])],
-              selectedDate: getTodayFormated(),minimal: true,);
-          },)+[ GButton('Add task', onPressed: (){
-            showAddEditObjectBottomSheet(
-              context,
-              selectedDate: getTodayFormated(),
-              isTask: true,
-              add: true,
-              object: Task(
-                  name: '',
-                  trackedEnd: [],
-                  trackedStart: [],
-                  parentId: object.id,
-                  isParentCalendar: false,
-                  value: object.value,
-                  checks: [],
-                  valueMultiply: false,
-                  tags: [],
-                  color: object.color
-              ),
-            );
-          })],
-        )
-//        getSubtitle("Tracked"),
-//        if(object.trackedStart.length==0)
-//          getEmptyView(context, "No timestamps")
-      ]//+getTrackedIntervalsWidget(context,object, object.color),
+        if(object is Activity)ExpansionTile(
+          title:GText('Sub-tasks'),
+          leading: GIcon(Icons.check_circle),
+          children:
+            [
+              getSubtitle('Sub-tasks'),
+            ]+List.generate(object.childs.length, (i){
+              return TaskListItem(task: MyApp.dataModel.tasks[MyApp.dataModel.tasks.indexOf(object.childs[i])],
+                selectedDate: getTodayFormated(),minimal: true,);
+            },)+[ GButton('Add task', onPressed: (){
+              showAddEditObjectBottomSheet(
+                context,
+                selectedDate: getTodayFormated(),isInCalendar: false,
+                isTask: true,
+                add: true,
+                object: Task(
+                    name: '',
+                    trackedEnd: [],
+                    trackedStart: [],
+                    parentId: object.id,
+                    isParentCalendar: false,
+                    value: object.value,
+                    checks: [],
+                    valueMultiply: false,
+                    tags: [],
+                    color: object.color
+                ),
+              );
+            })],
+        ),
+      ]
     );
   });
 }
@@ -557,9 +640,9 @@ showEditTimestampsBottomSheet(BuildContext context,{@required dynamic object,int
                 }
                 object.trackedStart[indexTimestamp]=startTime;
                 if(object is Task){
-                  MyApp.dataModel.task(MyApp.dataModel.findObjectIndexById(object), object, context, CUD.Update);
+                  MyApp.dataModel.task(object, context, CUD.Update);
                 }else if(object is Activity){
-                  MyApp.dataModel.activity(MyApp.dataModel.findObjectIndexById(object), object, context, CUD.Update);
+                  MyApp.dataModel.activity(object, context, CUD.Update);
                 }
                 Navigator.pop(context);
               })
@@ -979,7 +1062,7 @@ showAddEditCalendarBottomSheet(BuildContext context,{ECalendar eCalendar,int ind
         )
       ],
     );
-  });
+  },);
 }
 
 showSelectViewBottomSheet(BuildContext context,SelectedView selectedView, Function(SelectedView) onSelectedView){

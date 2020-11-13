@@ -1,9 +1,7 @@
 import 'package:circular_check_box/circular_check_box.dart';
 import 'package:effectivenezz/objects/timestamp.dart';
-import 'package:effectivenezz/ui/widgets/basics/gwidgets/gicon.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
-import 'package:effectivenezz/utils/basic/values_utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../main.dart';
@@ -34,8 +32,7 @@ class _GLeadingCalendarItemState extends State<GLeadingCalendarItem> {
         }else{
           widget.timeStamp.getParent().addCheck(widget.day);
         }
-        MyApp.dataModel.task(MyApp.dataModel.tasks.indexOf(widget.timeStamp.getParent()),
-            widget.timeStamp.getParent(), context, CUD.Update);
+        MyApp.dataModel.task(widget.timeStamp.getParent(), context, CUD.Update);
       },
       checkColor: widget.timeStamp.color,
       activeColor: getContrastColor(widget.timeStamp.color),

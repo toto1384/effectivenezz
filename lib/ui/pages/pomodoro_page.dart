@@ -70,6 +70,7 @@ class _PomodoroPageState extends State<PomodoroPage> {
                   },)+<Widget>[ GButton('Add task', onPressed: (){
                     showAddEditObjectBottomSheet(
                       context,
+                      isInCalendar: false,
                       selectedDate: getTodayFormated(),
                       isTask: true,
                       add: true,

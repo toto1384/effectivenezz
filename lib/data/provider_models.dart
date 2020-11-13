@@ -203,7 +203,9 @@ class DataModel{
       if(tracked){
         timestamps.addAll(item.getTrackedTimestamps(context,dateTimes));
       }else{
-        timestamps.addAll(item.getScheduled(context)[0].getPlanedTimestamps(context,dateTimes,semiOpacity: plannedSemiOpacity));
+        item.getScheduled().forEach((element) {
+          timestamps.addAll(element.getPlanedTimestamps(context,dateTimes,semiOpacity: plannedSemiOpacity));
+        });
       }
     });
 
@@ -211,7 +213,9 @@ class DataModel{
       if(tracked){
         timestamps.addAll(item.getTrackedTimestamps(context,dateTimes));
       }else{
-        timestamps.addAll(item.getScheduled(context)[0].getPlanedTimestamps(context,dateTimes,semiOpacity: plannedSemiOpacity));
+        item.getScheduled().forEach((element) {
+          timestamps.addAll(element.getPlanedTimestamps(context,dateTimes,semiOpacity: plannedSemiOpacity));
+        });
       }
     });
 
@@ -226,9 +230,9 @@ class DataModel{
 
       if(currentPlaying.id>0){
         if(currentPlaying is Task){
-          task(findObjectIndexById(currentPlaying), currentPlaying, context, CUD.Update);
+          task(currentPlaying, context, CUD.Update);
         }else{
-          activity(findObjectIndexById(currentPlaying), currentPlaying, context, CUD.Update);
+          activity(currentPlaying, context, CUD.Update);
         }
       }
 
@@ -238,9 +242,9 @@ class DataModel{
     if(playing!=null) {
       playing.trackedStart.add(getTodayFormated());
       if(playing is Activity){
-        activity(findObjectIndexById(playing), playing, context, CUD.Update);
+        activity(playing, context, CUD.Update);
       }else if(playing is Task){
-        task(findObjectIndexById(playing), playing, context, CUD.Update);
+        task( playing, context, CUD.Update);
       }
     }
 
@@ -271,7 +275,7 @@ class DataModel{
 
 
   //SIMPLIFIED CRUD METHODS
-  task(int index,Task event,BuildContext context,CUD cud,{bool withScheduleds,Scheduled addWith})async{
+  task(Task event,BuildContext context,CUD cud,{bool withScheduleds,List<Scheduled> addWith})async{
     print("task m");
     if(withScheduleds==null){
       withScheduleds=false;
@@ -283,18 +287,22 @@ class DataModel{
         int addedId =await databaseHelper.insertTask(event);
         tasks[tasks.length-1].id=addedId;
         if(addWith!=null){
-          addWith.parentId=addedId;
-          await scheduled(0, addWith, context, cud);
+          addWith.forEach((element) async{
+            element.parentId=addedId;
+            await scheduled(element, context, cud);
+          });
         }
         DistivityPageState.listCallback.notifyAdd(event);
         break;
+      case CUD.AddUpdate:
+        tasks.add(event);
+        continue update;
+      update:
       case CUD.Update:
-        tasks[index]=event;
+        tasks[findObjectIndexById(event)]=event;
         await databaseHelper.updateTask(event);
-        if(addWith!=null){
-          await scheduled(findObjectIndexById(addWith), addWith, context, cud);
-        }
-        DistivityPageState.listCallback.notifyUpdated(event);
+        cud==CUD.AddUpdate?DistivityPageState.listCallback.notifyAdd(event):
+          DistivityPageState.listCallback.notifyUpdated(event);
         break;
       case CUD.Delete:
         if(!event.isParentCalendar){
@@ -312,8 +320,8 @@ class DataModel{
         }
         await databaseHelper.deleteTask(event.id);
         if(withScheduleds){
-          event.getScheduled(context).forEach((element) async{
-            await scheduled(scheduleds.indexOf(element), element, context, cud);
+          event.getScheduled().forEach((element) async{
+            await scheduled(element, context, cud);
           });
         }
         DistivityPageState.listCallback.notifyRemoved(event);
@@ -322,7 +330,7 @@ class DataModel{
     MyAppState.ss(context);
   }
 
-  activity(int index,Activity event,BuildContext context,CUD cud,{bool withScheduleds,Scheduled addWith})async{
+  activity(Activity event,BuildContext context,CUD cud,{bool withScheduleds,List<Scheduled> addWith})async{
     print("activity m");
     if(withScheduleds==null)withScheduleds=false;
     switch(cud){
@@ -331,23 +339,28 @@ class DataModel{
         int addedId = await databaseHelper.insertActivity(event);
         activities[activities.length-1].id= addedId;
         if(addWith!=null){
-          addWith.parentId=addedId;
-          await scheduled(0, addWith, context, cud);
+          addWith.forEach((element) async{
+            element.parentId=addedId;
+            await scheduled(element, context, cud);
+          });
         }
         DistivityPageState.listCallback.notifyAdd(event);
         break;
+      case CUD.AddUpdate:
+        activities.add(event);
+        print('GOT TO ADD UPDATE');
+        continue update;
+      update:
       case CUD.Update:
-        activities[index]=event;
+        activities[findObjectIndexById(event)]=event;
         await databaseHelper.updateActivity(event);
-        if(addWith!=null){
-          await scheduled(findObjectIndexById(addWith), addWith, context, cud);
-        }
-        DistivityPageState.listCallback.notifyUpdated(event);
+        cud==CUD.AddUpdate?DistivityPageState.listCallback.notifyAdd(event):
+          DistivityPageState.listCallback.notifyUpdated(event);
         break;
       case CUD.Delete:
         for(int i = 0 ; i<tasks.length ; i++){
           if(tasks[i].parentId==event.id&&!tasks[i].isParentCalendar){
-            task(i, tasks[i], context, CUD.Delete);
+            task(tasks[i], context, CUD.Delete);
           }
         }
         activities.remove(event);
@@ -358,8 +371,8 @@ class DataModel{
         }
         await databaseHelper.deleteActivity(event.id);
         if(withScheduleds){
-          event.getScheduled(context).forEach((element) async{
-            await scheduled(scheduleds.indexOf(element), element, context, cud);
+          event.getScheduled().forEach((element) async{
+            await scheduled(element, context, cud);
           });
         }
         DistivityPageState.listCallback.notifyRemoved(event);
@@ -384,32 +397,36 @@ class DataModel{
       case CUD.Delete:
         for(int i = 0 ; i<tasks.length ; i++){
           if(tasks[i].parentId==eCalendar.id&&tasks[i].isParentCalendar){
-            task(i, tasks[i], context, CUD.Delete);
+            task(tasks[i], context, CUD.Delete);
           }
         }
         for(int i = 0 ; i<activities.length ; i++){
           if(activities[i].parentCalendarId==eCalendar.id){
-            activity(i, activities[i], context, CUD.Delete);
+            activity(activities[i], context, CUD.Delete);
           }
         }
         eCalendars.removeAt(index);
         await databaseHelper.deleteECalendar(eCalendar.id);
         DistivityPageState.listCallback.notifyRemoved(eCalendar);
         break;
+      case CUD.AddUpdate:
+        // TODO: Handle this case.
+        break;
     }
   }
 
   //SIMPLIFIED CRUD METHODS
-  scheduled(int index,Scheduled event,BuildContext context,CUD cud,)async{
+  scheduled(Scheduled event,BuildContext context,CUD cud,)async{
     switch(cud){
       case CUD.Create:
         scheduleds.add(event);
+        print('yeeeeeep');
         scheduleds[scheduleds.length-1].id=await databaseHelper.insertScheduled(event);
         if(!kIsWeb)scheduleNotificationForScheduled(notificationHelper,
             event.getNextStartTime(), event);
         break;
       case CUD.Update:
-        scheduleds[index]=event;
+        scheduleds[findObjectIndexById(event)]=event;
         await databaseHelper.updateScheduled(event);
         if(!kIsWeb)notificationHelper.cancelNotification(100000+event.id);
         if(!kIsWeb)scheduleNotificationForScheduled(notificationHelper,
@@ -420,7 +437,11 @@ class DataModel{
         await databaseHelper.deleteScheduled(event.id);
         if(!kIsWeb)notificationHelper.cancelNotification(100000+event.id);
         break;
+      case CUD.AddUpdate:
+        // TODO: Handle this case.
+        break;
     }
+    DistivityPageState.listCallback.notifyUpdated(null);
     MyAppState.ss(context);
   }
 
@@ -438,6 +459,9 @@ class DataModel{
       case CUD.Delete:
         tags.remove(event);
         await databaseHelper.deleteTag(event.id);
+        break;
+      case CUD.AddUpdate:
+        // TODO: Handle this case.
         break;
     }
     MyAppState.ss(context);
@@ -526,7 +550,7 @@ class DataModel{
       trackedEnd: [],
       trackedStart: [],
       value: 0,
-      name: '',
+      name: 'No activity',
       valueMultiply: false,
       parentCalendarId: -1,
       id: -1,
@@ -593,10 +617,10 @@ class DataModel{
     }else if(currentPlaying is Activity){
       //activity is playing
       currentPlaying.trackedStart.last=currentPlaying.trackedStart.last.subtract(Duration(minutes: i));
-      activity(findObjectIndexById(currentPlaying), currentPlaying, context, CUD.Update);
+      activity(currentPlaying, context, CUD.Update);
     }else if(currentPlaying is Task){
       currentPlaying.trackedStart.last=currentPlaying.trackedStart.last.subtract(Duration(minutes: i));
-      task(findObjectIndexById(currentPlaying), currentPlaying, context, CUD.Update);
+      task(currentPlaying, context, CUD.Update);
     }
   }
 

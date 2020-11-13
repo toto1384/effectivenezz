@@ -93,7 +93,7 @@ class _VerticalZoomState extends State<VerticalZoom> with AfterLayoutMixin{
         }else{
           double contentHeight = _coerceContentHeight(details.verticalScale * _contentHeightUpdateReference,);
 
-          widget.onScaleChange(contentHeight);
+          if(_contentHeightUpdateReference!=contentHeight)widget.onScaleChange(contentHeight);
 
           final scrollOffset = _lastFocus * (contentHeight) - details.localFocalPoint.dy;
 

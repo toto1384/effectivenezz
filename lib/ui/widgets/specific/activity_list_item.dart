@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:after_layout/after_layout.dart';
 import 'package:effectivenezz/objects/activity.dart';
+import 'package:effectivenezz/objects/scheduled.dart';
 import 'package:effectivenezz/objects/task.dart';
 import 'package:effectivenezz/ui/pages/pomodoro_page.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gicon.dart';
@@ -23,8 +24,10 @@ class ActivityListItem extends StatefulWidget{
   final Activity activity;
   final Function onTap;
   final bool minimal;
+  final Scheduled context;
 
-  const ActivityListItem({Key key,@required this.selectedDate,@required this.activity,this.onTap,this.minimal}) : super(key: key);
+  const ActivityListItem({Key key,@required this.selectedDate,@required this.activity,
+    this.onTap,this.minimal, this.context}) : super(key: key);
 
   @override
   _ActivityListItemState createState() => _ActivityListItemState();
@@ -62,9 +65,15 @@ class _ActivityListItemState extends State<ActivityListItem> with AfterLayoutMix
             ListTile(
               onTap: (){
                 if(widget.minimal??false){
-                  widget.onTap();
+                  if(widget.onTap!=null){
+                    widget.onTap();
+                  }else showObjectDetailsBottomSheet(
+                      getGlobalContext(context), widget.activity,widget.selectedDate,
+                      isInCalendar: false,sContext: widget.context);
                 }else{
-                  showObjectDetailsBottomSheet(getGlobalContext(context), widget.activity,widget.selectedDate);
+                  showObjectDetailsBottomSheet(
+                      getGlobalContext(context), widget.activity,widget.selectedDate,
+                      isInCalendar: false,sContext: widget.context);
                 }
               },
               leading: CircleAvatar(
@@ -111,9 +120,8 @@ class _ActivityListItemState extends State<ActivityListItem> with AfterLayoutMix
               ),
               title: GText(widget.activity.name),
               onLongPress: ()=>showAddEditObjectBottomSheet(
-                  context, selectedDate: widget.selectedDate,
-                  add: false,index: MyApp.dataModel.findObjectIndexById(widget.activity),
-                  object: widget.activity,scheduled: widget.activity.getScheduled(context)[0],isTask: false
+                  context, selectedDate: widget.selectedDate,isInCalendar: false,
+                  add: false, object: widget.activity,isTask: false
               ),
               trailing: Visibility(
                 visible: !(widget.minimal??false),
@@ -173,27 +181,6 @@ class _ActivityListItemState extends State<ActivityListItem> with AfterLayoutMix
           ],
         ),
       );
-    }
-
-    getStringSchedule(){
-      String schedule = "";
-
-      if(widget.activity.getScheduled(context)[0].startTime==null){
-        return "Not scheduled";
-      }
-
-      if(!areDatesOnTheSameDay((widget.activity.getScheduled(context)[0].
-        startTime), getTodayFormated())){
-        schedule = schedule+ getDateName((widget.activity.getScheduled(context)[0].startTime)) + " , ";
-      }
-      schedule = schedule+ getTimeName((widget.activity.getScheduled(context)[0].startTime))+" -- ";
-
-      if(!areDatesOnTheSameDay(widget.activity.getScheduled(context)[0].getEndTime(), getTodayFormated())){
-        schedule = schedule+ getDateName(widget.activity.getScheduled(context)[0].getEndTime())+ " , ";
-      }
-      schedule = schedule+ getTimeName(widget.activity.getScheduled(context)[0].getEndTime());
-
-      return schedule;
     }
 
     @override

@@ -42,13 +42,17 @@ class DistivityAnimatedListState extends State<DistivityAnimatedList> {
     int index= widget.getObjectIndexInTheList(object);
     if(index>=0){
       widget.onRemove(object,index);
-      key.currentState.removeItem(index, (context, animation) => widget.animatedListRemovedItemBuilder(object,animation));
+      key.currentState.removeItem(index, (context, animation) =>
+          widget.animatedListRemovedItemBuilder(object,animation));
     }
   }
 
   onAdd(dynamic object){
+    print('ON ADD PREPARING TO ADD');
     int index = widget.onAdd(object);
+    print('ON ADD FINISHED ADDING');
     if(index>=0)key.currentState.insertItem(index,duration: duration);
+    print('ON ADD NOTIFY LIST');
   }
 
   onUpdate(dynamic object){
@@ -68,7 +72,7 @@ class DistivityAnimatedListState extends State<DistivityAnimatedList> {
   void initState() {
     if(!initedCallback){
       DistivityPageState.listCallback.listen((obj,cud ){
-        if(key.currentState==null)return;
+        if(key.currentState==null||obj==null)return;
         if(cud==CUD.Create){
           onAdd(obj);
         }else if(cud==CUD.Delete){

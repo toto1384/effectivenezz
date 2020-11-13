@@ -59,7 +59,7 @@ class _DistivitySecondaryItemState extends State<DistivitySecondaryItem> with Af
                   }else{
                     MyApp.dataModel.currentPlaying.addCheck(getTodayFormated());
                   }
-                  MyApp.dataModel.task(MyApp.dataModel.findObjectIndexById(MyApp.dataModel.currentPlaying), MyApp.dataModel.currentPlaying, context, CUD.Update);
+                  MyApp.dataModel.task(MyApp.dataModel.currentPlaying, context, CUD.Update);
                 },
               ),
             Flexible(
