@@ -14,11 +14,11 @@ abstract class DatabaseHelper{
   Future<List<ECalendar>> queryAllECalendars();
   Future<List<Tag>> queryAllTags();
 
-  Future<int> insertTask(Task task,{List<Scheduled> scheduleds});
-  Future<int> insertActivity(Activity activity,{List<Scheduled> scheduleds});
-  Future<int> insertECalendar(ECalendar eCalendar);
-  Future<int> insertScheduled(Scheduled scheduled);
-  Future<int> insertTag(Tag tag);
+  Future<String> insertTask(Task task,);
+  Future<String> insertActivity(Activity activity,);
+  Future<String> insertECalendar(ECalendar eCalendar);
+  Future<String> insertScheduled(Scheduled scheduled);
+  Future<String> insertTag(Tag tag);
 
   Future<int> updateTask(Task task);
   Future<int> updateActivity(Activity activity);
@@ -26,11 +26,11 @@ abstract class DatabaseHelper{
   Future<int> updateScheduled(Scheduled scheduled);
   Future<int> updateTag(Tag tag);
 
-  Future<int> deleteTask(int taskId);
-  Future<int> deleteActivity(int activityId);
-  Future<int> deleteECalendar(int eCalendarId);
-  Future<int> deleteScheduled(int scheduledId);
-  Future<int> deleteTag(int tagId);
+  Future<int> deleteTask(String taskId);
+  Future<int> deleteActivity(String activityId);
+  Future<int> deleteECalendar(String eCalendarId);
+  Future<int> deleteScheduled(String scheduledId);
+  Future<int> deleteTag(String tagId);
 
   Future saveFromDriveData(Map<String,List> data);
 

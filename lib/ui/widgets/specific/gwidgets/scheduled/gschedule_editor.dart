@@ -1,6 +1,5 @@
 
 import 'package:effectivenezz/objects/scheduled.dart';
-import 'package:effectivenezz/ui/widgets/basics/gwidgets/gbutton.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gicon.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/ginfo_icon.dart';
@@ -10,6 +9,7 @@ import 'package:effectivenezz/utils/basic/overflows_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import 'gdate_time_edit_widget_for_scheduled.dart';
 
@@ -48,6 +48,7 @@ class _GScheduleEditorState extends State<GScheduleEditor>{
   }
 
   int index = 0;
+  PageController controller = PageController();
 
   @override
   Widget build(BuildContext context) {
@@ -57,8 +58,9 @@ class _GScheduleEditorState extends State<GScheduleEditor>{
       firstElement = Container();
     } else {
       firstElement = Container(
-        height: height+20,
+        height: height+30,
         child: PageView.builder(
+          controller: controller,
           onPageChanged: (i){
             setState(() {
               index = i;
@@ -81,13 +83,7 @@ class _GScheduleEditorState extends State<GScheduleEditor>{
                       scheduled: widget.scheduled[i],
                     )):(GDurationWidgetForScheduled( scheduled: widget.scheduled[i],
                       onScheduledChange: widget.onScheduledChange,)),
-                    GRepeatEditor( widget.scheduled[i], (sc){
-                      setState((){
-                        widget.scheduled[i].repeatRule=sc.repeatRule;
-                        widget.scheduled[i].repeatUntil=sc.repeatUntil;
-                        widget.scheduled[i].repeatValue=sc.repeatValue;
-                      });
-                    }),
+                    GRepeatEditor( widget.scheduled[i], widget.onScheduledChange),
                   ],
                 ),
               );
@@ -117,7 +113,7 @@ class _GScheduleEditorState extends State<GScheduleEditor>{
               IconButton(
                 icon: GIcon(Icons.more_vert),
                 onPressed: (){
-                  showDistivityModalBottomSheet(context, (ctx,ss){
+                  showDistivityModalBottomSheet(context, (ctx,ss,c){
                     return Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -133,7 +129,15 @@ class _GScheduleEditorState extends State<GScheduleEditor>{
                           title: GText('Delete this schedule'),
                           leading: GIcon(Icons.delete),
                           onTap: (){
-                            widget.onScheduledDeleted(widget.scheduled[index]);
+                            if(widget.scheduled.length>1){
+                              int unmodifiedIndex = index;
+                              if(index!=0)index--;
+                              print(index);
+                              widget.onScheduledDeleted(
+                                  widget.scheduled[unmodifiedIndex]);
+                            }else Fluttertoast.showToast(msg: "You can't delete the only schedule(but you can set the start time and duration to nothing)");
+
+                            Navigator.pop(context);
                           },
                         )
                       ],
@@ -154,7 +158,6 @@ class _GScheduleEditorState extends State<GScheduleEditor>{
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   //starts
-                  GText(widget.scheduled[0].parentId.toString()+widget.scheduled[0].isParentTask.toString()),
                   GDateTimeEditWidgetForScheduled( onScheduledChange: widget.onScheduledChange,
                       scheduled: widget.scheduled[0], isStartTime: true),
                   widget.isInCalendar?(GDateTimeEditWidgetForScheduled(
@@ -179,8 +182,8 @@ class _GScheduleEditorState extends State<GScheduleEditor>{
           height: 10,
           child: ListView.builder(itemBuilder: (ctx,i){
             return Icon(
-              widget.scheduled[i].isOverdue()?Icons.close:Icons.circle,
-              size: 7,color: index==i?Colors.white:Colors.grey,
+              widget.scheduled[i].repeatRule==RepeatRule.None?widget.scheduled[i].isOverdue()?Icons.close:Icons.circle:Icons.repeat,
+              size: widget.scheduled[i].isOverdue()?10:7,color: index==i?Colors.white:Colors.grey,
             );
           },itemCount:widget.scheduled.length,shrinkWrap: true,scrollDirection: Axis.horizontal,),
         ),

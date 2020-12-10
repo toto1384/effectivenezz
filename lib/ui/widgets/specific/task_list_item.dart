@@ -1,6 +1,4 @@
 import 'dart:async';
-
-import 'package:after_layout/after_layout.dart';
 import 'package:circular_check_box/circular_check_box.dart';
 import 'package:effectivenezz/objects/scheduled.dart';
 import 'package:effectivenezz/objects/task.dart';
@@ -12,7 +10,6 @@ import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
 import 'package:effectivenezz/utils/complex/overflows_complex.dart';
-import 'package:effectivenezz/utils/date_n_strings.dart';
 import 'package:flutter/material.dart';
 
 import '../../../main.dart';
@@ -31,11 +28,12 @@ class TaskListItem extends StatefulWidget {
   _TaskListItemState createState() => _TaskListItemState();
 }
 
-class _TaskListItemState extends State<TaskListItem> with AfterLayoutMixin{
+class _TaskListItemState extends State<TaskListItem> {
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {ifStartTimer();});
   }
 
   @override
@@ -98,7 +96,7 @@ class _TaskListItemState extends State<TaskListItem> with AfterLayoutMixin{
               ),color: MyColors.color_black_darker),
             ),
             Visibility(
-              visible: widget.task.getScheduled()[0].repeatValue==1&&widget.task.getScheduled()[0].repeatRule==RepeatRule.EveryXDays,
+              visible: widget.task.getScheduled().length!=0&&widget.task.getScheduled()[0].repeatValue==1&&widget.task.getScheduled()[0].repeatRule==RepeatRule.EveryXDays,
               child: Card(child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4,vertical: 2),
                 child: Row(
@@ -146,10 +144,6 @@ class _TaskListItemState extends State<TaskListItem> with AfterLayoutMixin{
     );
   }
 
-  @override
-  void afterFirstLayout(BuildContext context) {
-    ifStartTimer();
-  }
   ifStartTimer(){
     if(MyApp.dataModel.currentPlaying==(widget.task)){
       _everySecond = Timer.periodic(Duration(seconds: 1), (Timer t) {

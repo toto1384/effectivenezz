@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:circular_check_box/circular_check_box.dart';
 import 'package:effectivenezz/objects/activity.dart';
@@ -7,6 +6,7 @@ import 'package:effectivenezz/objects/scheduled.dart';
 import 'package:effectivenezz/objects/task.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gbutton.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gicon.dart';
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gselector.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gswitchable.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext_field.dart';
@@ -15,7 +15,6 @@ import 'package:effectivenezz/ui/widgets/lists/gsort_by_calendar_list_view.dart'
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/dates/gtracked_intervals_widget.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/gempty_view.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/ginfo_icon.dart';
-import 'package:effectivenezz/ui/widgets/specific/gwidgets/gtab_bar.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/scheduled/gdate_time_edit_widget_for_scheduled.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/scheduled/gschedule_editor.dart';
 import 'package:effectivenezz/ui/widgets/specific/task_list_item.dart';
@@ -31,10 +30,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:googleapis/drive/v2.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../main.dart';
-
 
 
 showAddEditObjectBottomSheet(
@@ -48,65 +46,67 @@ showAddEditObjectBottomSheet(
     if(object==null){
       object=Activity(
         tags: [],
+        id: Uuid().v4(),
         name: '',
         valueMultiply: false,
-        parentCalendarId: -1,
+        parentCalendarId: "-1",
+        schedules: [],
         trackedEnd: [],
         trackedStart: [],
-        value: 0,
-        color: Colors.red,
+        value: 0,blacklistedDates: [],description: '',
+        color: Colors.white,
         icon: Icons.mail,
       );
-      if(add)object.id=await MyApp.dataModel.databaseHelper.insertActivity(object);
     }
   }else{
     if(object==null){
       object=Task(
         name: '',
+        id: Uuid().v4(),blackListedDates: [],color: Colors.white,description: '',
         tags: [],
         valueMultiply: false,
         isParentCalendar: true,
         checks: [],
-        parentId: -1,
+        parentId: "-1",
         trackedEnd: [],
         trackedStart: [],
-        value: 0,
+        value: 0,schedules: []
       );
-      if(add)object.id=await MyApp.dataModel.databaseHelper.insertTask(object);
     }
   }
-  List<Scheduled> scheduleds = [];
-
-  if(!add)scheduleds.addAll(object.getScheduled());
-
-  if(withNewScheduled??false){
-    DistivityCalendarWidget.scheduledCallback.newScheduled.isParentTask=isTask;
-    DistivityCalendarWidget.scheduledCallback.newScheduled.parentId=object.id;
-    await MyApp.dataModel.scheduled(DistivityCalendarWidget.scheduledCallback.newScheduled, context, CUD.Create);
-    scheduleds.add(DistivityCalendarWidget.scheduledCallback.newScheduled);
-  }
-  if(scheduleds.length==0){
-    print('scheduleds is 0');
-    DistivityCalendarWidget.scheduledCallback.newScheduled = Scheduled(
-        repeatValue: 0,
-        repeatRule: RepeatRule.None,
-        isParentTask: isTask,
-        durationInMinutes: isInCalendar?30:null,
-        startTime: isInCalendar?getTodayFormated():null,
-        parentId: object.id
-    );
-    scheduleds.add(DistivityCalendarWidget.scheduledCallback.newScheduled);
-    await MyApp.dataModel.scheduled(DistivityCalendarWidget.scheduledCallback.newScheduled,
-        context, CUD.Create);
-  }
+  List<Scheduled> schedules = [];
 
   if(add==null)add=false;
+
+  if(!add)schedules.addAll(object.getScheduled());
+
+  if(withNewScheduled??false){
+    schedules.add(DistivityCalendarWidget.scheduledCallback.newScheduled);
+    object.schedules.add(DistivityCalendarWidget.scheduledCallback.newScheduled.id);
+  }
+  if(schedules.length==0){
+    Scheduled scheduled = Scheduled(
+        repeatValue: "0",
+        id: Uuid().v4(),
+        repeatRule: RepeatRule.None,
+        durationInMinutes: isInCalendar?30:0,
+        startTime: isInCalendar?getTodayFormated():null,
+    );
+    schedules.add(scheduled);
+    object.schedules.add(scheduled.id);
+  }
   TextEditingController nameEditingController = TextEditingController(text: object.name??'');
   TextEditingController descriptionEditingController = TextEditingController(text: object.description??'');
 
-  bool delete = true;
+  // schedules.sort((a, b) {
+  //   if(a.startTime==null)return -a.durationInMinutes;
+  //   if(b.startTime==null)return -b.durationInMinutes;
+  //   if(a.repeatRule==b.repeatRule){
+  //     return a.startTime.compareTo(b.startTime);
+  //   }else return a.repeatRule.index.compareTo(b.repeatRule.index);
+  // });
 
-  showDistivityModalBottomSheet(context, (ctx,ss){
+  showDistivityModalBottomSheet(context, (ctx,ss,c){
       return Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,7 +129,7 @@ showAddEditObjectBottomSheet(
                   icon: GIcon(Icons.send,size: TextType.textTypeSubtitle.size*1.5),
                   onPressed: ()async{
                     bool valid = true;
-                    scheduleds.forEach((element) {
+                    schedules.forEach((element) {
                       if((element.durationInMinutes??0)<0){
                         valid=false;
                       }
@@ -145,21 +145,27 @@ showAddEditObjectBottomSheet(
                           fontSize: 16.0
                       );
                     }else{
-                      delete=false;
                       object.name = nameEditingController.text;
                       object.description = descriptionEditingController.text;
+
+                      object.schedules = object.schedules.toSet().toList();
+
                       if(object is Task){
                         if(!object.isParentCalendar){
-                          Activity newAct =
-                            MyApp.dataModel.findActivityById(object.parentId)..childs.add(object);
+                          Activity newAct = MyApp.dataModel.findActivityById(object.parentId)..childs.add(object);
                           MyApp.dataModel.activities[MyApp.dataModel.findObjectIndexById(newAct)]=newAct;
                         }
-                        await MyApp.dataModel.task(object, context,
-                            add?CUD.AddUpdate:CUD.Update);
+                        await MyApp.dataModel.task(object, context, add?CUD.Create:CUD.Update);
                       }else{
-                        await MyApp.dataModel.activity(object, context,
-                            add?CUD.AddUpdate:CUD.Update);
+                        await MyApp.dataModel.activity(object, context, add?CUD.Create:CUD.Update);
                       }
+
+                      if(add){
+                        //add all
+                        await schedules.forEach((element) async{ await MyApp.dataModel.
+                        scheduled(element, context, CUD.Create,object.id);});
+                      }
+
                       DistivityCalendarWidget.scheduledCallback.notifyUpdated(null);
                       Navigator.pop(context);
                     }
@@ -184,7 +190,7 @@ showAddEditObjectBottomSheet(
                     if(object is Task){
                       if(object.color==null||object.color==(object.isParentCalendar?
                         MyApp.dataModel.findECalendarById(object.parentId).color:MyApp.dataModel.
-                        findActivityById(object.parentId).color)){
+                        findActivityById(object.parentId).color)||object.color==Colors.white){
                         if(b){
                           object.color=MyApp.dataModel.findECalendarById(i).color;
                         }else{
@@ -199,7 +205,7 @@ showAddEditObjectBottomSheet(
                         }
                       }
                     }else if(object is Activity){
-                      if(object.color==null||object.color==MyApp.dataModel.
+                      if(object.color==Colors.white||object.color==null||object.color==MyApp.dataModel.
                         findECalendarById(object.parentCalendarId).color){
                         object.color=MyApp.dataModel.findECalendarById(i).color;
                       }
@@ -237,35 +243,34 @@ showAddEditObjectBottomSheet(
 
           Divider(),
           GScheduleEditor(
-            scheduleds, (sc){
+            schedules, (sc){
               ss((){
-                for(int i = 0 ; i< scheduleds.length;i++){
-                  if(scheduleds[i].id==sc.id){
-                    scheduleds[i]=sc;
-                    MyApp.dataModel.scheduled(sc, context, CUD.Update);
+                for(int i = 0 ; i< schedules.length;i++){
+                  if(schedules[i].id==sc.id){
+                    schedules[i]=sc;
+                    if(!add)MyApp.dataModel.scheduled(sc, context, CUD.Update,object.id);
                   }
                 }
               });
             },isInCalendar: isInCalendar,
             onScheduledDeleted: (sc){
               ss((){
-                scheduleds.remove(sc);
+                schedules.remove(sc);
+                object.schedules.remove(sc.id);
               });
-              MyApp.dataModel.scheduled(sc, context, CUD.Delete);
+              if(!add)MyApp.dataModel.scheduled(sc, context, CUD.Delete,object.id);
             },
             onScheduledAdded: (){
-              ss((){
+              ss(()async{
                 Scheduled sc = Scheduled(
-                  isParentTask: isTask,
-                  parentId: object.id,
                   repeatRule: RepeatRule.None,
-                  repeatValue: 0,
-                  durationInMinutes: isInCalendar?30:0,
-                  startTime: isInCalendar?getTodayFormated():null
+                  repeatValue: "0",
+                  id: Uuid().v4()
                 );
-                scheduleds.add(sc);
-                MyApp.dataModel.scheduled(sc, context, CUD.Create);
-              });
+                schedules.add(sc);
+                object.schedules.add(sc.id);
+                if(!add)MyApp.dataModel.scheduled(sc, context, CUD.Create,object.id);
+                });
             },
           ),
           Divider(),
@@ -274,6 +279,9 @@ showAddEditObjectBottomSheet(
               padding: const EdgeInsets.all(7),
               child: GText('Advanced',textType: TextType.textTypeSubtitle,underline: true),
             ),
+            onExpansionChanged: (b){
+              if(b)c.expand();
+            },
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.only(top: 10,left: 7),
@@ -319,13 +327,7 @@ showAddEditObjectBottomSheet(
           ),
         ],
       );
-  },initialSnapping: .3,onCollapsed: (){
-    if(add==true&&delete==true){
-      print('delete $delete');
-      isTask?MyApp.dataModel.databaseHelper.deleteTask(object.id):
-        MyApp.dataModel.databaseHelper.deleteActivity(object.id);
-    }
-  });
+  },initialSnapping: .3);
 }
 
 showHourValuePopup(BuildContext context,{@required double value,@required bool isMultiply,@required Function(int,bool) onSelectedValueAndBool}){
@@ -411,7 +413,7 @@ showReplacePlayableBottomSheet(BuildContext context,dynamic currentPlaying){
     Navigator.pop(context);
   };
 
-  showDistivityModalBottomSheet(context, (ctx,ss){
+  showDistivityModalBottomSheet(context, (ctx,ss,c){
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
@@ -445,7 +447,7 @@ showObjectDetailsBottomSheet(BuildContext context, dynamic object,DateTime selec
     {@required bool isInCalendar,Scheduled sContext}){
   bool isActivity = object is Activity;
 
-  showDistivityModalBottomSheet(context, (ctx,ss){
+  showDistivityModalBottomSheet(context, (ctx,ss,c){
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -484,19 +486,19 @@ showObjectDetailsBottomSheet(BuildContext context, dynamic object,DateTime selec
             ],
           ),
         ),
-        Divider(),
+        if(sContext!=null)Divider(),
         if(sContext!=null)
           GDateTimeEditWidgetForScheduled(onScheduledChange: (s){
             ss((){
               sContext=s;
-              MyApp.dataModel.scheduled(sContext, context, CUD.Update);
+              MyApp.dataModel.scheduled(sContext, context, CUD.Update,object.id);
             });
           }, scheduled: sContext, isStartTime: true),
         if(sContext!=null)
           GDateTimeEditWidgetForScheduled(onScheduledChange: (s){
             ss((){
               sContext=s;
-              MyApp.dataModel.scheduled(sContext, context, CUD.Update);
+              MyApp.dataModel.scheduled(sContext, context, CUD.Update,object.id);
             });
           }, scheduled: sContext, isStartTime: false),
         Divider(),
@@ -516,7 +518,7 @@ showObjectDetailsBottomSheet(BuildContext context, dynamic object,DateTime selec
         ),
         if(object is Task)
           Visibility(
-            visible: object.getScheduled()[0].repeatValue==1&&object.getScheduled()[0].repeatRule==RepeatRule.EveryXDays,
+            visible: object.getScheduled().length!=0&&object.getScheduled()[0].repeatValue==1&&object.getScheduled()[0].repeatRule==RepeatRule.EveryXDays,
             child: ListTile(
               leading: GIcon(Icons.local_fire_department_rounded),
               title: GText("${object.getStreakNumberForEveryday()} day(s) streak"),
@@ -539,7 +541,7 @@ showObjectDetailsBottomSheet(BuildContext context, dynamic object,DateTime selec
           leading: GIcon(Icons.av_timer),
           title: GText('See tracking history'),
           onTap: (){
-            showDistivityModalBottomSheet(context, (ctx,ss){
+            showDistivityModalBottomSheet(context, (ctx,ss,c){
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
@@ -568,7 +570,7 @@ showObjectDetailsBottomSheet(BuildContext context, dynamic object,DateTime selec
                 isTask: true,
                 add: true,
                 object: Task(
-                    name: '',
+                    name: '',schedules: [],
                     trackedEnd: [],
                     trackedStart: [],
                     parentId: object.id,
@@ -595,7 +597,7 @@ showEditTimestampsBottomSheet(BuildContext context,{@required dynamic object,int
   DateTime startTime = object.trackedStart[indexTimestamp];
   DateTime endTime = indexTimestamp==object.trackedEnd.length?null:object.trackedEnd[indexTimestamp];
 
-  showDistivityModalBottomSheet(context, (ctx,ss){
+  showDistivityModalBottomSheet(context, (ctx,ss,c){
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
@@ -813,14 +815,14 @@ showEditTimestampsBottomSheet(BuildContext context,{@required dynamic object,int
   });
 }
 
-showSelectParentBottomSheet(BuildContext context,{@required dynamic taskOrActivity,@required Function(int,bool) onSelected}){
+showSelectParentBottomSheet(BuildContext context,{@required dynamic taskOrActivity,@required Function(String,bool) onSelected}){
 
   bool cal=true;
 
   bool isParentCalendar = (taskOrActivity is Activity)||(taskOrActivity.isParentCalendar==true);
-  int parentId=taskOrActivity is Activity?taskOrActivity.parentCalendarId:taskOrActivity.parentId;
+  String parentId=taskOrActivity is Activity?taskOrActivity.parentCalendarId:taskOrActivity.parentId;
 
-  showDistivityModalBottomSheet(context, (ctx,ss){
+  showDistivityModalBottomSheet(context, (ctx,ss,c){
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
@@ -906,94 +908,135 @@ showSelectParentBottomSheet(BuildContext context,{@required dynamic taskOrActivi
   });
 }
 
-List<int> daysSelected = [];
-
 showRepeatEditBottomSheet(
     BuildContext context,
-    {@required Function(RepeatRule,int) onUpdate,
+    {@required Function(RepeatRule,String,DateTime) onUpdate,
     @required RepeatRule repeatRule,
-    @required int repeatValue}){
+    @required String repeatValue,@required DateTime repeatUntil}){
 
-  TextEditingController valueEditingController = TextEditingController(text: ((repeatValue??0).toString()));
+  TextEditingController valueEditingController = TextEditingController(text: ((repeatValue??1).toString()));
+  List<int> daysSelected = repeatValue.toString().characters.skip(1).map((e) => int.parse(e)).toList();
 
+  showDistivityDialog(context, actions: [GButton('Save', onPressed: (){
+    String valueFromTEC = ((valueEditingController.text))??"0";
+    if(repeatRule==RepeatRule.EveryXWeeks){
+      String toset = valueFromTEC.toString();
+      daysSelected.forEach((item){
+        toset = toset + item.toString();
+      });
+      repeatValue=toset;
+    }else repeatValue=valueFromTEC;
+    onUpdate(repeatRule,repeatValue,repeatUntil);
+    Navigator.pop(context);
+  })], title: 'Repeats on..', stateGetter: (ctx,ss){
 
-  showDistivityModalBottomSheet(context, (ctx,ss){
     return Column(
       mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Center(child: GButton('Save', onPressed: (){
-          int valueFromTEC = (int.parse(valueEditingController.text))??0;
-          if(repeatRule==RepeatRule.EveryXWeeks){
-            String toset = valueFromTEC.toString();
-            daysSelected.forEach((item){
-              toset = toset + item.toString();
-            });
-            repeatValue=int.parse(toset);
-          }else repeatValue=valueFromTEC;
-          onUpdate(repeatRule,repeatValue);
-          Navigator.pop(context);
-        }),),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: GTabBar(
-              onSelected: (i,b){
-                if(b==true){
-                  ss((){
-                    repeatRule= RepeatRule.values[i];
-                  });
-                }
-              },
-              items: [
-                'No repeat',
-                'Every x days',
-                'Every x weeks',
-                'Every x months'
-              ],
-              selected: [
-                RepeatRule.values.indexOf(repeatRule),
-              ]
+      children: [
+        Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: GText('Every'),
             ),
-          ),
+            Visibility(
+              visible: repeatRule!=RepeatRule.None,
+              child: Expanded(child: GTextField(valueEditingController,small: true,hint: 'Value',))
+            ),
+            GSelector<RepeatRule>(currentValue: repeatRule, values: RepeatRule.values, onSelect: (rr){
+              ss((){repeatRule=rr;});
+            },getName: (rr){
+              switch(rr){
+                case RepeatRule.None:return ' No repeat';
+                case RepeatRule.EveryXDays:return ' day(s)';
+                case RepeatRule.EveryXWeeks:return ' week(s)(not supported)';
+                case RepeatRule.EveryXMonths:return ' month(s)';
+              }
+            },),
+          ],
         ),
-        if(repeatRule==RepeatRule.EveryXDays)
-          GTextField(valueEditingController,focus: true,textInputType: TextInputType.number),
-        if(repeatRule==RepeatRule.EveryXWeeks||repeatRule==RepeatRule.EveryXMonths)
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              GText('Will be supported in the future')
-//              GTextField(valueEditingController, width: 300),
-//              Padding(
-//                padding: const EdgeInsets.all(8.0),
-//                child: SingleChildScrollView(
-//                  child: Row(
-//                    mainAxisSize: MainAxisSize.min,
-//                    children: List<Widget>.generate(7,(i){
-//                      return Padding(
-//                        padding: const EdgeInsets.all(8.0),
-//                        child: CircleAvatar(
-//                          backgroundColor: daysSelected.contains(i)?Colors.white:MyColors.color_black,
-//                          child:GestureDetector(
-//                            child: GText(getDayOfTheWeekStringShort(i)),
-//                            onTap: (){
-//                              if(daysSelected.contains(i)){
-//                                daysSelected.remove(i);
-//                              }else daysSelected.add(i);
-//                            },
-//                          ),
-//                        ),
-//                      );
-//                    }),
-//                  ),
-//                ),
-//              )
-            ],
-          ),
+        if(repeatRule==RepeatRule.EveryXWeeks&&false)
+             Padding(
+               padding: const EdgeInsets.all(8.0),
+               child: Row(
+                 mainAxisSize: MainAxisSize.min,
+                 children: List<Widget>.generate(7,(i){
+                   return Padding(
+                     padding: const EdgeInsets.all(8.0),
+                     child: GestureDetector(
+                       onTap: (){
+                         ss((){
+                           if(daysSelected.contains(i)){
+                             daysSelected.remove(i);
+                           }else daysSelected.add(i);
+                         });
+                       },
+                       child: CircleAvatar(
+                         backgroundColor: daysSelected.contains(i)?Colors.white:MyColors.color_black,
+                         child: GText(getDayOfTheWeekStringShort(i+1,false),
+                           color: daysSelected.contains(i)?MyColors.color_black:Colors.white,),
+                       ),
+                     ),
+                   );
+                 }),
+               ),
+             ),
+        Divider(),
+        if(false)GDateTimeEditWidgetForScheduled(onScheduledChange: (s){
+          ss((){
+            repeatUntil=s.startTime;
+          });
+        }, scheduled: Scheduled(repeatValue: "0",repeatRule: RepeatRule.None,startTime: repeatUntil),
+          isStartTime: true,gDateTimeShow: GDateTimeShow.Date,text: 'Ends',)
       ],
     );
-  },hideHandler: true);
+  });
+
+
+//   showDistivityModalBottomSheet(context, (ctx,ss){
+//     return Column(
+//       mainAxisSize: MainAxisSize.min,
+//       children: <Widget>[
+//         Center(child: GButton('Save', onPressed: (){
+//
+//         }),),
+//         Padding(
+//           padding: const EdgeInsets.all(8.0),
+//           child: SingleChildScrollView(
+//             scrollDirection: Axis.horizontal,
+//             child: GTabBar(
+//               onSelected: (i,b){
+//                 if(b==true){
+//                   ss((){
+//                     repeatRule= RepeatRule.values[i];
+//                   });
+//                 }
+//               },
+//               items: [
+//                 'No repeat',
+//                 'Every x days',
+//                 'Every x weeks',
+//                 'Every x months'
+//               ],
+//               selected: [
+//                 RepeatRule.values.indexOf(repeatRule),
+//               ]
+//             ),
+//           ),
+//         ),
+//         if(repeatRule==RepeatRule.EveryXDays)
+//           GTextField(valueEditingController,focus: true,textInputType: TextInputType.number),
+//         if(repeatRule==RepeatRule.EveryXWeeks||repeatRule==RepeatRule.EveryXMonths)
+//           Column(
+//             mainAxisSize: MainAxisSize.min,
+//             children: <Widget>[
+//               GText('Will be supported in the future')
+// //              GTextField(valueEditingController, width: 300),
+//             ],
+//           ),
+//       ],
+//     );
+//   },hideHandler: true);
 }
 
 showAddEditCalendarBottomSheet(BuildContext context,{ECalendar eCalendar,int index,bool add}){
@@ -1001,13 +1044,13 @@ showAddEditCalendarBottomSheet(BuildContext context,{ECalendar eCalendar,int ind
 
   if(index==null)index=MyApp.dataModel.eCalendars.length;
 
-  if(eCalendar==null)eCalendar=ECalendar(name: '',parentId: -1,show: true,color: Colors.white,
-    description: '',value: 0,themesStart: [],themesEnd: []);
+  if(eCalendar==null)eCalendar=ECalendar(name: '',show: true,color: Colors.white,
+    description: '',value: 0,id: Uuid().v4());
 
   TextEditingController nameEditingController = TextEditingController(text: eCalendar.name);
   TextEditingController descriptionEditingController = TextEditingController(text: eCalendar.description);
 
-  showDistivityModalBottomSheet(context, (ctx,ss){
+  showDistivityModalBottomSheet(context, (ctx,ss,c){
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
@@ -1066,7 +1109,7 @@ showAddEditCalendarBottomSheet(BuildContext context,{ECalendar eCalendar,int ind
 }
 
 showSelectViewBottomSheet(BuildContext context,SelectedView selectedView, Function(SelectedView) onSelectedView){
-  showDistivityModalBottomSheet(context, (ctx,ss){
+  showDistivityModalBottomSheet(context, (ctx,ss,c){
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
@@ -1107,38 +1150,38 @@ showSelectViewBottomSheet(BuildContext context,SelectedView selectedView, Functi
   });
 }
 
-showAllDriveSavesBottomSheet(BuildContext context)async{
-  List<File> files = await MyApp.dataModel.driveHelper.getAllFiles(context);
-
-  showDistivityModalBottomSheet(context, (ctx,ss){
-    return files.length==0?GEmptyView("There are no saves on this account. Maybe you logged with the wrong account. If not contact us!"):Column(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(files.length, (i) => ListTile(
-        leading: GIcon(Icons.insert_drive_file),
-        onTap: (){
-          showYesNoDialog(
-              context,
-              title: "Restore save from Drive?",
-              text: "Keep in mind that the current save WILL BE DELETED FOREVER AND THERE IS NO UNDO BUTTON",
-              noString: "Cancel",
-              yesString: "Restore save",
-              onYesPressed: ()async{
-                MyApp.dataModel.driveHelper.downloadAndReplaceFile(context, files[i]);
-              });
-        },
-        title: GText(files[i].originalFilename+getStringFromDate(files[i].createdDate)),
-        trailing: IconButton(
-          icon: GIcon(Icons.delete_forever),
-          onPressed: (){
-            showYesNoDialog(context, title: "Delete this save?", text: "This action can not be undone", onYesPressed: ()async {
-              await MyApp.dataModel.driveHelper.deleteFile(context, files[i]);
-              ss((){
-                files.removeAt(i);
-              });
-            });
-          },
-        ),
-      )),
-    );
-  });
-}
+// showAllDriveSavesBottomSheet(BuildContext context)async{
+//   List<File> files = await MyApp.dataModel.driveHelper.getAllFiles(context);
+//
+//   showDistivityModalBottomSheet(context, (ctx,ss,c){
+//     return files.length==0?GEmptyView("There are no saves on this account. Maybe you logged with the wrong account. If not contact us!"):Column(
+//       mainAxisSize: MainAxisSize.min,
+//       children: List.generate(files.length, (i) => ListTile(
+//         leading: GIcon(Icons.insert_drive_file),
+//         onTap: (){
+//           showYesNoDialog(
+//               context,
+//               title: "Restore save from Drive?",
+//               text: "Keep in mind that the current save WILL BE DELETED FOREVER AND THERE IS NO UNDO BUTTON",
+//               noString: "Cancel",
+//               yesString: "Restore save",
+//               onYesPressed: ()async{
+//                 MyApp.dataModel.driveHelper.downloadAndReplaceFile(context, files[i]);
+//               });
+//         },
+//         title: GText(files[i].originalFilename+getStringFromDate(files[i].createdDate)),
+//         trailing: IconButton(
+//           icon: GIcon(Icons.delete_forever),
+//           onPressed: (){
+//             showYesNoDialog(context, title: "Delete this save?", text: "This action can not be undone", onYesPressed: ()async {
+//               await MyApp.dataModel.driveHelper.deleteFile(context, files[i]);
+//               ss((){
+//                 files.removeAt(i);
+//               });
+//             });
+//           },
+//         ),
+//       )),
+//     );
+//   });
+// }

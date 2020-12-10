@@ -10,33 +10,26 @@ import 'name_value_object.dart';
 
 class TimeStamp {
 
-  int id;
-  int parentId;
+  String id;
+  dynamic parent;
   String title;
   DateTime start;
   int durationInMinutes;
   Color color;
   bool tracked;
-  bool isTask;
   int parentIndex;
 
   TimeStamp({@required this.durationInMinutes,
-    @required this.isTask,
     @required this.start,
     @required this.title,
     @required this.color,
     @required this.tracked,
-    @required this.parentId,@required this.parentIndex,@required this.id});
+    @required this.parent,@required this.parentIndex,@required this.id});
 
   DateTime getEndTime(){
     if(start!=null)return start.add(Duration(minutes: durationInMinutes));
 
     return null;
-  }
-
-  getParent(){
-    print('timestamp get parent');
-    return isTask?MyApp.dataModel.findTaskById(parentId):MyApp.dataModel.findActivityById(parentId);
   }
 
   getScheduled(){
@@ -77,8 +70,7 @@ class TimeStamp {
 
       toreturn.add(TimeStamp(
         id: id,
-        parentId: parentId,
-        isTask: isTask,
+        parent: parent,
         title: title,
         tracked: tracked,
         start: startToreturn,

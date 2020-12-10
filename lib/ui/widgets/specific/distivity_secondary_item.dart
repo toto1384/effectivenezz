@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:after_layout/after_layout.dart';
 import 'package:effectivenezz/objects/task.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gicon.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
@@ -20,7 +19,7 @@ class DistivitySecondaryItem extends StatefulWidget {
   _DistivitySecondaryItemState createState() => _DistivitySecondaryItemState();
 }
 
-class _DistivitySecondaryItemState extends State<DistivitySecondaryItem> with AfterLayoutMixin,TickerProviderStateMixin {
+class _DistivitySecondaryItemState extends State<DistivitySecondaryItem> with TickerProviderStateMixin {
 
   @override
   void dispose() {
@@ -32,6 +31,13 @@ class _DistivitySecondaryItemState extends State<DistivitySecondaryItem> with Af
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _everySecond = Timer.periodic(Duration(seconds: 1), (Timer t) {
+      setState(() {
+        if(MyApp.dataModel.currentPlaying!=null)
+          tracked = getTextFromDuration(getTodayFormated().difference(MyApp.dataModel.currentPlaying.trackedStart.last));
+      });
+    });});
   }
 
   @override
@@ -92,7 +98,10 @@ class _DistivitySecondaryItemState extends State<DistivitySecondaryItem> with Af
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 IconButton(icon: GIcon(Icons.stop,color: contrastColor,), onPressed: (){
+                  print(MyApp.dataModel.currentPlaying.trackedStart.length);
+                  print(MyApp.dataModel.currentPlaying.trackedEnd.length);
                   MyApp.dataModel.setPlaying(context, null,);
+
                 }),
                 PopupMenuButton(
                   child: GIcon(Icons.more_horiz,color: contrastColor,),
@@ -157,12 +166,4 @@ class _DistivitySecondaryItemState extends State<DistivitySecondaryItem> with Af
   Timer _everySecond;
   String tracked="0:00:00";
 
-  @override
-  void afterFirstLayout(BuildContext context) {
-    _everySecond = Timer.periodic(Duration(seconds: 1), (Timer t) {
-      setState(() {
-        tracked = getTextFromDuration(getTodayFormated().difference(MyApp.dataModel.currentPlaying.trackedStart.last));
-      });
-    });
-  }
 }

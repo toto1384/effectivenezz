@@ -1,6 +1,4 @@
 import 'dart:async';
-
-import 'package:after_layout/after_layout.dart';
 import 'package:effectivenezz/objects/activity.dart';
 import 'package:effectivenezz/objects/scheduled.dart';
 import 'package:effectivenezz/objects/task.dart';
@@ -8,12 +6,10 @@ import 'package:effectivenezz/ui/pages/pomodoro_page.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gicon.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
 import 'package:effectivenezz/ui/widgets/specific/task_list_item.dart';
-import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
 import 'package:effectivenezz/utils/complex/overflows_complex.dart';
-import 'package:effectivenezz/utils/date_n_strings.dart';
 import 'package:flutter/material.dart';
 
 import '../../../main.dart';
@@ -33,7 +29,7 @@ class ActivityListItem extends StatefulWidget{
   _ActivityListItemState createState() => _ActivityListItemState();
 }
 
-class _ActivityListItemState extends State<ActivityListItem> with AfterLayoutMixin{
+class _ActivityListItemState extends State<ActivityListItem>{
     List<Task> childs = [];
 
     bool includeChilds = false;
@@ -44,6 +40,9 @@ class _ActivityListItemState extends State<ActivityListItem> with AfterLayoutMix
 //        childs=MyApp.dataModel.findTaskByActivity(widget.activity.id);
 //      }
       super.initState();
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        ifStartTimer();
+      });
     }
 
     @override
@@ -78,8 +77,8 @@ class _ActivityListItemState extends State<ActivityListItem> with AfterLayoutMix
               },
               leading: CircleAvatar(
                 maxRadius: 20,
-                backgroundColor: widget.activity.color,
-                child: GIcon(widget.activity.icon,color: getContrastColor(widget.activity.color)),
+                backgroundColor: widget.activity.color.withOpacity(.3),
+                child: GIcon(widget.activity.icon,color: widget.activity.color),
               ),
               subtitle: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -181,11 +180,6 @@ class _ActivityListItemState extends State<ActivityListItem> with AfterLayoutMix
           ],
         ),
       );
-    }
-
-    @override
-    void afterFirstLayout(BuildContext context) {
-      ifStartTimer();
     }
     ifStartTimer(){
       if(MyApp.dataModel.isPlaying(widget.activity)){

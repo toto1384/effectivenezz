@@ -3,16 +3,19 @@ import 'package:intl/intl.dart';
 import 'basic/typedef_and_enums.dart';
 
 DateFormat _getDateFormat(){
-
-  return DateFormat('HH:mm:ss : dd-MM-yyyy');
+  return DateFormat('yyyy-MM-dd HH:mm:sss.SSS');
 }
 
-DateTime getDateFromString(String string){
+DateTime getDateFromString(String string,{bool isUtc = false}){
   if(string==null||string.trim()==''){
     return null;
   }
+  string= string.replaceAll("Z", "").replaceAll("T", " ");
 
-  return _getDateFormat().parse(string);
+  DateTime dateTime = _getDateFormat().parse(string,isUtc);
+  if(dateTime.isUtc)dateTime=dateTime.toLocal();
+
+  return dateTime;
 }
 
 String getStringFromDate(DateTime dateTime){
@@ -42,7 +45,7 @@ getDateName(DateTime dateTime){
   }else if(dateTime.day+1==DateTime.now().day&&dateTime.month+1==DateTime.now().month&&dateTime.year+1==DateTime.now().year){
     return 'Yesterday';
   }else{
-    return '${dateTime.day}:${dateTime.month}';
+    return '${dateTime.day} ${getMonthOfTheYearStringShort(dateTime.month, true)}';
   }
 }
 
@@ -60,6 +63,23 @@ getDayOfTheWeekStringShort(int dayOfTheWeek,bool big){
     case 4 : return big?'Fri':"F";
     case 5 : return big?'Sat':"S";
     case 6 : return big?'Sun':"S";
+  }
+}
+
+getMonthOfTheYearStringShort(int dayOfTheWeek,bool big){
+  switch(dayOfTheWeek){
+    case 1 : return big?'Jan':"J";
+    case 2 : return big?'Feb':"F";
+    case 3 : return big?'Mar':"M";
+    case 4 : return big?'Apr':"A";
+    case 5 : return big?'May':"M";
+    case 6 : return big?'Jun':"J";
+    case 7 : return big?'Jul':"J";
+    case 8 : return big?'Aug':"A";
+    case 9 : return big?'Sep':"S";
+    case 10 : return big?'Oct':"O";
+    case 11 : return big?'Nov':"N";
+    case 12 : return big?'Dec':"D";
   }
 }
 
@@ -87,16 +107,19 @@ String getDatesNameForAppBarSelector(DateTime dateTime,SelectedView selectedView
       return dts[0] + " - " + dts.last;
       break;
     case SelectedView.Week:
-      List<String> dts= List.generate(7, (i)=>getDateName(dateTime.add(Duration(days: i))));
-      return dts[0] + " - " + dts.last;
+      return "Week ${weekNumber(dateTime)}";
       break;
     case SelectedView.Month:
-      List<String> dts= List.generate(30, (i)=>getDateName(dateTime.add(Duration(days: i))));
-      return dts[0] + " - " + dts.last;
+      return getMonthOfTheYearStringShort(dateTime.month, true);
       break;
     default: return '';
   }
 
+}
+
+int weekNumber(DateTime date) {
+  int dayOfYear = int.parse(DateFormat("D").format(date));
+  return ((dayOfYear - date.weekday + 10) / 7).floor();
 }
 
 daysDifference(DateTime d1,DateTime d2){

@@ -40,11 +40,29 @@ class ScheduledCallback{
   ScheduledCallback();
 
   listen(Function(Scheduled) function){
-    listens.add(function);
+    listens.insert(0,function);
+  }
+
+  disposeListens(){
+    listens=[];
   }
 
   notifyUpdated(Scheduled object){
     newScheduled=object;
+    listens.forEach((element) {
+      element(object);
+    });
+  }
+}
+
+class PageChangeCallback{
+  List<Function(Type)> listens  = [];
+
+  listen(Function(Type) function){
+    listens.insert(0,function);
+  }
+
+  notifyUpdated(Type object){
     listens.forEach((element) {
       element(object);
     });

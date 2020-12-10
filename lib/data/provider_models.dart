@@ -2,16 +2,15 @@
 
 import 'dart:io';
 
+import 'package:effectivenezz/data/backend.dart';
 import 'package:effectivenezz/data/database_helper.dart';
 import 'package:effectivenezz/data/notifications.dart';
-import 'package:effectivenezz/data/web_db.dart';
 import 'package:effectivenezz/objects/activity.dart';
 import 'package:effectivenezz/objects/calendar.dart';
 import 'package:effectivenezz/objects/scheduled.dart';
 import 'package:effectivenezz/objects/tag.dart';
 import 'package:effectivenezz/objects/task.dart';
 import 'package:effectivenezz/objects/timestamp.dart';
-import 'package:effectivenezz/ui/pages/quick_start_page.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:effectivenezz/utils/distivity_page.dart';
@@ -19,24 +18,21 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:neat_periodic_task/neat_periodic_task.dart';
+import 'package:uuid/uuid.dart';
 
 import '../main.dart';
 import 'database.dart';
-import 'package:effectivenezz/data/drive_helper.dart';
-import 'prefs.dart';
 import 'package:flutter/services.dart';
-import 'package:effectivenezz/utils/basic/utils.dart';
 
 class DataModel{
 
   static const platform = const MethodChannel('flutter.native/helper');
 
-  DatabaseHelper databaseHelper;
-
   double screenWidth=400;
 
-  Prefs prefs;
-  GoogleDriveHelper driveHelper;
+
+  DatabaseHelper databaseHelper;
+  Backend backend;
   NotificationHelper notificationHelper;
 
   dynamic currentPlaying;
@@ -50,33 +46,32 @@ class DataModel{
   static Future<DataModel> init(BuildContext context)async{
     DataModel dataModel = DataModel();
     print(1);
-    print(2);
-    dataModel.databaseHelper = (kIsWeb?WebDb():await MobileDB.getDatabase(context));
+    if(!kIsWeb)dataModel.databaseHelper=await MobileDB.getDatabase(context);
     print(3);
-    dataModel.prefs = await Prefs.getInstance();
-    print(4);
-    dataModel.driveHelper= await GoogleDriveHelper.init(context,dataModel.prefs);
+    dataModel.backend = await Backend.initBackend(context,);
     print(5);
-    dataModel.scheduleds= await dataModel.databaseHelper.queryAllScheduled();
-    dataModel.tasks=await dataModel.databaseHelper.queryAllTasks();
-    dataModel.activities = await dataModel.databaseHelper.queryAllActivities();
-    dataModel.tasks.forEach((element) {
-      if(!element.isParentCalendar){
-        dataModel.activities.forEach((act) {
-          if(act.id==element.parentId){
-            act.childs.add(element);
-          }
-        });
-      }
-    });
-    dataModel.eCalendars = await dataModel.databaseHelper.queryAllECalendars();
-    dataModel.tags=await dataModel.databaseHelper.queryAllTags();
-    print(6);
-    dataModel.populatePlaying();
-    print(7);
-    if(!kIsWeb)dataModel.initNotificationsWithCorrectContext(context);
+    if(dataModel.backend.auth_token!=null){
+      dataModel.scheduleds= await dataModel.backend.scheduled(context,RequestType.Query);
+      dataModel.tasks=await dataModel.backend.task(context,RequestType.Query);
+      dataModel.activities = await dataModel.backend.activity(context,RequestType.Query);
+      dataModel.tasks.forEach((element) {
+        if(!element.isParentCalendar){
+          dataModel.activities.forEach((act) {
+            if(act.id==element.parentId){
+              act.childs.add(element);
+            }
+          });
+        }
+      });
+      dataModel.eCalendars = await dataModel.backend.calendar(context,RequestType.Query);
+      dataModel.tags=await dataModel.backend.tag(context,RequestType.Query);
+      print(6);
+      dataModel.populatePlaying();
+      print(7);
+      if(!kIsWeb)dataModel.initNotificationsWithCorrectContext(context);
 
-    if(!kIsWeb)dataModel.scheduleEveryDay(context);
+      if(!kIsWeb)dataModel.scheduleEveryDay(context);
+    }
 
     if(!kIsWeb)dataModel.setupDrift();
 
@@ -86,20 +81,18 @@ class DataModel{
 
   setupDrift()async{
     if(!kIsWeb){
-      if(driveHelper.currentUser!=null){
+      if(backend.driveHelper.currentUser!=null){
         platform.invokeMethod('setupDrift',{
-          "id":driveHelper.currentUser.id,
-          "email":driveHelper.currentUser.email
+          "id":backend.driveHelper.currentUser.id,
+          "email":backend.driveHelper.currentUser.email
         });
       }
     }
   }
 
   launchFeedback(BuildContext context){
-    if(driveHelper.currentUser!=null){
+    if(backend.driveHelper.currentUser!=null){
       platform.invokeMethod('showConversationActivity',);
-    }else{
-      launchPage(context,QuickStartPage(driveHelper));
     }
   }
 
@@ -144,17 +137,21 @@ class DataModel{
 
     dataModel.scheduleds.forEach((element) {
       DateTime nextStartTime = element.getNextStartTime();
-      if(nextStartTime!=null&&!ids.contains(100000+element.id)){
+      if(nextStartTime!=null&&!ids.contains(100000+stringIdToInt(element.id))){
         dataModel.scheduleNotificationForScheduled(dataModel.notificationHelper,nextStartTime, element);
       }
     });
   }
 
+  static stringIdToInt(String s){
+    return Uuid().parse(s).getRange(0, 5).reduce((value, element) => value+element);
+  }
+
   scheduleNotificationForScheduled(NotificationHelper notificationHelper,DateTime dateTime,Scheduled scheduled){
     if(dateTime==null)return;
-    notificationHelper.scheduleNotification(id: 100000+scheduled.id, title: "Time for ${scheduled.getParent().name}",
+    notificationHelper.scheduleNotification(id: 100000+stringIdToInt(scheduled.id), title: "Time for ${scheduled.getParent().name}",
         body: "${scheduled.getParent().name} is between ${scheduled.startTime} and "
-            "${scheduled.startTime.add(Duration(minutes: scheduled.durationInMinutes))}", payload: "sch",
+            "${scheduled.startTime.add(Duration(minutes: scheduled.durationInMinutes??0))}", payload: "sch",
     dateTime: dateTime,color: scheduled.getParent().color);
   }
 
@@ -176,6 +173,7 @@ class DataModel{
 
   populatePlaying(){
     print("populatePlaying m");
+    currentPlaying=null;
     tasks.forEach((element) {
       if(element.trackedEnd.length<element.trackedStart.length){
         currentPlaying=element;
@@ -200,22 +198,28 @@ class DataModel{
     final timestamps = <TimeStamp>[];
 
     tasks.forEach((item){
-      if(tracked){
-        timestamps.addAll(item.getTrackedTimestamps(context,dateTimes));
-      }else{
-        item.getScheduled().forEach((element) {
-          timestamps.addAll(element.getPlanedTimestamps(context,dateTimes,semiOpacity: plannedSemiOpacity));
-        });
+      if(item.isParentCalendar){
+        if(findECalendarById(item.parentId).show){
+          if(tracked){
+            timestamps.addAll(item.getTrackedTimestamps(context,dateTimes));
+          }else{
+            item.getScheduled().forEach((element) {
+              timestamps.addAll(element.getPlanedTimestamps(context,dateTimes,semiOpacity: plannedSemiOpacity));
+            });
+          }
+        }
       }
     });
 
     activities.forEach((item){
-      if(tracked){
-        timestamps.addAll(item.getTrackedTimestamps(context,dateTimes));
-      }else{
-        item.getScheduled().forEach((element) {
-          timestamps.addAll(element.getPlanedTimestamps(context,dateTimes,semiOpacity: plannedSemiOpacity));
-        });
+      if(findECalendarById(item.parentCalendarId).show){
+        if(tracked){
+          timestamps.addAll(item.getTrackedTimestamps(context,dateTimes));
+        }else{
+          item.getScheduled().forEach((element) {
+            timestamps.addAll(element.getPlanedTimestamps(context,dateTimes,semiOpacity: plannedSemiOpacity));
+          });
+        }
       }
     });
 
@@ -228,7 +232,7 @@ class DataModel{
     if(currentPlaying!=null){
       currentPlaying.trackedEnd.add(getTodayFormated());
 
-      if(currentPlaying.id>0){
+      if(currentPlaying.id!="-1"){
         if(currentPlaying is Task){
           task(currentPlaying, context, CUD.Update);
         }else{
@@ -275,7 +279,7 @@ class DataModel{
 
 
   //SIMPLIFIED CRUD METHODS
-  task(Task event,BuildContext context,CUD cud,{bool withScheduleds,List<Scheduled> addWith})async{
+  task(Task event,BuildContext context,CUD cud,{bool withScheduleds,})async{
     print("task m");
     if(withScheduleds==null){
       withScheduleds=false;
@@ -283,26 +287,16 @@ class DataModel{
 
     switch(cud){
       case CUD.Create:
+        event.id = (await backend.task(context,RequestType.Post,task: event)).first.id;
         tasks.add(event);
-        int addedId =await databaseHelper.insertTask(event);
-        tasks[tasks.length-1].id=addedId;
-        if(addWith!=null){
-          addWith.forEach((element) async{
-            element.parentId=addedId;
-            await scheduled(element, context, cud);
-          });
-        }
         DistivityPageState.listCallback.notifyAdd(event);
+        if(!kIsWeb)await databaseHelper.insertTask(event);
         break;
-      case CUD.AddUpdate:
-        tasks.add(event);
-        continue update;
-      update:
       case CUD.Update:
         tasks[findObjectIndexById(event)]=event;
-        await databaseHelper.updateTask(event);
-        cud==CUD.AddUpdate?DistivityPageState.listCallback.notifyAdd(event):
-          DistivityPageState.listCallback.notifyUpdated(event);
+        DistivityPageState.listCallback.notifyUpdated(event);
+        if(!kIsWeb)await databaseHelper.updateTask(event);
+        await backend.task(context,RequestType.Update,task: event,);
         break;
       case CUD.Delete:
         if(!event.isParentCalendar){
@@ -312,50 +306,40 @@ class DataModel{
             }
           }
         }
-        tasks.remove(event);
         if(currentPlaying!=null){
           if(event.id==currentPlaying.id){
             setPlaying(context, null);
           }
         }
-        await databaseHelper.deleteTask(event.id);
+        tasks.remove(event);
+        DistivityPageState.listCallback.notifyRemoved(event);
+        if(!kIsWeb)await databaseHelper.deleteTask(event.id);
         if(withScheduleds){
           event.getScheduled().forEach((element) async{
-            await scheduled(element, context, cud);
+            await scheduled(element, context, cud,event.id);
           });
         }
-        DistivityPageState.listCallback.notifyRemoved(event);
+        await backend.task(context,RequestType.Delete,task: event);
         break;
     }
     MyAppState.ss(context);
   }
 
-  activity(Activity event,BuildContext context,CUD cud,{bool withScheduleds,List<Scheduled> addWith})async{
+  activity(Activity event,BuildContext context,CUD cud,{bool withScheduleds,})async{
     print("activity m");
     if(withScheduleds==null)withScheduleds=false;
     switch(cud){
       case CUD.Create:
+        event.id = (await backend.activity(context,RequestType.Post,activity: event)).first.id;
         activities.add(event);
-        int addedId = await databaseHelper.insertActivity(event);
-        activities[activities.length-1].id= addedId;
-        if(addWith!=null){
-          addWith.forEach((element) async{
-            element.parentId=addedId;
-            await scheduled(element, context, cud);
-          });
-        }
         DistivityPageState.listCallback.notifyAdd(event);
+        if(!kIsWeb)await databaseHelper.insertActivity(event);
         break;
-      case CUD.AddUpdate:
-        activities.add(event);
-        print('GOT TO ADD UPDATE');
-        continue update;
-      update:
       case CUD.Update:
         activities[findObjectIndexById(event)]=event;
-        await databaseHelper.updateActivity(event);
-        cud==CUD.AddUpdate?DistivityPageState.listCallback.notifyAdd(event):
-          DistivityPageState.listCallback.notifyUpdated(event);
+        DistivityPageState.listCallback.notifyUpdated(event);
+        if(!kIsWeb)await databaseHelper.updateActivity(event);
+        await backend.activity(context,RequestType.Update,activity: event,);
         break;
       case CUD.Delete:
         for(int i = 0 ; i<tasks.length ; i++){
@@ -369,13 +353,14 @@ class DataModel{
             setPlaying(context, null);
           }
         }
-        await databaseHelper.deleteActivity(event.id);
+        DistivityPageState.listCallback.notifyRemoved(event);
+        if(!kIsWeb)await databaseHelper.deleteActivity(event.id);
         if(withScheduleds){
           event.getScheduled().forEach((element) async{
-            await scheduled(element, context, cud);
+            await scheduled(element, context, cud,event.id);
           });
         }
-        DistivityPageState.listCallback.notifyRemoved(event);
+        await backend.activity(context,RequestType.Delete,activity: event);
         break;
     }
     MyAppState.ss(context);
@@ -385,14 +370,16 @@ class DataModel{
     switch(cud){
 
       case CUD.Create:
+        eCalendar.id = (await backend.calendar(context,RequestType.Post,calendar: eCalendar)).first.id;
         eCalendars.add(eCalendar);
-        eCalendars[eCalendars.length-1].id= await databaseHelper.insertECalendar(eCalendar);
-        DistivityPageState.listCallback.notifyAdd(eCalendar);
+        DistivityPageState.listCallback.notifyAdd(null);
+        if(!kIsWeb)await databaseHelper.insertECalendar(eCalendar);
         break;
       case CUD.Update:
         eCalendars[index]=eCalendar;
-        await databaseHelper.updateECalendar(eCalendar);
-        DistivityPageState.listCallback.notifyUpdated(eCalendar);
+        DistivityPageState.listCallback.notifyUpdated(null);
+        if(!kIsWeb)await databaseHelper.updateECalendar(eCalendar);
+        await backend.calendar(context,RequestType.Update,calendar: eCalendar,);
         break;
       case CUD.Delete:
         for(int i = 0 ; i<tasks.length ; i++){
@@ -406,39 +393,36 @@ class DataModel{
           }
         }
         eCalendars.removeAt(index);
-        await databaseHelper.deleteECalendar(eCalendar.id);
-        DistivityPageState.listCallback.notifyRemoved(eCalendar);
-        break;
-      case CUD.AddUpdate:
-        // TODO: Handle this case.
+        DistivityPageState.listCallback.notifyRemoved(null);
+        if(!kIsWeb)await databaseHelper.deleteECalendar(eCalendar.id);
+        await backend.calendar(context,RequestType.Delete,calendar: eCalendar);
         break;
     }
   }
 
   //SIMPLIFIED CRUD METHODS
-  scheduled(Scheduled event,BuildContext context,CUD cud,)async{
+  scheduled(Scheduled event,BuildContext context,CUD cud,String parentId)async{
     switch(cud){
       case CUD.Create:
+        event.id = (await backend.scheduled(context,RequestType.Post,scheduled: event,parentId: parentId)).first.id;
         scheduleds.add(event);
-        print('yeeeeeep');
-        scheduleds[scheduleds.length-1].id=await databaseHelper.insertScheduled(event);
+        if(!kIsWeb)await databaseHelper.insertScheduled(event);
         if(!kIsWeb)scheduleNotificationForScheduled(notificationHelper,
             event.getNextStartTime(), event);
         break;
       case CUD.Update:
         scheduleds[findObjectIndexById(event)]=event;
-        await databaseHelper.updateScheduled(event);
-        if(!kIsWeb)notificationHelper.cancelNotification(100000+event.id);
+        if(!kIsWeb)await databaseHelper.updateScheduled(event);
+        if(!kIsWeb)notificationHelper.cancelNotification(100000+stringIdToInt(event.id));
         if(!kIsWeb)scheduleNotificationForScheduled(notificationHelper,
             event.getNextStartTime(), event);
+        await backend.scheduled(context,RequestType.Update,scheduled: event,);
         break;
       case CUD.Delete:
         scheduleds.remove(event);
-        await databaseHelper.deleteScheduled(event.id);
-        if(!kIsWeb)notificationHelper.cancelNotification(100000+event.id);
-        break;
-      case CUD.AddUpdate:
-        // TODO: Handle this case.
+        if(!kIsWeb)await databaseHelper.deleteScheduled(event.id);
+        if(!kIsWeb)notificationHelper.cancelNotification(100000+stringIdToInt(event.id));
+        await backend.scheduled(context,RequestType.Delete,scheduled: event);
         break;
     }
     DistivityPageState.listCallback.notifyUpdated(null);
@@ -446,22 +430,22 @@ class DataModel{
   }
 
   //SIMPLIFIED CRUD METHODS
-  tag(int index,Tag event,BuildContext context,CUD cud,)async{
+  tag(Tag event,BuildContext context,CUD cud,)async{
     switch(cud){
       case CUD.Create:
+        event.id = (await backend.tag(context,RequestType.Post,tag: event)).first.id;
         tags.add(event);
-        tags[tasks.length-1].id=await databaseHelper.insertTag(event);
+        if(!kIsWeb)await databaseHelper.insertTag(event);
         break;
       case CUD.Update:
-        tags[index]=event;
-        await databaseHelper.updateTag(event);
+        tags[findObjectIndexById(event)]=event;
+        if(!kIsWeb)await databaseHelper.updateTag(event);
+        await backend.tag(context,RequestType.Update,tag: event,);
         break;
       case CUD.Delete:
         tags.remove(event);
-        await databaseHelper.deleteTag(event.id);
-        break;
-      case CUD.AddUpdate:
-        // TODO: Handle this case.
+        if(!kIsWeb)await databaseHelper.deleteTag(event.id);
+        await backend.tag(context,RequestType.Delete,tag: event);
         break;
     }
     MyAppState.ss(context);
@@ -471,12 +455,12 @@ class DataModel{
   //FIND METHODS
   Color findParentColor(dynamic task){
     if(task is Task){
-      if(task.parentId<0){
+      if(task.parentId=="-1"){
         return Colors.white;
       }
       return task.isParentCalendar?findECalendarById(task.parentId).color:findActivityById(task.parentId).color;
     }else if(task is Activity){
-      if(task.parentCalendarId<0){
+      if(task.parentCalendarId=="-1"){
         return Colors.white;
       }
       return findECalendarById(task.parentCalendarId).color;
@@ -486,12 +470,12 @@ class DataModel{
 
   String findParentName(dynamic  task){
     if(task is Task){
-      if(task.parentId<0){
+      if(task.parentId=="-1"){
         return "No parent";
       }
       return task.isParentCalendar?findECalendarById(task.parentId).name:findActivityById(task.parentId).name;
     }else if(task is Activity){
-      if(task.parentCalendarId<0){
+      if(task.parentCalendarId=="-1"){
         return "No parent";
       }
       return findECalendarById(task.parentCalendarId).name;
@@ -500,12 +484,12 @@ class DataModel{
   }
 
   //FIND BY PARENT
-  List<Task> findTasksByCalendar(int calendarId){
+  List<Task> findTasksByCalendar(String calendarId){
     print("findtasksbycalendar m");
     List<Task> toreturn  = [];
 
     if(calendarId==null){
-      calendarId=-1;
+      calendarId="-1";
     }
 
     tasks.forEach((item){
@@ -524,12 +508,12 @@ class DataModel{
 
   }
 
-  List<Activity> findActivitiesByCalendar(int calendarId){
+  List<Activity> findActivitiesByCalendar(String calendarId){
     print("findactivitiesbycalendar m");
     List<Activity> toreturn = [];
 
     if(calendarId==null){
-      calendarId=-1;
+      calendarId="-1";
     }
 
     activities.forEach((item){
@@ -542,7 +526,7 @@ class DataModel{
 
 
   //FIND BY ID
-  Activity findActivityById(int id){
+  Activity findActivityById(String id){
     print("findactivitybyid m");
     Activity activity = Activity(
       color: Colors.white,
@@ -552,8 +536,8 @@ class DataModel{
       value: 0,
       name: 'No activity',
       valueMultiply: false,
-      parentCalendarId: -1,
-      id: -1,
+      parentCalendarId: "-1",
+      id: "-1",schedules: []
     );
 
     activities.forEach((item){
@@ -566,9 +550,9 @@ class DataModel{
 
   }
 
-  ECalendar findECalendarById(int id){
+  ECalendar findECalendarById(String id){
     print("findecalendarbyid m");
-    ECalendar toreturn = ECalendar(name: 'Nothing', color: Colors.transparent,show: true,parentId: -1,themesEnd: [],themesStart: [],value: 0);
+    ECalendar toreturn = ECalendar(name: 'Nothing', color: Colors.transparent,show: true, value: 0);
     eCalendars.forEach((item){
       if(item.id==id){
         toreturn=item;
@@ -577,7 +561,7 @@ class DataModel{
     return toreturn;
   }
 
-  Task findTaskById(int id){
+  Task findTaskById(String id){
     print("findtaskbyid m");
     Task toreturn = Task(
       color: Colors.white,
@@ -586,11 +570,12 @@ class DataModel{
       trackedStart: [],
       value: 0,
       name: '',
-      parentId: 0,
+      parentId: "-1",
       checks: [],
       isParentCalendar: false,
       valueMultiply: false,
-      id: -1,
+      id: "-1",
+      schedules: []
     );
     tasks.forEach((item){
       if(item.id==id){

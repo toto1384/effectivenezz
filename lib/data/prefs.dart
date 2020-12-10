@@ -60,6 +60,16 @@ class Prefs{
   }
 
 
+  getAuthToken(){
+    String intSelectedView =sharedPreferences.getString(_PrefsValues.authToken)??"";
+    return intSelectedView;
+  }
+
+  setAuthToken(String authToken)async{
+    await sharedPreferences.setString(_PrefsValues.authToken, authToken);
+  }
+
+
 }
 
 class _PrefsValues{
@@ -67,6 +77,7 @@ class _PrefsValues{
   static final selectedView = "sv";
   
   static final promoCode ='pc';
+  static final authToken ='at';
 
   static final firstTime="ft";
 }

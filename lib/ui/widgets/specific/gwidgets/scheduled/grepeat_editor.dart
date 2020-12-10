@@ -31,15 +31,17 @@ class _GRepeatEditorState extends State<GRepeatEditor> {
           getRepeatText(widget.scheduled.repeatRule, widget.scheduled.repeatValue),
           variant: 3,
           onPressed: (){
-            showRepeatEditBottomSheet(context, onUpdate: (rr,rv){
+            showRepeatEditBottomSheet(context, onUpdate: (rr,rv,ru){
               setState((){
                 widget.scheduled.repeatRule=rr;
                 widget.scheduled.repeatValue=rv;
+                widget.scheduled.repeatUntil=ru;
                 if(widget.scheduled.startTime==null)widget.scheduled.startTime=
                     getTodayFormated();
                 widget.onScheduledChange(widget.scheduled);
               });
-            }, repeatRule: widget.scheduled.repeatRule, repeatValue: widget.scheduled.repeatValue);
+            }, repeatRule: widget.scheduled.repeatRule,
+              repeatValue: widget.scheduled.repeatValue,repeatUntil: widget.scheduled.repeatUntil);
           },
         ),
       ],

@@ -68,7 +68,7 @@ class GMetricWidget extends StatelessWidget {
             int minutesTracked=0;
 
             tracked.forEach((element) {
-              averageHourValue+=element.getParent().value;
+              averageHourValue+=element.parent.value;
               minutesTracked+=element.durationInMinutes;
             });
             if(averageHourValue!=0)averageHourValue=averageHourValue/minutesTracked;
@@ -86,7 +86,7 @@ class GMetricWidget extends StatelessWidget {
               int minutesTracked=0;
 
               tracked.forEach((element) {
-                averageHourValue+=element.getParent().value;
+                averageHourValue+=element.parent.value;
                 minutesTracked+=element.durationInMinutes;
               });
               if(averageHourValue!=0)averageHourValue=averageHourValue/minutesTracked;

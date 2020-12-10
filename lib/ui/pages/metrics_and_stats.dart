@@ -1,4 +1,3 @@
-import 'package:after_layout/after_layout.dart';
 import 'package:effectivenezz/main.dart';
 import 'package:effectivenezz/ui/pages/metric_page.dart';
 import 'package:effectivenezz/ui/widgets/basics/distivity_drawer.dart';
@@ -24,14 +23,20 @@ class MetricsAndStatsPage extends StatefulWidget {
   _MetricsAndStatsPageState createState() => _MetricsAndStatsPageState();
 }
 
-class _MetricsAndStatsPageState extends DistivityPageState<MetricsAndStatsPage> with AfterLayoutMixin{
+class _MetricsAndStatsPageState extends DistivityPageState<MetricsAndStatsPage>{
 
   DateTime selectedDate = getTodayFormated();
 
-
   @override
-  void afterFirstLayout(BuildContext context) async{
-    if(await MyApp.dataModel.prefs.isFirstTime(this.runtimeType.toString())){
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      afterFirstLayout();
+    });
+  }
+
+  void afterFirstLayout() async{
+    if(await MyApp.dataModel.backend.prefs.isFirstTime(this.runtimeType.toString())){
       SweetSheet sweetSheet = SweetSheet();
       sweetSheet.show(
           context: context,

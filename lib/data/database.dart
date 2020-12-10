@@ -23,7 +23,7 @@ class MobileDB extends DatabaseHelper{
   static final scheduledTable = 'scheduledTable';
   static final tagsTable = 'tagsTable';
 
-  static final _databaseVersion = 1;
+  static final _databaseVersion = 3;
 
   Database _database;
 
@@ -88,7 +88,7 @@ class MobileDB extends DatabaseHelper{
   Future _onCreate(Database db, int version,BuildContext context) async {
     await db.execute('''
           CREATE TABLE $taskTable (
-            $taskId INTEGER PRIMARY KEY,
+            $taskId TEXT PRIMARY KEY,
             $taskName TEXT NOT NULL,
             $taskChecks TEXT NOT NULL,
             $taskColor INTEGER NOT NULL,
@@ -100,12 +100,13 @@ class MobileDB extends DatabaseHelper{
             $taskValueMultiply INTEGER NOT NULL,
             $taskValue INTEGER NOT NULL,
             $taskTags TEXT NOT NULL,
-            $taskBlacklistedDates TEXT
+            $taskBlacklistedDates TEXT,
+            $taskSchedules TEXT
           )
           ''');
     await db.execute('''
           CREATE TABLE $activityTable (
-            $activityId INTEGER PRIMARY KEY,
+            $activityId TEXT PRIMARY KEY,
             $activityName TEXT NOT NULL,
             $activityColor INTEGER NOT NULL,
             $activityTrackedStart TEXT NOT NULL,
@@ -116,27 +117,23 @@ class MobileDB extends DatabaseHelper{
             $activityValueMultiply INTEGER NOT NULL,
             $activityIcon INTEGER,
             $activityTags TEXT NOT NULL,
-            $activityBlacklistedDates TEXT
+            $activityBlacklistedDates TEXT,
+            $activitySchedules TEXT
           )
           ''');
     await db.execute('''
           CREATE TABLE $calendarTable (
-            $ecalendarId INTEGER PRIMARY KEY,
+            $ecalendarId TEXT PRIMARY KEY,
             $ecalendarName TEXT NOT NULL,
             $ecalendarColor INTEGER NOT NULL,
             $ecalendarDescription TEXT,
             $ecalendarShow INTEGER NOT NULL,
-            $ecalendarParentId INTEGER NOT NULL,
-            $ecalendarValue INTEGER NOT NULL,
-            $ecalendarThemesStart TEXT NOT NULL,
-            $ecalendarThemesEnd TEXT NOT NULL
+            $ecalendarValue INTEGER NOT NULL
           )
           ''');
     await db.execute('''
           CREATE TABLE $scheduledTable (
-            $scheduledId INTEGER PRIMARY KEY,
-            $scheduledParentId INTEGER NOT NULL,
-            $scheduledIsParentTask INTEGER NOT NULL,
+            $scheduledId TEXT PRIMARY KEY,
             $scheduledStartTime TEXT,
             $scheduledDuration INTEGER,
             $scheduledRepeatRule INTEGER NOT NULL,
@@ -146,7 +143,7 @@ class MobileDB extends DatabaseHelper{
           ''');
     await db.execute('''
           CREATE TABLE $tagsTable (
-            $tagId INTEGER PRIMARY KEY,
+            $tagId TEXT PRIMARY KEY,
             $tagShow INTEGER NOT NULL,
             $tagColor TEXT NOT NULL,
             $tagName TEXT NOT NULL
@@ -156,17 +153,10 @@ class MobileDB extends DatabaseHelper{
   
 
   ///////////ACTIVITY
-  Future<int> insertActivity(Activity activity,{List<Scheduled> scheduleds}) async {
+  Future<String> insertActivity(Activity activity,) async {
 
     int insertActivityId =  await _database.insert(activityTable, activity.toMap());
-
-    if(scheduleds!=null&&scheduleds.length!=0){
-      scheduleds.forEach((element) async {
-        element.parentId=insertActivityId;
-        await insertScheduled(element);
-      });
-    }
-    return insertActivityId;
+    return insertActivityId.toString();
   }
 
 
@@ -179,18 +169,18 @@ class MobileDB extends DatabaseHelper{
   }
 
 
-  Future<int> updateActivity(Activity activity,{List<Scheduled> scheduleds}) async {
-    if(scheduleds!=null&&scheduleds.length!=0){
-      scheduleds.forEach((element)async {
+  Future<int> updateActivity(Activity activity,{List<Scheduled> schedules}) async {
+    if(schedules!=null&&schedules.length!=0){
+      schedules.forEach((element)async {
         await updateScheduled(element);
       });
     }
     return await _database.update(activityTable, activity.toMap(), where: '$activityId = ?', whereArgs: [activity.id]);
   }
 
-  Future<int> deleteActivity(int id,{List<Scheduled> scheduleds}) async {
-    if(scheduleds!=null&&scheduleds.length!=0){
-      scheduleds.forEach((element) async{
+  Future<int> deleteActivity(String id,{List<Scheduled> schedules}) async {
+    if(schedules!=null&&schedules.length!=0){
+      schedules.forEach((element) async{
         await deleteScheduled(element.id);
       });
     }
@@ -203,18 +193,11 @@ class MobileDB extends DatabaseHelper{
 
 
   /////////////////TASK
-  Future<int> insertTask(Task task,{List<Scheduled> scheduleds}) async {
+  Future<String> insertTask(Task task,) async {
 
     int taskId =await _database.insert(taskTable, task.toMap());
 
-    if(scheduleds!=null&&scheduleds.length!=0){
-      scheduleds.forEach((element) async{
-        element.parentId=taskId;
-        await insertScheduled(element);
-      });
-    }
-
-    return taskId;
+    return taskId.toString();
   }
 
 
@@ -238,7 +221,7 @@ class MobileDB extends DatabaseHelper{
     return await _database.update(taskTable, task.toMap(), where: '$taskId = ?', whereArgs: [task.id]);
   }
 
-  Future<int> deleteTask(int id,{List<Scheduled> scheduleds}) async {
+  Future<int> deleteTask(String id,{List<Scheduled> scheduleds}) async {
 
     if(scheduleds!=null&&scheduleds.length!=0){
       scheduleds.forEach((element) async{
@@ -257,8 +240,8 @@ class MobileDB extends DatabaseHelper{
   ////////////////CALENDAR
 
 
-  Future<int> insertECalendar(ECalendar eCalendar) async {
-    return await _database.insert(calendarTable, eCalendar.toMap());
+  Future<String> insertECalendar(ECalendar eCalendar) async {
+    return (await _database.insert(calendarTable, eCalendar.toMap())).toString();
   }
 
 
@@ -275,7 +258,7 @@ class MobileDB extends DatabaseHelper{
     return await _database.update(calendarTable, eCalendar.toMap(), where: '$ecalendarId = ?', whereArgs: [eCalendar.id]);
   }
 
-  Future<int> deleteECalendar(int id) async {
+  Future<int> deleteECalendar(String id) async {
     return await _database.delete(calendarTable, where: '$ecalendarId = ?', whereArgs: [id]);
   }
 
@@ -287,8 +270,8 @@ class MobileDB extends DatabaseHelper{
   ////////////////SCHEDULED
 
 
-  Future<int> insertScheduled(Scheduled scheduled) async {
-    return await _database.insert(scheduledTable, scheduled.toMap());
+  Future<String> insertScheduled(Scheduled scheduled) async {
+    return (await _database.insert(scheduledTable, scheduled.toMap())).toString();
   }
 
 
@@ -305,7 +288,7 @@ class MobileDB extends DatabaseHelper{
     return await _database.update(scheduledTable, scheduled.toMap(), where: '$scheduledId = ?', whereArgs: [scheduled.id]);
   }
 
-  Future<int> deleteScheduled(int id) async {
+  Future<int> deleteScheduled(String id) async {
     return await _database.delete(scheduledTable, where: '$scheduledId = ?', whereArgs: [id]);
   }
 
@@ -316,8 +299,8 @@ class MobileDB extends DatabaseHelper{
   ////////////////TAGS
 
 
-  Future<int> insertTag(Tag tag) async {
-    return await _database.insert(tagsTable, tag.toMap());
+  Future<String> insertTag(Tag tag) async {
+    return (await _database.insert(tagsTable, tag.toMap())).toString();
   }
 
 
@@ -334,7 +317,7 @@ class MobileDB extends DatabaseHelper{
     return await _database.update(tagsTable, tag.toMap(), where: '$tagId = ?', whereArgs: [tag.id]);
   }
 
-  Future<int> deleteTag(int id) async {
+  Future<int> deleteTag(String id) async {
     return await _database.delete(tagsTable, where: '$tagId = ?', whereArgs: [id]);
   }
 

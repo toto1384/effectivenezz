@@ -1,3 +1,4 @@
+import 'package:circular_check_box/circular_check_box.dart';
 import 'package:effectivenezz/data/drive_helper.dart';
 import 'package:effectivenezz/main.dart';
 import 'package:effectivenezz/objects/activity.dart';
@@ -5,6 +6,7 @@ import 'package:effectivenezz/objects/calendar.dart';
 import 'package:effectivenezz/objects/scheduled.dart';
 import 'package:effectivenezz/objects/task.dart';
 import 'package:effectivenezz/ui/widgets/basics/distivity_radio_group.dart';
+import 'package:effectivenezz/ui/widgets/basics/distivity_restart_widget.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gbutton.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gswitchable.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
@@ -18,6 +20,7 @@ import 'package:effectivenezz/utils/basic/values_utils.dart';
 import 'package:effectivenezz/utils/distivity_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 
 
 
@@ -36,10 +39,8 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
 
   Scheduled sleepScheduled = Scheduled(
     durationInMinutes: 8*60,
-    isParentTask: false,
     repeatRule: RepeatRule.EveryXDays,
-    repeatValue: 1,
-    parentId: 1000,
+    repeatValue: "1",
   );
   bool addReview = true;
   List<MainOccupationType> mainOccupationTypes = [];
@@ -52,6 +53,7 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
   PageController pageController = PageController(initialPage: 0,);
   
   int pageIndex = 0;
+  bool loading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -110,9 +112,9 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
                       children: [
                         GText("Already an user?"),
                         GButton("Log in", onPressed: (){
-                          widget.driveHelper.handleSignIn(context).then((v)async{
-                            await MyApp.dataModel.driveHelper.downloadAndReplaceFile(context,
-                                (await MyApp.dataModel.driveHelper.getAllFiles(context))[0]);
+                          widget.driveHelper.handleSignIn(context).then((value) {
+                            MyApp.dataModel=null;
+                            DistivityRestartWidget.restartApp(context);
                           });
                         },variant: 2),
                       ],
@@ -170,14 +172,19 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
                           setState(() {
                             sleepScheduled=sch..startTime.subtract(Duration(days: 1));
                           });
-                        },isStartTime: true,scheduled: sleepScheduled,text:'',onlyTime: true,),
-                        GSwitchable(text: "Schedule daily review(an essential habit for a productive day)",
-                            checked: addReview, onCheckedChanged: (b){
+                        },isStartTime: true,scheduled: sleepScheduled,text:'',gDateTimeShow: GDateTimeShow.Time,),
+                        ListTile(
+                          leading: CircularCheckBox(
+                            value: addReview,
+                            onChanged: (b){
                               setState(() {
                                 addReview=b;
                               });
-                            }, isCheckboxOrSwitch: true
-                        ),
+                            },checkColor: MyColors.color_black_darker,
+                            activeColor: MyColors.color_yellow,
+                          ),
+                          title: GText("Schedule daily review(an essential habit for a productive day)"),
+                        )
                       ],
                     ),
                   ),
@@ -210,8 +217,8 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
                                 width: 100,
                                 child: Padding(
                                   padding: const EdgeInsets.all(2),
-                                  child: GTextField(
-                                      activityDurationMinutesTEC, hint: 'hours',small: true),
+                                  child: GTextField(activityDurationMinutesTEC, hint: 'hours',small: true,
+                                    textInputType: TextInputType.number,),
                                 ),
                               ),
                               GText(' hours will change my life in 6 months'),
@@ -272,7 +279,11 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
                       await save();
                     },),
                   ),
-                  GText("(and continue)",)
+                  GText("(and continue)",),
+                  if(loading)Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(width:25,height:25,child: CircularProgressIndicator()),
+                  ),
                 ],
               ),
             ),
@@ -284,89 +295,88 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
 
 
   save()async{
+    setState(() {
+      loading=true;
+    });
+    Uuid uuid = Uuid();
     //cals
-    MyApp.dataModel.databaseHelper.insertECalendar(ECalendar(
+    String bodyCalendarId = (await MyApp.dataModel.backend.calendar(context,RequestType.Post,calendar: ECalendar(
       name: 'Body',
       color: Colors.brown,
-      parentId: -1,
       show: true,
-      themesEnd: [],
-      themesStart: [],
       value: 0,
-      id: 1000,
-    ));
-    await MyApp.dataModel.databaseHelper.insertECalendar(ECalendar(
+      id: uuid.v4()
+    ))).first.id;
+    String habitsCalendarId = (await MyApp.dataModel.backend.calendar(context,RequestType.Post,calendar: ECalendar(
       name: 'Habits',
       color: Colors.green,
-      parentId: -1,
       show: true,
-      themesEnd: [],
-      themesStart: [],
       value: 0,
-      id: 1001,
-    ));//habits
-    await MyApp.dataModel.databaseHelper.insertECalendar(ECalendar(
+      id: uuid.v4()
+    ))).first.id;
+    String workCalendarId = (await MyApp.dataModel.backend.calendar(context,RequestType.Post,calendar: ECalendar(
         name: 'Work',
         value: 10000,
         color: Colors.red,
         show: true,
-        themesEnd: [],
-        themesStart: [],
-        parentId: -1,
-        id: 1010
-    ));//work
-    await MyApp.dataModel.databaseHelper.insertECalendar(ECalendar(
+        id: uuid.v4()
+    ))).first.id;
+    String addictionsCalendarId = (await MyApp.dataModel.backend.calendar(context,RequestType.Post,calendar: ECalendar(
       name: 'Addictions',
       value: -1000,
-      parentId: -1,
-      themesStart: [],
-      themesEnd: [],
       show: true,
       color: Colors.grey,
-      id: 1005,
-    ));
+      id: uuid.v4()
+    ))).first.id;
     //
 
     //addictions
-    await MyApp.dataModel.databaseHelper.insertActivity(Activity(
+    await MyApp.dataModel.backend.activity(context,RequestType.Post,activity: Activity(
         value: -1000,
         name: 'Social Media',
-        parentCalendarId: 1005,
+        parentCalendarId: addictionsCalendarId,
         trackedEnd: [],
+        schedules: [],
         tags: [],
         trackedStart: [],
         color: Colors.grey,
         valueMultiply: false,
-        icon: Icons.phone_android
+        icon: Icons.phone_android,
+        id: uuid.v4()
     ));
-    await MyApp.dataModel.databaseHelper.insertActivity(Activity(
+    await MyApp.dataModel.backend.activity(context,RequestType.Post,activity: Activity(
         value: -1000,
         name: 'Netflix/TV',
-        parentCalendarId: 1005,
+        parentCalendarId: addictionsCalendarId,
+        schedules: [],
         trackedEnd: [],
         tags: [],
         trackedStart: [],
         valueMultiply: false,
         color: Colors.grey,
-        icon: Icons.tv
+        icon: Icons.tv,
+        id: uuid.v4()
     ));
-    await MyApp.dataModel.databaseHelper.insertActivity( Activity(
+    await MyApp.dataModel.backend.activity(context,RequestType.Post,activity: Activity(
       value: -100,
       name: 'Gaming',
-      parentCalendarId: 1005,
+      parentCalendarId: addictionsCalendarId,
+      schedules: [],
       trackedEnd: [],
       tags: [],
       color: Colors.grey,
       trackedStart: [],
       valueMultiply: false,
       icon: Icons.gamepad,
-    ),);
+      id: uuid.v4()
+    ));
     //
 
     //sleep
-    await MyApp.dataModel.databaseHelper.insertActivity(Activity(
+    await MyApp.dataModel.backend.activity(context,RequestType.Post,activity: Activity(
         name: "Sleep",
-        parentCalendarId: 1000,
+        parentCalendarId: bodyCalendarId,
+        schedules: [(await MyApp.dataModel.backend.scheduled(context,RequestType.Post,scheduled: sleepScheduled)).first.id],
         value: 10,
         trackedEnd: [],
         tags: [],
@@ -374,42 +384,50 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
         trackedStart: [],
         valueMultiply: false,
         icon: Icons.hotel,
-        id: 1000
-    ),scheduleds: [sleepScheduled]);
+        id: uuid.v4()
+    ));
 
     //activity
     if(activityNameTEC.text!=''&&activityDurationMinutesTEC.text!='')
-      await MyApp.dataModel.databaseHelper.insertActivity( Activity(
+      await MyApp.dataModel.backend.activity(context,RequestType.Post,activity:Activity(
         trackedEnd: [],
         tags: [],
         trackedStart: [],
         valueMultiply: false,
         name: activityNameTEC.text,
+        schedules: [(await MyApp.dataModel.backend.scheduled(context,RequestType.Post,scheduled: Scheduled(
+          durationInMinutes: int.parse(activityDurationMinutesTEC.text)*60,
+          repeatValue: 1.toString(),
+          repeatRule: RepeatRule.EveryXDays,
+          startTime: sleepScheduled.getEndTime()??getTodayFormated().add(Duration(hours: 1)),
+          id: uuid.v4()
+        ))).first.id],
         value: 100000,
         color: Colors.red,
-        parentCalendarId: 1010,
-        id: 11,
+        parentCalendarId: habitsCalendarId,
         icon: Icons.star_border,
-      ), scheduleds: [Scheduled(
-        isParentTask: false,
-        durationInMinutes: int.parse(activityDurationMinutesTEC.text)*60,
-        repeatValue: 1,
-        repeatRule: RepeatRule.EveryXDays,
-        parentId: 11,
-        startTime: sleepScheduled.getEndTime()??getTodayFormated().add(Duration(hours: 1)),
-      )]);//activity
-    if(addReview)await MyApp.dataModel.databaseHelper.insertTask(Task(
-        id: 12,
-        parentId: 1001,
+        id: uuid.v4()
+      ));
+
+    if(addReview)await MyApp.dataModel.backend.task(context,RequestType.Post,task:Task(
+        parentId: habitsCalendarId,
         value: 10000,
         name: 'Review your day',
         valueMultiply: false,
+        schedules: [(await MyApp.dataModel.backend.scheduled(context,RequestType.Post,scheduled: Scheduled(
+            repeatRule: RepeatRule.EveryXDays,
+            repeatValue: "1",
+            durationInMinutes: 20,
+            startTime: sleepScheduled.startTime.subtract(Duration(minutes: 20)),
+            id: uuid.v4()
+        ))).first.id],
         trackedStart: [],
         tags: [],
         trackedEnd: [],
         isParentCalendar: true,
         checks: [],
         color: Colors.blue,
+        id: uuid.v4(),
         description: "ANSWER THESE QUESTIONS ON A PIECE OF PAPER!\n\n\n"
             "Look at your calendar,Have you spend your week on the right things?\nWhy?\n"
             "Did you followed your schedule?\nIf not, Why?\n"
@@ -425,20 +443,13 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
             "How can I solve the biggest flaw in myself that is holding me from achieving my goals\n"
             "Consider how many people work for years to get a 15% raise when they could quickly switch to"
             " a new job that pays 25% better. - How are you doing something similar in your life? How can you work smarter?\n"
-    ),scheduleds: [Scheduled(
-        repeatRule: RepeatRule.EveryXDays,
-        repeatValue: 1,
-        durationInMinutes: 20,
-        isParentTask: true,
-        startTime: sleepScheduled.startTime.subtract(Duration(minutes: 20)),
-        parentId: 12
-    )]);//review
+    ));
 
-    mainOccupationTypes.forEach((element) async {
+    await mainOccupationTypes.forEach((element) async {
       switch(element){
 
         case MainOccupationType.NineToFive:
-          await MyApp.dataModel.databaseHelper.insertActivity(Activity(
+          await MyApp.dataModel.backend.activity(context,RequestType.Post,activity: Activity(
             trackedEnd: [],
             tags: [],
             trackedStart: [],
@@ -446,20 +457,20 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
             name: 'Job',
             value: 1000,
             color: Colors.red,
-            parentCalendarId: 1010,
-            id: 102,
+            parentCalendarId: workCalendarId,
+            schedules: [(await MyApp.dataModel.backend.scheduled(context,RequestType.Post,scheduled: Scheduled(
+              durationInMinutes: 60*8,
+              repeatValue: "1",
+              repeatRule: RepeatRule.EveryXDays,
+              startTime: DateTime(getTodayFormated().year,getTodayFormated().month,getTodayFormated().day,9,0,0),
+              id: uuid.v4()
+            ))).first.id],
             icon: Icons.work,
-          ),scheduleds: [Scheduled(
-            isParentTask: false,
-            durationInMinutes: 60*8,
-            repeatValue: 1,
-            repeatRule: RepeatRule.EveryXDays,
-            parentId: 102,
-            startTime: DateTime(getTodayFormated().year,getTodayFormated().month,getTodayFormated().day,9,0,0),
-          )]);
+            id: uuid.v4()
+          ));
           break;
         case MainOccupationType.Freelance:
-          await MyApp.dataModel.databaseHelper.insertActivity(Activity(
+          await MyApp.dataModel.backend.activity(context,RequestType.Post,activity: Activity(
             trackedEnd: [],
             tags: [],
             trackedStart: [],
@@ -467,17 +478,17 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
             name: "Client 1",
             value: 1000,
             color: Colors.red,
-            parentCalendarId: 1010,
-            id: 101,
+            parentCalendarId: workCalendarId,
+            schedules: [(await MyApp.dataModel.backend.scheduled(context,RequestType.Post,scheduled: Scheduled(
+              durationInMinutes: 0,
+              repeatValue: "1",
+              repeatRule: RepeatRule.EveryXDays,
+              id: uuid.v4()
+            ))).first.id],
             icon: Icons.person,
-          ),scheduleds: [Scheduled(
-            isParentTask: false,
-            durationInMinutes: 0,
-            repeatValue: 1,
-            repeatRule: RepeatRule.EveryXDays,
-            parentId: 101,
-          )]);
-          await MyApp.dataModel.databaseHelper.insertActivity(Activity(
+            id: uuid.v4()
+          ));
+          await MyApp.dataModel.backend.activity(context,RequestType.Post,activity: Activity(
             trackedEnd: [],
             tags: [],
             trackedStart: [],
@@ -485,17 +496,17 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
             name: "Client 2",
             value: 1000,
             color: Colors.red,
-            parentCalendarId: 1010,
-            id: 100,
+            parentCalendarId: workCalendarId,
+            schedules: [(await MyApp.dataModel.backend.scheduled(context,RequestType.Post,scheduled: Scheduled(
+              durationInMinutes: 0,
+              repeatValue: "1",
+              repeatRule: RepeatRule.EveryXDays,
+              id: uuid.v4()
+            ))).first.id],
             icon: Icons.person,
-          ),scheduleds: [Scheduled(
-            isParentTask: false,
-            durationInMinutes: 0,
-            repeatValue: 1,
-            repeatRule: RepeatRule.EveryXDays,
-            parentId: 100,
-          )]);
-          await MyApp.dataModel.databaseHelper.insertActivity(Activity(
+            id: uuid.v4()
+          ));
+          await MyApp.dataModel.backend.activity(context,RequestType.Post,activity: Activity(
             trackedEnd: [],
             tags: [],
             trackedStart: [],
@@ -503,19 +514,19 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
             name: "Client 3",
             value: 1000,
             color: Colors.red,
-            parentCalendarId: 1010,
-            id: 103,
+            parentCalendarId: workCalendarId,
+            schedules: [(await MyApp.dataModel.backend.scheduled(context,RequestType.Post,scheduled: Scheduled(
+              durationInMinutes: 0,
+              repeatValue: "1",
+              repeatRule: RepeatRule.EveryXDays,
+              id: uuid.v4()
+            ))).first.id],
             icon: Icons.person,
-          ),scheduleds: [Scheduled(
-            isParentTask: false,
-            durationInMinutes: 0,
-            repeatValue: 1,
-            repeatRule: RepeatRule.EveryXDays,
-            parentId: 103,
-          )]);
+            id: uuid.v4()
+          ));
           break;
         case MainOccupationType.Business:
-          await MyApp.dataModel.databaseHelper.insertActivity(Activity(
+          await MyApp.dataModel.backend.activity(context,RequestType.Post,activity: Activity(
             trackedEnd: [],
             tags: [],
             trackedStart: [],
@@ -523,17 +534,17 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
             name: "Product",
             value: 1000,
             color: Colors.red,
-            parentCalendarId: 1010,
-            id: 104,
+            parentCalendarId: workCalendarId,
+            schedules: [(await MyApp.dataModel.backend.scheduled(context,RequestType.Post,scheduled: Scheduled(
+              durationInMinutes: 0,
+              repeatValue: "1",
+              id: uuid.v4(),
+              repeatRule: RepeatRule.EveryXDays,
+            ))).first.id],
             icon: Icons.palette,
-          ), scheduleds: [Scheduled(
-            isParentTask: false,
-            durationInMinutes: 0,
-            repeatValue: 1,
-            repeatRule: RepeatRule.EveryXDays,
-            parentId: 104,
-          )]);
-          await MyApp.dataModel.databaseHelper.insertActivity(Activity(
+            id: uuid.v4()
+          ));
+          await MyApp.dataModel.backend.activity(context,RequestType.Post,activity: Activity(
             trackedEnd: [],
             tags: [],
             trackedStart: [],
@@ -541,17 +552,17 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
             name: "Traffic",
             value: 1000,
             color: Colors.red,
-            parentCalendarId: 1010,
-            id: 105,
+            parentCalendarId: workCalendarId,
             icon: Icons.people_outline,
-          ),scheduleds: [Scheduled(
-            isParentTask: false,
-            durationInMinutes: 0,
-            repeatValue: 1,
-            repeatRule: RepeatRule.EveryXDays,
-            parentId: 105,
-          )]);
-          await MyApp.dataModel.databaseHelper.insertActivity(Activity(
+            id: uuid.v4(),
+            schedules: [(await MyApp.dataModel.backend.scheduled(context,RequestType.Post,scheduled: Scheduled(
+              durationInMinutes: 0,
+              repeatValue: "1",
+              repeatRule: RepeatRule.EveryXDays,
+              id: uuid.v4()
+            ))).first.id]
+          ));
+          await MyApp.dataModel.backend.activity(context,RequestType.Post,activity: Activity(
             trackedEnd: [],
             tags: [],
             trackedStart: [],
@@ -559,59 +570,46 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
             name: "Marketing",
             value: 1000,
             color: Colors.red,
-            parentCalendarId: 1010,
-            id: 106,
+            parentCalendarId: workCalendarId,
+            schedules: [(await MyApp.dataModel.backend.scheduled(context,RequestType.Post,scheduled: Scheduled(
+              durationInMinutes: 0,
+              repeatValue: "1",
+              repeatRule: RepeatRule.EveryXDays,
+              id: uuid.v4()
+            ))).first.id],
             icon: Icons.web,
-          ), scheduleds: [Scheduled(
-            isParentTask: false,
-            durationInMinutes: 0,
-            repeatValue: 1,
-            repeatRule: RepeatRule.EveryXDays,
-            parentId: 106,
-          )]);
-          await MyApp.dataModel.databaseHelper.insertActivity(Activity(
+            id: uuid.v4()
+          ));
+          await MyApp.dataModel.backend.activity(context,RequestType.Post,activity: Activity(
             trackedEnd: [],
             tags: [],
             trackedStart: [],
             valueMultiply: false,
             name: "Business management",
             value: 1000,
+            schedules: [(await MyApp.dataModel.backend.scheduled(context,RequestType.Post,scheduled: Scheduled(
+              durationInMinutes: 0,
+              repeatValue: "1",
+              repeatRule: RepeatRule.EveryXDays,
+              id: uuid.v4()
+            ))).first.id],
             color: Colors.red,
-            parentCalendarId: 1010,
-            id: 107,
+            parentCalendarId: workCalendarId,
             icon: Icons.pie_chart_outlined,
-          ),scheduleds: [Scheduled(
-            isParentTask: false,
-            durationInMinutes: 0,
-            repeatValue: 1,
-            repeatRule: RepeatRule.EveryXDays,
-            parentId: 107,
-          )]);
+            id: uuid.v4()
+          ));
           break;
       }
     });
-
-    await MyApp.dataModel.databaseHelper.insertTask(Task(
-        parentId: -1,
-        value: 10000,
-        name: 'Adjust your schedule to your likings in the \'Calendar\' Page',
-        valueMultiply: false,
-        trackedStart: [],
-        tags: [],
-        trackedEnd: [],
-        isParentCalendar: true,
-        checks: [],
-        color: Colors.blue,
-    ),scheduleds: [Scheduled(
-        repeatRule: RepeatRule.None,
-        repeatValue: 0,
-        durationInMinutes: 10,
-        isParentTask: true,
-    )]);
-    await MyApp.dataModel.databaseHelper.insertTask(Task(
-      parentId: -1,
+    await MyApp.dataModel.backend.task(context,RequestType.Post,task: Task(
       value: 10000,
-      name: 'Have a look at the metrics page',
+      schedules: [(await MyApp.dataModel.backend.scheduled(context,RequestType.Post,scheduled: Scheduled(
+        repeatRule: RepeatRule.None,
+        repeatValue: "0",
+        durationInMinutes: 10,
+        id: uuid.v4()
+      ))).first.id],
+      name: 'Adjust your schedule to your likings in the \'Calendar\' Page',
       valueMultiply: false,
       trackedStart: [],
       tags: [],
@@ -619,14 +617,27 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
       isParentCalendar: true,
       checks: [],
       color: Colors.blue,
-    ),scheduleds: [Scheduled(
-      repeatRule: RepeatRule.None,
-      repeatValue: 0,
-      durationInMinutes: 10,
-      isParentTask: true,
-    )]);
-    await MyApp.dataModel.databaseHelper.insertTask(Task(
-      parentId: -1,
+      id: uuid.v4()
+    ));
+    await MyApp.dataModel.backend.task(context,RequestType.Post,task: Task(
+      value: 10000,
+      name: 'Have a look at the metrics page',
+      valueMultiply: false,
+      trackedStart: [],
+      schedules: [(await MyApp.dataModel.backend.scheduled(context,RequestType.Post,scheduled: Scheduled(
+        repeatRule: RepeatRule.None,
+        repeatValue: "0",
+        durationInMinutes: 10,
+        id: uuid.v4()
+      ))).first.id],
+      tags: [],
+      trackedEnd: [],
+      isParentCalendar: true,
+      checks: [],
+      color: Colors.blue,
+      id: uuid.v4()
+    ));
+    await MyApp.dataModel.backend.task(context,RequestType.Post,task: Task(
       value: 10000,
       name: 'Add your own activities/tasks',
       valueMultiply: false,
@@ -635,36 +646,42 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
       trackedEnd: [],
       isParentCalendar: true,
       checks: [],
+      schedules: [(await MyApp.dataModel.backend.scheduled(context,RequestType.Post,scheduled: Scheduled(
+        repeatRule: RepeatRule.None,
+        repeatValue: "0",
+        durationInMinutes: 10,
+        id: uuid.v4()
+      ))).first.id],
       color: Colors.blue,
-    ),scheduleds:[ Scheduled(
-      repeatRule: RepeatRule.None,
-      repeatValue: 0,
-      durationInMinutes: 10,
-      isParentTask: true,
-    )]);
-    await MyApp.dataModel.databaseHelper.insertTask(Task(
-      parentId: -1,
-      value: 10000,
-      name: 'Read our encouragement letter(it\'s short believe me)',
-      valueMultiply: false,
-      trackedStart: [],
-      tags: [],
-      trackedEnd: [],
-      isParentCalendar: true,
-      checks: [],
-      color: Colors.blue,
-      description: 'We are so proud to have you here. But, for the first days, it will be annoying to track your '
-          'time. YOU WILL MAKE MISTAKES, YOU WILL FORGET WHEN TO TRACK A NEW ACTIVITY, AND YOU WILL BE POTENTIALLY '
-          'PISSED . But that\'s fine, we all make mistakes, and a 15-30 minute mistake won\'t reflect in your metrics'
-          ' very much. So be patient with this journey, because on the other side there is unlimited potential for'
-          ' your productivityWe addressed this problem by letting you edit the timestamp(do it by pressing on the'
-          ' seconds passing or clicking the 3 dots button)'
-    ),scheduleds: [Scheduled(
-      repeatRule: RepeatRule.None,
-      repeatValue: 0,
-      durationInMinutes: 10,
-      isParentTask: true,
-    )]);
+      id: uuid.v4()
+    ));
+    await MyApp.dataModel.backend.task(context,RequestType.Post,task: Task(
+        value: 10000,
+        name: 'Read our encouragement letter(it\'s short believe me)',
+        valueMultiply: false,
+        trackedStart: [],
+        tags: [],
+        trackedEnd: [],
+        isParentCalendar: true,
+        checks: [],
+        color: Colors.blue,
+        id: uuid.v4(),
+        description: 'We are so proud to have you here. But, for the first days, it will be annoying to track your '
+            'time. YOU WILL MAKE MISTAKES, YOU WILL FORGET WHEN TO TRACK A NEW ACTIVITY, AND YOU WILL BE POTENTIALLY '
+            'PISSED . But that\'s fine, we all make mistakes, and a 15-30 minute mistake won\'t reflect in your metrics'
+            ' very much. So be patient with this journey, because on the other side there is unlimited potential for'
+            ' your productivityWe addressed this problem by letting you edit the timestamp(do it by pressing on the'
+            ' seconds passing or clicking the 3 dots button)',
+        schedules:[(await MyApp.dataModel.backend.scheduled(context,RequestType.Post,scheduled: Scheduled(
+          repeatRule: RepeatRule.None,
+          repeatValue: "0",
+          durationInMinutes: 10,
+          id: uuid.v4()
+        ))).first.id]
+    ));
+    setState(() {
+      loading=false;
+    });
   }
 
 }

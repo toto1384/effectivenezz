@@ -20,7 +20,7 @@ class GButton extends StatelessWidget {
         child: GText("$text",color: (variant??1)==1?MyColors.color_black_darker:Colors.white),
       ),
       onPressed: onPressed,
-      shape: getShape(smallRadius: false),
+      shape: getShape(smallRadius: true),
 
       color: (variant??1)==1?MyColors.color_yellow:(variant==2)?MyColors.color_black_darker:MyColors.color_black,
     );

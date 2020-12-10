@@ -7,7 +7,6 @@ import 'package:effectivenezz/ui/widgets/specific/gwidgets/gapp_bar.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/gtab_bar.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
-import 'package:effectivenezz/utils/distivity_page.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -23,7 +22,7 @@ class IAPScreen extends StatefulWidget {
   _IAPScreenState createState() => _IAPScreenState();
 }
 
-class _IAPScreenState extends DistivityPageState<IAPScreen> {
+class _IAPScreenState extends State<IAPScreen> {
 
 
   YoutubePlayerController controller = YoutubePlayerController(
@@ -117,7 +116,7 @@ class _IAPScreenState extends DistivityPageState<IAPScreen> {
                           child: Center(
                             child: FloatingActionButton.extended(
                               heroTag: null,
-                              onPressed: ()=>MyApp.dataModel.driveHelper.iapHelper.purchase(context,PackageType.Pro,yearly),
+                              onPressed: ()=>MyApp.dataModel.backend.driveHelper.iapHelper.purchase(context,PackageType.Pro,yearly),
                               label: GText('Start 14 day free trial :))'),
                               icon: GIcon(Icons.play_arrow),
                               backgroundColor: MyColors.color_black_darker,

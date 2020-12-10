@@ -35,7 +35,7 @@ class _SettingsPageState extends DistivityPageState<SettingsPage>{
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
-            children: MyApp.dataModel.driveHelper!=null?<Widget>[
+            children: MyApp.dataModel.backend.driveHelper!=null?<Widget>[
               ListTile(
                 leading: GIcon(Icons.person),
                 title: GText('Users and Data'),

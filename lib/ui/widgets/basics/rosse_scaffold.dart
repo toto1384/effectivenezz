@@ -1,4 +1,3 @@
-import 'package:after_layout/after_layout.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/ginfo_icon.dart';
 import 'package:effectivenezz/utils/basic/widgets_basic.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
@@ -33,13 +32,18 @@ class RosseSilver extends StatefulWidget {
   RosseSilverState createState() => RosseSilverState();
 }
 
-class RosseSilverState extends State<RosseSilver> with AfterLayoutMixin,TickerProviderStateMixin {
+class RosseSilverState extends State<RosseSilver> with TickerProviderStateMixin {
 
 
   @override
   initState() {
     super.initState();
     _hideFabAnimation = AnimationController(vsync: this, duration: kThemeAnimationDuration,value: 1);
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      setState(() {
+        size=key.currentContext.size;
+      });
+    });
   }
 
   @override
@@ -132,12 +136,5 @@ class RosseSilverState extends State<RosseSilver> with AfterLayoutMixin,TickerPr
 
   bool showFab = true;
   AnimationController _hideFabAnimation;
-
-  @override
-  void afterFirstLayout(BuildContext context) {
-    setState(() {
-      size=key.currentContext.size;
-    });
-  }
 
 }

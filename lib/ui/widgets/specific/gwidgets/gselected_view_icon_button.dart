@@ -26,7 +26,7 @@ class GSelectedViewIconButton extends StatelessWidget {
     return IconButton(
       icon: GIcon(Icons.preview_rounded),
       onPressed: () {
-        showDistivityModalBottomSheet(context, (ctx, ss) {
+        showDistivityModalBottomSheet(context, (ctx, ss,c) {
           return Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,7 +45,10 @@ class GSelectedViewIconButton extends StatelessWidget {
                         onZoomUpdate(v);
                       });
                     },
-                    value: actualZoom,
+                    onChangeEnd: (v){
+                      MyApp.dataModel.backend.prefs.setHeightPerMinute(v);
+                    },
+                    value: (actualZoom<(1/3))?1/3:actualZoom,
                     min: 1.0/3.0,
                     max: 5,
                   ),
@@ -56,7 +59,7 @@ class GSelectedViewIconButton extends StatelessWidget {
                 title: GText('Day view'),
                 onTap: () {
                   onSelectedView(SelectedView.Day);
-                  MyApp.dataModel.prefs.setSelectedView(SelectedView.Day);
+                  MyApp.dataModel.backend.prefs.setSelectedView(SelectedView.Day);
                   Navigator.pop(context);
                 },
               ),
@@ -65,7 +68,7 @@ class GSelectedViewIconButton extends StatelessWidget {
                 title: GText('3 Day view'),
                 onTap: () {
                   onSelectedView(SelectedView.ThreeDay);
-                  MyApp.dataModel.prefs.setSelectedView(SelectedView.ThreeDay);
+                  MyApp.dataModel.backend.prefs.setSelectedView(SelectedView.ThreeDay);
                   Navigator.pop(context);
                 },
               ),
@@ -74,7 +77,7 @@ class GSelectedViewIconButton extends StatelessWidget {
                 title: GText('Week view'),
                 onTap: () {
                   onSelectedView(SelectedView.Week);
-                  MyApp.dataModel.prefs.setSelectedView(SelectedView.Week);
+                  MyApp.dataModel.backend.prefs.setSelectedView(SelectedView.Week);
                   Navigator.pop(context);
                 },
               ),
@@ -83,7 +86,7 @@ class GSelectedViewIconButton extends StatelessWidget {
                 title: GText('Month view'),
                 onTap: () {
                   onSelectedView(SelectedView.Month);
-                  MyApp.dataModel.prefs.setSelectedView(SelectedView.Month);
+                  MyApp.dataModel.backend.prefs.setSelectedView(SelectedView.Month);
                   Navigator.pop(context);
                 },
               ),

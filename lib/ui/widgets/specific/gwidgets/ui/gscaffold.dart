@@ -27,7 +27,7 @@ class GScaffoldState extends ScaffoldState {
 
   static bool show = true;
 
-  DeviceScreenType deviceScreenType = DeviceScreenType.mobile;
+  static DeviceScreenType deviceScreenType = DeviceScreenType.mobile;
 
   @override
   Widget build(BuildContext context) {
@@ -69,18 +69,21 @@ class GScaffoldState extends ScaffoldState {
                     duration: Duration(milliseconds: 100),
                   ),
                   Expanded(
-                    child: Center(
-                      child: GMaxWebWidth(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            if(widget.appBar!=null)Padding(
-                              padding: const EdgeInsets.only(top: 40),
-                              child: widget.appBar,
-                            ),
-                            Expanded(child: widget.body),
-                          ],
-                        )
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Center(
+                        child: GMaxWebWidth(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              if(widget.appBar!=null)Padding(
+                                padding: const EdgeInsets.only(top: 40),
+                                child: widget.appBar,
+                              ),
+                              Expanded(child: widget.body),
+                            ],
+                          )
+                        ),
                       ),
                     ),
                   ),
@@ -91,7 +94,6 @@ class GScaffoldState extends ScaffoldState {
             );
             break;
           case DeviceScreenType.watch:
-            // TODO: Handle this case.
             return Container();
             break;
           default:return Container();

@@ -1,7 +1,5 @@
 
 import 'dart:math';
-
-import 'package:after_layout/after_layout.dart';
 import 'package:effectivenezz/main.dart';
 import 'package:effectivenezz/objects/list_callback.dart';
 import 'package:effectivenezz/ui/pages/quick_start_page.dart';
@@ -17,10 +15,11 @@ import 'package:flutter/material.dart';
 import 'package:launch_review/launch_review.dart';
 
 
-class DistivityPageState<T extends StatefulWidget> extends State<T> with AfterLayoutMixin{
+class DistivityPageState<T extends StatefulWidget> extends State<T> {
 
   GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
   static ListCallback listCallback = ListCallback();
+  static PageChangeCallback pageChangeCallback = PageChangeCallback();
 
   static CustomKey customKey;
 
@@ -118,10 +117,6 @@ class DistivityPageState<T extends StatefulWidget> extends State<T> with AfterLa
   @override
   Widget build(BuildContext context) {
     return Container();
-  }
-
-  @override
-  void afterFirstLayout(BuildContext context) {
   }
 
 }

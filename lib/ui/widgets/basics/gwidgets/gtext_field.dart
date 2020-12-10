@@ -1,4 +1,3 @@
-import 'package:auto_size_text_field/auto_size_text_field.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +16,7 @@ class GTextField extends StatelessWidget {
 
 
   GTextField(this. textEditingController,{this. hint,
-    this. textInputType,this. focus,this. onChanged,this. variant,this. textType,this. small});
+    this.textInputType,this. focus,this. onChanged,this. variant,this. textType,this. small});
 
   @override
   Widget build(BuildContext context) {
@@ -26,14 +25,14 @@ class GTextField extends StatelessWidget {
       constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
       decoration: BoxDecoration(
         color: (variant??1)==1?MyColors.color_black:Colors.transparent,
-        borderRadius: BorderRadius.circular(100),
+        borderRadius: BorderRadius.circular(5),
       ),
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 10,vertical: 2),
-        child: AutoSizeTextField(
+        padding: EdgeInsets.symmetric(horizontal: 5,vertical: 1),
+        child: TextFormField(
           onChanged: (str){if(onChanged!=null)onChanged(str);},
           autofocus: focus??false,
-          keyboardType: textInputType??TextInputType.text,
+          keyboardType: textInputType,
           controller: textEditingController,
           maxLines: 1000,
           minLines: 1,

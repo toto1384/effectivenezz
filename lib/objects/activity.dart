@@ -4,38 +4,39 @@ import 'package:effectivenezz/objects/scheduled.dart';
 import 'package:effectivenezz/objects/task.dart';
 import 'package:effectivenezz/objects/timestamp.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
-import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:effectivenezz/utils/date_n_strings.dart';
 import 'package:flutter/material.dart';
 
 
-final String activityId = 'eid';
-final String activityName = 'en';
-final String activityIcon = 'eic';
-final String activityTags = 'eta';
-final String activityColor = 'ec';
-final String activityTrackedStart = 'ets';
-final String activityTrackedEnd = 'ete';
-final String activityParentCalendarId = 'ep';
-final String activityDescription = 'ede';
-final String activityValue = 'ev';
-final String activityBlacklistedDates = 'bd';
-final String activityValueMultiply = 'evm';
+final String activityId = '_id';
+final String activityName = 'name';
+final String activityIcon = 'icon';
+final String activityTags = 'tags';
+final String activityColor = 'color';
+final String activityTrackedStart = 'trackedStart';
+final String activityTrackedEnd = 'trackedEnd';
+final String activityParentCalendarId = 'parentId';
+final String activityDescription = 'description';
+final String activityValue = 'value';
+final String activityBlacklistedDates = 'blacklistedDates';
+final String activityValueMultiply = 'valueMultiply';
+final String activitySchedules = 'schedules';
 
 
 
 class Activity {
 
-  int id;
+  String id;
   String name;
   Color color;
   IconData icon;
-  List<int> tags;
+  List<String> tags;
 
   List<DateTime> trackedStart;
   List<DateTime> trackedEnd;
+  List<String> schedules;
 
-  int parentCalendarId;
+  String parentCalendarId;
   String description;
 
   int value;
@@ -46,41 +47,25 @@ class Activity {
 
 
   Activity({ this.id, @required this.name,@required this.trackedStart,@required this.trackedEnd,
-    @required this.parentCalendarId,this.description,@required this.value,
+    @required this.parentCalendarId,this.description,@required this.value,@required this.schedules,
     this.color,@required this.valueMultiply,this.icon,@required this.tags,this.blacklistedDates});
 
 
   List<Scheduled> getScheduled(){
     List<Scheduled>  toreturn = [];
     MyApp.dataModel.scheduleds.forEach((element) {
-      if((!element.isParentTask)&&(element.parentId==id)){
+      if(schedules.contains(element.id)){
         toreturn.add(element);
       }
     });
     return toreturn;
   }
 
-  insertSchedule({@required DateTime startTime,@required DateTime repeatUntil,@required RepeatRule repeatRule,
-    @required int repeatValue,@required int durationInMinutes}){
-
-    MyApp.dataModel.databaseHelper.insertScheduled(Scheduled(
-      isParentTask: false,
-      parentId: id,
-      durationInMinutes: durationInMinutes,
-      repeatRule: repeatRule,
-      repeatValue: repeatValue,
-      startTime: startTime,
-      repeatUntil: repeatUntil,
-    ));
-  }
-
-
-
-  static List<int> tagsFromString(String tags){
-    List<int> toreturn = [];
+  static List<String> tagsFromString(String tags){
+    List<String> toreturn = [];
     tags.split(",").forEach((element) {
       if((element!="")){
-        toreturn.add(int.parse(element));
+        toreturn.add((element));
       }
     });
     return toreturn;
@@ -89,6 +74,25 @@ class Activity {
   stringFromTags(){
     String toreturn = '';
     tags.forEach((element) {
+      toreturn= toreturn+ element.toString()+",";
+    });
+    return toreturn;
+  }
+
+
+  static List<String> schedulesFromString(String tags){
+    List<String> toreturn = [];
+    tags.split(",").forEach((element) {
+      if((element!="")){
+        toreturn.add(element);
+      }
+    });
+    return toreturn;
+  }
+
+  stringFromSchedules(){
+    String toreturn = '';
+    schedules.forEach((element) {
       toreturn= toreturn+ element.toString()+",";
     });
     return toreturn;
@@ -108,7 +112,28 @@ class Activity {
       activityIcon:icon!=null?icon.codePoint:null,
       activityTags:stringFromTags(),
       activityBlacklistedDates:stringFromDateTimes(blacklistedDates),
+      activitySchedules:stringFromSchedules(),
     };
+  }
+
+  Map<String,dynamic> toMapBackend(){
+    print(schedules.toString());
+    var map= {
+      activityValue: value,
+      activityValueMultiply: valueMultiply?1:0,
+      activityTrackedStart : trackedStart.map((e) => e.millisecondsSinceEpoch).toList(),
+      activityParentCalendarId: parentCalendarId,
+      activityName:name,
+      activityTrackedEnd:trackedEnd.map((e) => e.millisecondsSinceEpoch).toList(),
+      activityColor: color==null?MyApp.dataModel.findParentColor(this).value.toString():color.value.toString(),
+      activityIcon:icon!=null?icon.codePoint:null,
+      activityTags:tags,
+      activityBlacklistedDates:(blacklistedDates??[]).map((e) => e.millisecondsSinceEpoch).toList(),
+      activitySchedules:schedules,
+      activityDescription:description??"",
+    };
+    if(id!=null)map[activityId]=id;
+    return map;
   }
 
   static Activity fromMap(Map map){
@@ -125,6 +150,25 @@ class Activity {
       icon: map[activityIcon]==null?null:IconData(map[activityIcon],fontFamily: "MaterialIcons"),
       tags: tagsFromString(map[activityTags]),
       blacklistedDates: dateTimesFromString(map[activityBlacklistedDates]),
+      schedules: schedulesFromString(map[activitySchedules])
+    );
+  }
+
+  static Activity fromMapBackend(Map map){
+    return Activity(
+        value: map[activityValue],
+        trackedStart: map[activityTrackedStart].map((e)=>getDateFromString(e,isUtc: true)).cast<DateTime>().toList(),
+        parentCalendarId: map[activityParentCalendarId],
+        name: map[activityName],
+        trackedEnd: map[activityTrackedEnd].map((e)=>getDateFromString(e,isUtc: true)).cast<DateTime>().toList(),
+        color: Color(int.parse(map[activityColor])??0xffffff),
+        description: map[activityDescription]??'',
+        id: map[activityId],
+        valueMultiply: map[activityValueMultiply]==1,
+        icon: map[activityIcon]==null?null:IconData(map[activityIcon],fontFamily: "MaterialIcons"),
+        tags: (map[activityTags]).cast<String>(),
+        blacklistedDates: (map[activityBlacklistedDates]??[]).map((e)=>getDateFromString(e,isUtc: true)).cast<DateTime>().toList(),
+        schedules: map[activitySchedules].cast<String>()
     );
   }
 
@@ -224,10 +268,8 @@ class Activity {
   //
   //       return subtractDurations(Duration(minutes: getScheduled(context)[0].durationInMinutes), tracked);
   //     case RepeatRule.EveryXWeeks:
-  //     // TODO: Handle this case.
   //       break;
   //     case RepeatRule.EveryXMonths:
-  //     // TODO: Handle this case.
   //       break;
   //   }
   //   return Duration.zero;
@@ -267,9 +309,8 @@ class Activity {
 
     for(int i = 0; i<trackedStart.length;i++){
         List<TimeStamp> splittedPlanedTimestamp = TimeStamp(
-          id: int.parse("${id}000$i"),
-          parentId: id,
-          isTask: false,
+          id: "${id}000$i",
+          parent: this,
           color: color,
           durationInMinutes: (((trackedStart.length!=trackedEnd.length)&&
               (i==(trackedStart.length-1)))?getTodayFormated():trackedEnd[i]).difference(trackedStart[i]).inMinutes,

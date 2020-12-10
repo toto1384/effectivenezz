@@ -1,5 +1,5 @@
 import 'package:effectivenezz/main.dart';
-import 'package:effectivenezz/ui/pages/track_page.dart';
+import 'package:effectivenezz/ui/pages/plan_vs_tracked_page.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gbutton.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
 import 'package:effectivenezz/ui/widgets/lists/gsort_by_money_tasks_and_activities.dart';
@@ -27,14 +27,14 @@ class _PopupPageState extends DistivityPageState<PopupPage> {
       onWillPop: (){
         MinimizeApp.minimizeApp();
         Navigator.pop(context);
-        launchPage(context, TrackPage());
+        launchPage(context, PlanVsTrackedPage());
         return Future.delayed(Duration.zero).then((value) => false);
       },
       child: GestureDetector(
         onTap: (){
           MinimizeApp.minimizeApp();
           Navigator.pop(context);
-          launchPage(context, TrackPage());
+          launchPage(context, PlanVsTrackedPage());
         },
         child: Scaffold(
           backgroundColor: Colors.transparent,
@@ -57,7 +57,7 @@ class _PopupPageState extends DistivityPageState<PopupPage> {
                           children: [
                             getSubtitle("Record new entry"),
                             GButton('Open app',variant: 2,onPressed: (){
-                              launchPage(context, TrackPage());
+                              launchPage(context, PlanVsTrackedPage());
                             },),
                           ],
                         ),
@@ -73,7 +73,7 @@ class _PopupPageState extends DistivityPageState<PopupPage> {
                                 MyApp.dataModel.setPlaying(context, e);
                                 MinimizeApp.minimizeApp();
                                 Navigator.pop(context);
-                                launchPage(context, TrackPage());
+                                launchPage(context, PlanVsTrackedPage());
                               },scrollable: false
                             ),
                           ),

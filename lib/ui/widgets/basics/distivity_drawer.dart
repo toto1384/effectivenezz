@@ -4,15 +4,18 @@ import 'package:effectivenezz/ui/pages/manage_calendars.dart';
 import 'package:effectivenezz/ui/pages/metrics_and_stats.dart';
 import 'package:effectivenezz/ui/pages/plan_vs_tracked_page.dart';
 import 'package:effectivenezz/ui/pages/settings_page.dart';
-import 'package:effectivenezz/ui/pages/tasks_page.dart';
 import 'package:effectivenezz/ui/pages/time_doctor.dart';
 import 'package:effectivenezz/ui/pages/track_page.dart';
 import 'package:effectivenezz/ui/pages/users_n_data.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/drawer/gcalendar_list_for_drawer.dart';
+import 'package:effectivenezz/ui/widgets/specific/gwidgets/ui/gscaffold.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
+import 'package:effectivenezz/utils/complex/overflows_complex.dart';
+import 'package:effectivenezz/utils/distivity_page.dart';
 import 'package:flutter/material.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 
 import 'gwidgets/gicon.dart';
 import 'gwidgets/gtext.dart';
@@ -59,6 +62,40 @@ class _DistivityDrawerState extends State<DistivityDrawer> {
                       //     ),
                       //   ),
                       // ),
+                      if(GScaffoldState.deviceScreenType!=DeviceScreenType.mobile)
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Card(
+                            shape: getShape(),
+                            color: MyColors.color_yellow,
+                            child: InkWell(
+                              onTap: ()=>showAddEditObjectBottomSheet(context, isInCalendar: isShowingPage
+                                (PlanVsTrackedPage), selectedDate: getTodayFormated(), add: true,isTask: false),
+                              child: ListTile(
+                                title: GText("Add Activity",color: MyColors.color_black_darker,),
+                                leading: GIcon(Icons.add,color: MyColors.color_black_darker,),
+                              ),
+                            ),
+                          ),
+                        ),
+                      if(GScaffoldState.deviceScreenType!=DeviceScreenType.mobile)
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Card(
+                            shape: getShape(),
+                            color: MyColors.color_yellow,
+                            child: InkWell(
+                              onTap: ()=>showAddEditObjectBottomSheet(context, isInCalendar: isShowingPage
+                                (PlanVsTrackedPage), selectedDate: getTodayFormated(), add: true,isTask: true),
+                              child: ListTile(
+                                title: GText("Add Task",color: MyColors.color_black_darker,),
+                                leading: GIcon(Icons.add,color: MyColors.color_black_darker,),
+                              ),
+                            ),
+                          ),
+                        ),
+                      if(GScaffoldState.deviceScreenType!=DeviceScreenType.mobile)
+                        Divider(),
                       getCalendarWidget(locked: false),
                       getPageItem(name: "Track", page: TrackPage(), icon: Icons.timer),
                       getPageItem(name: "Metrics&Stats", page: MetricsAndStatsPage(), icon: Icons.insert_chart,locked:false),
@@ -151,7 +188,8 @@ class _DistivityDrawerState extends State<DistivityDrawer> {
             maxRadius: 20,
             backgroundColor: MyColors.color_yellow,
           ),
-          title: GText(MyApp.dataModel.driveHelper.currentUser!=null?MyApp.dataModel.driveHelper.currentUser.displayName:"Logged off"),
+          title: GText(MyApp.dataModel.backend.driveHelper.currentUser!=null?
+            MyApp.dataModel.backend.driveHelper.currentUser.displayName:"Logged off"),
           onTap: (){
             launchPage(context, UsersNData());//UsersNData());
           },

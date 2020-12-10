@@ -1,10 +1,15 @@
 
 
 import 'package:flutter/material.dart';
+import 'package:sliding_sheet/sliding_sheet.dart';
 
 typedef ReturnChild = Widget Function(BuildContext buildContext,Function closeTooltip);
 
 typedef StateGetter = Widget Function( BuildContext buildContext , Function(Function) state);
+
+typedef SheetStateGetter = Widget Function( BuildContext buildContext , Function(Function) state, SheetController sheetController);
+
+typedef StateCloseGetter = Widget Function( BuildContext buildContext , Function(Function) state,Function close);
 
 class TextType{
 
@@ -78,7 +83,7 @@ enum RequestType{
   Query,
 }
 enum CUD{
-  Create,Update,Delete,AddUpdate
+  Create,Update,Delete
 }
 
 

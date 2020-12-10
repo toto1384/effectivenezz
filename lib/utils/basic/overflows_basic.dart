@@ -7,9 +7,11 @@ import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_duration_picker/flutter_duration_picker.dart';
-import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:sliding_sheet/sliding_sheet.dart';
 import '../date_n_strings.dart';
 import 'widgets_basic.dart';
@@ -65,15 +67,18 @@ showYesNoDialog(BuildContext context,{@required String title,@required String te
   });
 }
 
-showDistivityModalBottomSheet(BuildContext context, StateGetter stateGetter,
+showDistivityModalBottomSheet(BuildContext context, SheetStateGetter stateGetter,
     {bool hideHandler,bool dismissible,double initialSnapping,Function onCollapsed}){
 
   if(hideHandler==null){
     hideHandler=false;
   }
 
+  SheetController sheetController = SheetController();
+
   showSlidingBottomSheet(context, builder: (ctx){
     return SlidingSheetDialog(
+      controller: sheetController,
       maxWidth: MediaQuery.of(context).size.height,
       listener: (state){
         if(state.isHidden){
@@ -97,26 +102,44 @@ showDistivityModalBottomSheet(BuildContext context, StateGetter stateGetter,
           builder: (ctx,setState){
             return Card(
               color: MyColors.color_black_darker,
-              elevation: 0,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Visibility(
-                    visible: !hideHandler,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                      child: (IconButton(
-                        onPressed: (){Navigator.pop(context);},
-                        icon: GIcon(Icons.close),
-                      )),
-                    ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Visibility(
+                        visible: !hideHandler,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          child: (IconButton(
+                            onPressed: (){Navigator.pop(context);},
+                            icon: GIcon(Icons.close),
+                          )),
+                        ),
+                      ),
+                      Visibility(
+                        visible: kIsWeb&&!hideHandler,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          child: (IconButton(
+                            onPressed: ()async{
+                              if(sheetController.state.isExpanded){
+                                Fluttertoast.showToast(msg: 'Sheet already expanded');
+                              }else sheetController.expand();
+                            },
+                            icon: GIcon(Icons.vertical_align_top_outlined),
+                          )),
+                        ),
+                      ),
+                    ],
                   ),
                   stateGetter(context,(func){
                     setState((){
                       func();
                     });
-                  }),
+                  },sheetController),
                 ],
               ),
             );
@@ -125,6 +148,58 @@ showDistivityModalBottomSheet(BuildContext context, StateGetter stateGetter,
       },
     );
   });
+}
+
+
+showDistivityDialogAtPosition(BuildContext context,{@required RenderBox renderBox,
+  @required StateCloseGetter stateGetter,@required SelectedView selectedView})async{
+  Completer<OverlayEntry> completer = Completer();
+
+  double dx = 0;
+
+  print((renderBox.localToGlobal(Offset(0,0)).dy));
+
+  if(selectedView==SelectedView.Day){
+    dx = MediaQuery.of(context).size.width/2;
+  }else{
+    if((renderBox.localToGlobal(Offset(0,0)).dx) > (MediaQuery.of(context).size.width/2)){
+      print("right");
+      dx = (renderBox.localToGlobal(Offset(0, 0)).dx-500);
+    }else {
+      print('left');
+      dx =renderBox.localToGlobal(Offset(renderBox.size.width,0)).dx;
+    }
+  }
+
+  Offset position = Offset(dx, 50);
+
+  OverlayEntry overlayEntry = OverlayEntry(
+      builder: (context) => StatefulBuilder(
+          builder: (context, ss) {
+            return Positioned(
+                top: position.dy,
+                width: 500,
+                left: position.dx,
+                child: Card(
+                  color: MyColors.color_black_darker,
+                  elevation: 20,
+                  shadowColor: MyColors.color_gray_darker,
+                  shape: getShape(),
+                  child: Container(
+                    constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height-100),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: SingleChildScrollView(
+                          child: stateGetter(context,(func){ss((){func();});},()async{(await completer.future).remove();}),
+                      ),
+                    ),
+                  ),
+                )
+            );
+          }
+      ));
+  Overlay.of(context).insert(overlayEntry);
+  completer.complete(overlayEntry);
 }
 
 showDistivityDatePicker(BuildContext context,{@required Function(DateTime) onDateSelected,DateTime selectedDate}) {
@@ -173,21 +248,10 @@ showPickDurationBottomSheet(BuildContext context,Function(Duration) onDurationPi
 }
 
 showEditColorBottomSheet(BuildContext context,Color selectedColor, Function(Color) onSelected){
-  showDistivityModalBottomSheet(context, (ctx,ss){
-    return Center(
-      child: Container(
-        width: 300,
-        height: 300,
-        child: MaterialColorPicker(
-          allowShades: true,
-          onColorChange: (Color color) {
-            onSelected(color);
-            Navigator.pop(context);
-          },
-          onlyShadeSelection: true,
-          selectedColor: selectedColor,
-        ),
-      ),
-    );
+  showDistivityDialog(context, actions: [], title: "Pick color!", stateGetter: (ctx,ss){
+    return BlockPicker(pickerColor: selectedColor??Colors.red, onColorChanged: (color){
+      onSelected(color);
+      Navigator.pop(context);
+    });
   });
 }

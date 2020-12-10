@@ -79,14 +79,17 @@ class _GSortByMoneyTasksAndActivitiesState extends State<GSortByMoneyTasksAndAct
                         'you happy. \n Watch this video, it explains this concept better'),
                     Padding(
                       padding: const EdgeInsets.all(15.0),
-                      child: YoutubePlayer(
-                        controller: YoutubePlayerController(
-                            initialVideoId: 'u_zMDLQgFrM',
-                            flags: YoutubePlayerFlags(
-                                autoPlay: false
-                            )
-                        ),
+                      child: Container(
+                        constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height/3),
+                        child: YoutubePlayer(
+                          controller: YoutubePlayerController(
+                              initialVideoId: 'u_zMDLQgFrM',
+                              flags: YoutubePlayerFlags(
+                                  autoPlay: false
+                              )
+                          ),
 
+                        ),
                       ),
                     ),
                   ],

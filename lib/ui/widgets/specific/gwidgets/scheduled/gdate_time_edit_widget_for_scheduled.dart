@@ -7,6 +7,11 @@ import 'package:effectivenezz/utils/date_n_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+
+enum GDateTimeShow{
+  All,Date,Time
+}
+
 class GDateTimeEditWidgetForScheduled extends StatelessWidget {
 
 
@@ -14,7 +19,7 @@ class GDateTimeEditWidgetForScheduled extends StatelessWidget {
   final Scheduled scheduled;
   final bool isStartTime;
   final String text;
-  final bool onlyTime;
+  final GDateTimeShow gDateTimeShow;
   final Widget trailing;
 
   GDateTimeEditWidgetForScheduled({
@@ -22,7 +27,7 @@ class GDateTimeEditWidgetForScheduled extends StatelessWidget {
     @required this. scheduled,
     @required this. isStartTime,
     this. text,
-    this. onlyTime,
+    this. gDateTimeShow,
     this. trailing,
   });
 
@@ -45,6 +50,7 @@ class GDateTimeEditWidgetForScheduled extends StatelessWidget {
                   ),
                 ),
               ),
+              if(gDateTimeShow!=GDateTimeShow.Date)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: GButton(
@@ -87,12 +93,12 @@ class GDateTimeEditWidgetForScheduled extends StatelessWidget {
                   },
                 ),
               ),
-              if(!(onlyTime??false))
+              if(!(gDateTimeShow==GDateTimeShow.Time))
                 Padding(
                   padding: const EdgeInsets.all(15),
                   child: GText('•'),
                 ),
-              if(!(onlyTime??false))
+              if(!(gDateTimeShow==GDateTimeShow.Time))
                 GButton(
                   getDateName(isStartTime?scheduled.startTime:scheduled.getEndTime()),
                   variant: 3,

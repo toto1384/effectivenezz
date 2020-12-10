@@ -1,5 +1,3 @@
-
-import 'package:after_layout/after_layout.dart';
 import 'package:effectivenezz/main.dart';
 import 'package:effectivenezz/ui/widgets/basics/distivity_drawer.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gicon.dart';
@@ -19,16 +17,18 @@ class ManageCalendars extends StatefulWidget {
   ManageCalendarsState createState() => ManageCalendarsState();
 }
 
-class ManageCalendarsState extends DistivityPageState<ManageCalendars> with AfterLayoutMixin {
+class ManageCalendarsState extends DistivityPageState<ManageCalendars>{
 
   ScrollController scrollController= ScrollController();
 
   @override
-  void afterFirstLayout(BuildContext context) {
-    super.afterFirstLayout(context);
-    DistivityPageState.listCallback.listen((object, d) {
-      if(mounted)setState(() {
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      DistivityPageState.listCallback.listen((object, d) {
+        if(mounted)setState(() {
 
+        });
       });
     });
   }

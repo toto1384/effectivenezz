@@ -128,7 +128,8 @@ class WebIapHelper extends IAPHelper{
 
   static Future<WebIapHelper> init(String id) async{
     print(11);
-    http.Response response = await performApiRequest(RequestType.Query, "https://api.revenuecat.com/v1/subscribers/$id", {
+    http.Response response = await performApiRequest(RequestType.Query,
+        "https://api.revenuecat.com/v1/subscribers/$id", headers: {
       "authorization" : "Bearer NhStgtRStPcvQuPQvlLIjuoIaSyKSrDB",
       "content-type": "application/json",
       "x-platform": "stripe",

@@ -1,4 +1,3 @@
-import 'package:after_layout/after_layout.dart';
 import 'package:dartx/dartx.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
 import 'package:flutter/foundation.dart';
@@ -34,7 +33,7 @@ class VerticalZoom extends StatefulWidget {
   _VerticalZoomState createState() => _VerticalZoomState();
 }
 
-class _VerticalZoomState extends State<VerticalZoom> with AfterLayoutMixin{
+class _VerticalZoomState extends State<VerticalZoom>{
   ScrollController _scrollController;
   double _contentHeightUpdateReference;
   double _lastFocus;
@@ -45,6 +44,9 @@ class _VerticalZoomState extends State<VerticalZoom> with AfterLayoutMixin{
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      widget.onScaleChange(MyApp.dataModel.backend.prefs.getHeightPerMinute()*24*60);
+    });
   }
 
   @override
@@ -107,7 +109,7 @@ class _VerticalZoomState extends State<VerticalZoom> with AfterLayoutMixin{
         if(kIsWeb){
           _latestScaleUpdateDetails = null;
         }else{
-          MyApp.dataModel.prefs.setHeightPerMinute(widget.contentHeight/(24*60));
+          MyApp.dataModel.backend.prefs.setHeightPerMinute(widget.contentHeight/(24*60));
         }
       },
       child: SingleChildScrollView(
@@ -130,8 +132,4 @@ class _VerticalZoomState extends State<VerticalZoom> with AfterLayoutMixin{
 
   double _getFocus(Offset focalPoint,double height) => (_scrollController.offset + focalPoint.dy) / height;
 
-  @override
-  void afterFirstLayout(BuildContext context) {
-    widget.onScaleChange(MyApp.dataModel.prefs.getHeightPerMinute()*24*60);
-  }
 }

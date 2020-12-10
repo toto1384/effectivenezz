@@ -1,6 +1,5 @@
 import 'package:effectivenezz/ui/pages/plan_vs_tracked_page.dart';
 import 'package:effectivenezz/ui/pages/quick_start_page.dart';
-import 'package:effectivenezz/ui/pages/track_page.dart';
 import 'package:effectivenezz/ui/widgets/basics/distivity_restart_widget.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:effectivenezz/utils/basic/values_utils.dart';
@@ -102,7 +101,7 @@ class MyAppState extends State<MyApp> {
       DataModel.init(context).then((value) {
         MyApp.dataModel=value;
         MyApp.dataModel.screenWidth=MediaQuery.of(context).size.width;
-        launchPage(context, value.driveHelper.currentUser==null?QuickStartPage(value.driveHelper):PlanVsTrackedPage());
+        launchPage(context, value.backend.driveHelper.currentUser==null?QuickStartPage(value.backend.driveHelper):PlanVsTrackedPage());
       });
     }
   }

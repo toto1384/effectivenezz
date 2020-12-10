@@ -1,10 +1,14 @@
 import 'package:effectivenezz/objects/activity.dart';
 import 'package:effectivenezz/objects/task.dart';
 import 'package:effectivenezz/ui/widgets/basics/distivity_animated_list.dart';
+import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
+import 'package:effectivenezz/ui/widgets/lists/glist_refresher.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/gempty_view.dart';
 import 'package:effectivenezz/ui/widgets/specific/task_list_item.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
+import 'package:effectivenezz/utils/basic/values_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart' as pull;
 import 'package:sticky_headers/sticky_headers/widget.dart';
 
 import '../../../main.dart';
@@ -37,6 +41,8 @@ class DistivityAnimatedListObj extends StatefulWidget {
 }
 
 class _DistivityAnimatedListObjState extends State<DistivityAnimatedListObj> {
+
+  pull.RefreshController refreshController= pull.RefreshController(initialRefresh: false,);
   @override
   Widget build(BuildContext context) {
 
@@ -57,8 +63,12 @@ class _DistivityAnimatedListObjState extends State<DistivityAnimatedListObj> {
 
     return !visible ? GEmptyView(
         "No upcoming tasks and activities") : (widget.scrollable??true)?
-    ListView.builder(itemCount: widget.headerItemCount+(widget.additionalButton!=null?1:0), itemBuilder:(ctx, ind)=>logik(ind),controller: widget.scrollController,)
-        :Column(children: List.generate(widget.headerItemCount+(widget.additionalButton!=null?1:0), logik),);
+    GListRefresher(
+        child: ListView.builder(
+          itemCount: widget.headerItemCount+(widget.additionalButton!=null?1:0),
+          itemBuilder:(ctx, ind)=>logik(ind),controller: widget.scrollController,
+        )
+    ):Column(children: List.generate(widget.headerItemCount+(widget.additionalButton!=null?1:0), logik),);
   }
   //THIS GENERATES EACH HEADING
   Widget logik(ind){

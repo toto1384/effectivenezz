@@ -24,7 +24,7 @@ class _GPremiumWrapperState extends State<GPremiumWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    return MyApp.dataModel.driveHelper.isPremium?widget.child:Container(
+    return MyApp.dataModel.backend.driveHelper.isPremium?widget.child:Container(
       height: widget.height,
       width: widget.width,
       child: Stack(

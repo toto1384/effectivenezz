@@ -8,7 +8,7 @@ class GTabBar extends StatelessWidget {
   final Function(int,bool) onSelected;
   final int variant ;
 
-  GTabBar({@required this. items, @required this. selected, this. onSelected,this. variant});
+  GTabBar({@required this. items, @required this. selected, this. onSelected,this. variant=1});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class GTabBar extends StatelessWidget {
             child: (
                 GButton(
                   items[index],
-                  variant: isSelected ? 1 : 2,
+                  variant: isSelected ? 1 : variant==1?3:2,
                   onPressed: () {
                     onSelected(index, !isSelected);
                   },

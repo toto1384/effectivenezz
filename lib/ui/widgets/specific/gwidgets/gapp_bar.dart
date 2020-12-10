@@ -18,8 +18,9 @@ class GAppBar extends PreferredSize implements PreferredSizeWidget {
   final bool smallSubtitle;
   final bool disablePadding;
   final double size;
+  final Widget explicitTitle;
 
-  GAppBar(this. title, {this.size, this. backEnabled, this. centered, this. drawerEnabled, this. trailing,
+  GAppBar(this. title, {this.size,this.explicitTitle, this. backEnabled, this. centered, this. drawerEnabled, this. trailing,
     this. subtitle, this. smallSubtitle, this. disablePadding,
   });
 
@@ -51,7 +52,7 @@ class GAppBar extends PreferredSize implements PreferredSizeWidget {
               title: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  GText(title, textType: TextType.textTypeTitle,),
+                  explicitTitle!=null?explicitTitle:GText(title, textType: TextType.textTypeTitle,),
                   if(subtitle != null && (smallSubtitle??true))subtitle
                 ],
               ),

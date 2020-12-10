@@ -4,8 +4,6 @@ import 'package:effectivenezz/ui/widgets/basics/gwidgets/gicon.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext_field.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/gapp_bar.dart';
-import 'package:effectivenezz/ui/widgets/specific/gwidgets/gdownloads_from_drive_list_tile.dart';
-import 'package:effectivenezz/ui/widgets/specific/gwidgets/gsave_to_drive_list_tile.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/gsign_in_out_list_tile.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/ui/gmax_web_width.dart';
 import 'package:effectivenezz/utils/basic/overflows_basic.dart';
@@ -35,21 +33,22 @@ class _UsersNDataState extends State<UsersNData> {
                   maxRadius: 20,
                   backgroundColor: MyColors.color_yellow,
                 ),
-                title: GText(MyApp.dataModel.driveHelper.currentUser!=null?MyApp.dataModel.driveHelper.currentUser.displayName:"Logged off"),
+                title: GText(MyApp.dataModel.backend.driveHelper.currentUser!=null?
+                  MyApp.dataModel.backend.driveHelper.currentUser.displayName:"Logged off"),
 
               ),
               Divider(),
               GSignInOutListTile(),
-              GSaveToDriveListTile(),
-              GDownloadsFromDriveListTile(),
-              ListTile(
-                title: GText("Delete everything"),
-                leading: GIcon(Icons.delete_forever),
-                onTap: (){
-                  deleteDb(context);
-                },
-
-              ),
+              // GSaveToDriveListTile(),
+              // GDownloadsFromDriveListTile(),
+              // ListTile(
+              //   title: GText("Delete everything"),
+              //   leading: GIcon(Icons.delete_forever),
+              //   onTap: (){
+              //     deleteDb(context);
+              //   },
+              //
+              // ),
               if(!kIsWeb)ListTile(
                 title: GText("Pricing"),
                 leading: GIcon(Icons.monetization_on),
@@ -63,7 +62,7 @@ class _UsersNDataState extends State<UsersNData> {
                 leading: GIcon(Icons.subdirectory_arrow_left),
                 onTap: (){
                   TextEditingController tec = TextEditingController();
-                  showDistivityModalBottomSheet(context, (ctx,ss){
+                  showDistivityModalBottomSheet(context, (ctx,ss,c){
                     return Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Row(
@@ -78,7 +77,7 @@ class _UsersNDataState extends State<UsersNData> {
                           IconButton(
                             icon: GIcon(Icons.send),
                             onPressed: ()async{
-                              await MyApp.dataModel.prefs.setPromoCode(tec.text);
+                              await MyApp.dataModel.backend.prefs.setPromoCode(tec.text);
                               Navigator.pop(context);
                             },
                           ),

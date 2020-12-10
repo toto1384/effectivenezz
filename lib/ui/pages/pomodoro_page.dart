@@ -10,7 +10,9 @@ import 'package:effectivenezz/utils/basic/date_basic.dart';
 import 'package:effectivenezz/utils/basic/typedef_and_enums.dart';
 import 'package:effectivenezz/utils/basic/utils.dart';
 import 'package:effectivenezz/utils/complex/overflows_complex.dart';
+import 'package:effectivenezz/utils/distivity_page.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 
 class PomodoroPage extends StatefulWidget {
   final dynamic object;
@@ -66,7 +68,7 @@ class _PomodoroPageState extends State<PomodoroPage> {
                   ),
                   children: List<Widget>.generate(widget.object.childs.length, (i){
                     return TaskListItem(task: MyApp.dataModel.tasks[MyApp.dataModel.tasks.indexOf(widget.object.childs[i])],
-                      selectedDate: getTodayFormated(),minimal: true,);
+                      selectedDate: getTodayFormated(),minimal: true,onTap: (){},);
                   },)+<Widget>[ GButton('Add task', onPressed: (){
                     showAddEditObjectBottomSheet(
                       context,
@@ -75,7 +77,8 @@ class _PomodoroPageState extends State<PomodoroPage> {
                       isTask: true,
                       add: true,
                       object: Task(
-                          name: '',
+                          name: '',schedules: [],
+                          id: Uuid().v4(),
                           trackedEnd: [],
                           trackedStart: [],
                           parentId: widget.object.id,
