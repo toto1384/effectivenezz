@@ -34,6 +34,7 @@ class GoogleDriveHelper{
       await (kIsWeb?WebIapHelper.init(driveHelper.currentUser.id.toString()):
       MobileIAPHelper.init(buildContext,driveHelper.currentUser.id.toString()));
       driveHelper.isPremium=await driveHelper.iapHelper.isSubscriptionActive(prefs);
+      print("AAAAAAAAAAAA${driveHelper.isPremium}");
     }
 
     return driveHelper;

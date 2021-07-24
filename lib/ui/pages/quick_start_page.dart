@@ -12,6 +12,7 @@ import 'package:effectivenezz/ui/widgets/basics/gwidgets/gswitchable.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext.dart';
 import 'package:effectivenezz/ui/widgets/basics/gwidgets/gtext_field.dart';
 import 'package:effectivenezz/ui/widgets/buttons/gsign_in_with_google_welcome_activity_button.dart';
+import 'package:effectivenezz/ui/widgets/buttons/product_hunt.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/scheduled/gdate_time_edit_widget_for_scheduled.dart';
 import 'package:effectivenezz/ui/widgets/specific/gwidgets/ui/gmax_web_width.dart';
 import 'package:effectivenezz/utils/basic/date_basic.dart';
@@ -59,14 +60,41 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
   Widget build(BuildContext context) {
     return Scaffold(
 
-      floatingActionButton: (pageIndex==4||pageIndex==0)?null:FloatingActionButton.extended(onPressed: ()async{
-        pageController.
-          animateToPage((pageIndex+1), duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
-        setState(() {
-          pageIndex++;
-        });
-      },backgroundColor: MyColors.color_black, label: GText(pageIndex==3?"Finish":"Next($pageIndex/3)")),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: (pageIndex==4||pageIndex==0)?ProductHunt():
+      FloatingActionButton.extended(onPressed: ()async{
+          pageController.
+            animateToPage((pageIndex+1), duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
+          setState(() {
+            pageIndex++;
+          });
+        },backgroundColor: MyColors.color_yellow,
+        label: GText(pageIndex==3?"Finish":"Next($pageIndex/3)",color: MyColors.color_black_darker,)),
+      floatingActionButtonLocation: pageIndex==0?FloatingActionButtonLocation.startDocked:
+        FloatingActionButtonLocation.miniCenterDocked,
+      bottomNavigationBar: pageIndex==0?Padding(
+        padding: const EdgeInsets.only(top: 10,bottom: 10),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  GText("Already an user?"),
+                  GButton("Log in", onPressed: (){
+                    widget.driveHelper.handleSignIn(context).then((value) {
+                      MyApp.dataModel=null;
+                      DistivityRestartWidget.restartApp(context);
+                    });
+                  },variant: 2),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ):null,
       body: GMaxWebWidth(
         child: PageView(
           controller: pageController,
@@ -79,18 +107,19 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Padding(
-                      padding: EdgeInsets.only(top: (MediaQuery.of(context).size.height/5),left: 10,right: 10),
+                      padding: EdgeInsets.only(top: (MediaQuery.of(context).size.height/7),left: 10,right: 10),
                       child: Container(
                           constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height/2.5),
                           child: Image.asset(AssetsPath.timeIllustration)
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(top: 10,left: 20,right: 20),
-                      child: GText('Welcome to Effectivenezz, the place to manage your time. Let\'s start your '
-                          'onboarding journey in less than 2 minutes(because we know that time is important)',
-                        isCentered: true,),
+                      padding: const EdgeInsets.only(top: 10,left: 20,right: 20,bottom: 5),
+                      child: GText('Welcome to Effectivenezz. The easiest way to achieve 100h work-weeks. No motivation required.',
+                        isCentered: true,textType: TextType.textTypeSubtitle,),
                     ),
+                    GText('Let\'s start your '
+                    'on-boarding journey in less than 2 minutes(because we know that time is important)',isCentered: true,),
                     Padding(
                       padding: const EdgeInsets.only(top: 50),
                       child: GButton('Start',onPressed: (){
@@ -103,24 +132,6 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
                     ),
                   ],
                 )),
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        GText("Already an user?"),
-                        GButton("Log in", onPressed: (){
-                          widget.driveHelper.handleSignIn(context).then((value) {
-                            MyApp.dataModel=null;
-                            DistivityRestartWidget.restartApp(context);
-                          });
-                        },variant: 2),
-                      ],
-                    ),
-                  ),
-                ),
               ],
             ),
             ListView(
@@ -173,17 +184,24 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
                             sleepScheduled=sch..startTime.subtract(Duration(days: 1));
                           });
                         },isStartTime: true,scheduled: sleepScheduled,text:'',gDateTimeShow: GDateTimeShow.Time,),
-                        ListTile(
-                          leading: CircularCheckBox(
-                            value: addReview,
-                            onChanged: (b){
-                              setState(() {
-                                addReview=b;
-                              });
-                            },checkColor: MyColors.color_black_darker,
-                            activeColor: MyColors.color_yellow,
-                          ),
-                          title: GText("Schedule daily review(an essential habit for a productive day)"),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: CircularCheckBox(
+                                value: addReview,
+                                onChanged: (b){
+                                  setState(() {
+                                    addReview=b;
+                                  });
+                                },checkColor: MyColors.color_black_darker,
+                                activeColor: MyColors.color_yellow,
+                              ),
+                            ),
+                            GText("Schedule daily review(an essential habit for a productive day)")
+                          ],
                         )
                       ],
                     ),
@@ -240,7 +258,7 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
                                         activityDurationMinutesTEC, hint: 'hours',small: true),
                                   ),
                                 ),),
-                              TextSpan(text: ' hours will change my life in 6 months',style: TextStyle(
+                              TextSpan(text: ' hours will change my life in 6 months?',style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: TextType.textTypeNormal.fontWeight,
                                 fontSize: TextType.textTypeNormal.size,
@@ -248,9 +266,14 @@ class _QuickStartPageState extends DistivityPageState<QuickStartPage> {
                             ],),textAlign: TextAlign.center,
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(15.0),
-                          child: GTextField(activityNameTEC,hint: 'Activity name',),
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(15.0),
+                            child: Container(
+                              constraints: BoxConstraints(maxWidth: 400),
+                              child: GTextField(activityNameTEC,hint: 'Activity name',)
+                            ),
+                          ),
                         ),
                       ],
                     ),

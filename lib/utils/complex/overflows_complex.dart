@@ -502,16 +502,6 @@ showObjectDetailsBottomSheet(BuildContext context, dynamic object,DateTime selec
             });
           }, scheduled: sContext, isStartTime: false),
         Divider(),
-        if(object.description!="")ExpansionTile(
-          title: GText('Description'),
-          leading: GIcon(Icons.note),
-          children: [
-            if(object.description!="")Padding(
-              padding: const EdgeInsets.all(15),
-              child: GText(object.description),
-            )
-          ],
-        ),
         ListTile(
           leading: GIcon(Icons.attach_money),
           title: GText("${formatDouble(object.value.toDouble())} \$/hour"),

@@ -390,9 +390,9 @@ class PlanVsTrackedPageState extends DistivityPageState<PlanVsTrackedPage>{
 
       case PlanTracked.PlanVsTracked:
         if(planned){
-          toreturn.addAll( MyApp.dataModel.getTimeStamps(context,dateTimes: selectedDateTimes,tracked: true,plannedSemiOpacity: true));
-        }else{
           toreturn.addAll( MyApp.dataModel.getTimeStamps(context,dateTimes: selectedDateTimes,tracked: false,plannedSemiOpacity: true));
+        }else{
+          toreturn.addAll( MyApp.dataModel.getTimeStamps(context,dateTimes: selectedDateTimes,tracked: true,plannedSemiOpacity: true));
         }
         break;
       case PlanTracked.Plan:

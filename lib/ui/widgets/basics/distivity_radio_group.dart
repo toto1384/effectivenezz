@@ -22,13 +22,16 @@ class RosseRadioGroup extends StatelessWidget {
           String key = items.keys.toList()[index];
           bool value = items.values.toList()[index];
 
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: (RadioButton(index: index, keyString: key, value: value, height: 120,
-              onTap: (){
-                onSelected(index,key);
-              },
-            )
+          return Container(
+            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.height/1.5),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: (RadioButton(index: index, keyString: key, value: value, height: 100,
+                onTap: (){
+                  onSelected(index,key);
+                },
+              )
+              ),
             ),
           );
         }),
@@ -74,12 +77,12 @@ class RadioButton extends StatelessWidget {
 
           color: Colors.transparent,
           elevation: 0,
-          shape: getShape(subtleBorder: !value),
+          shape: getShape(),
           child: AnimatedContainer(
             duration: Duration(milliseconds: 500),
             curve: Curves.ease,
             decoration: BoxDecoration(
-              color: value?Colors.white:Colors.transparent,
+              color: value?Colors.white:MyColors.color_black.withOpacity(.5),
               borderRadius: BorderRadius.circular(15),
             ),
             height: height??40,

@@ -152,6 +152,7 @@ class WebIapHelper extends IAPHelper{
           //expired
           iapHelper.isPro=false;
         }else{
+          print("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC");
           iapHelper.isPro=true;
         }
       });
@@ -163,6 +164,8 @@ class WebIapHelper extends IAPHelper{
 
   @override
   Future<bool> isSubscriptionActive(Prefs prefs) async{
+    print("BBBBBBBBB ${remoteConfig.getString("skip_purchases")} ${remoteConfig.getString('promo_code')}");
+
     if(remoteConfig.getString('skip_purchases')=='1')return true;
     if(prefs.getPromoCode()==remoteConfig.getString('promo_code'))return true;
     return isPro??false;
