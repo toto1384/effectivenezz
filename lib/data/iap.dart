@@ -36,7 +36,7 @@ class MobileIAPHelper extends IAPHelper{
 
   static Future<MobileIAPHelper> init(BuildContext context,String id) async {
     if(!kIsWeb){
-      await Purchases.setup("NhStgtRStPcvQuPQvlLIjuoIaSyKSrDB",appUserId: id);
+      await Purchases.setup("key",appUserId: id);
 
       Purchases.addPurchaserInfoUpdateListener((purchaserInfo){
       });
@@ -130,7 +130,7 @@ class WebIapHelper extends IAPHelper{
     print(11);
     http.Response response = await performApiRequest(RequestType.Query,
         "https://api.revenuecat.com/v1/subscribers/$id", headers: {
-      "authorization" : "Bearer NhStgtRStPcvQuPQvlLIjuoIaSyKSrDB",
+      "authorization" : "Bearer [key]",
       "content-type": "application/json",
       "x-platform": "stripe",
     });
